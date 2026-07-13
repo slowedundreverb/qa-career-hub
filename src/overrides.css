@@ -870,38 +870,98 @@ body:has(.topic-overlay) {
 
 @media (max-width: 620px) {
   .topbar {
-    grid-template-columns: 38px minmax(0, 1fr) 38px;
-    gap: 7px;
-    padding-inline: 10px;
+    height: auto;
+    min-height: 112px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand settings"
+      "switch switch";
+    gap: 8px 12px;
+    padding: 10px 12px;
+  }
+
+  .brand {
+    grid-area: brand;
+  }
+
+  .settings-wrap {
+    grid-area: settings;
+  }
+
+  .settings-menu {
+    top: 114px;
   }
 
   .mode-switch {
-    width: min(100%, 250px);
+    grid-area: switch;
+    width: 100%;
+    max-width: none;
+    padding: 3px;
+    border-radius: 12px;
   }
 
   .mode-btn {
     flex: 1;
-    padding-inline: 6px;
+    min-width: 0;
+    padding: 9px 6px;
     white-space: nowrap;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .mode-btn span { display: none; }
 
+  .sidebar,
+  .learn-sidebar {
+    min-height: 142px;
+    gap: 10px 12px;
+    padding: 14px 12px;
+  }
+
+  .sidebar > .eyebrow,
+  .learn-sidebar > .eyebrow {
+    margin-left: 2px;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+  }
+
+  .sidebar .side-nav,
+  .learn-nav {
+    min-height: 62px;
+    padding: 4px;
+    border-radius: 13px;
+  }
+
   .sidebar .side-nav button {
     flex-direction: column;
     gap: 4px;
+    padding: 8px 4px;
     font-size: 9px;
+    line-height: 1.15;
   }
 
   .sidebar .side-nav button b { display: none; }
   .sidebar .update-box div { display: none; }
   .sidebar .update-box .pulse { display: none; }
+  .sidebar .update-box { min-height: 46px; }
+  .sidebar .update-box button { width: 38px; height: 38px; }
+
+  .learn-sidebar .progress-ring {
+    width: 48px;
+    height: 48px;
+  }
+
+  .learn-sidebar .progress-ring::before {
+    width: 38px;
+    height: 38px;
+  }
+
+  .learn-sidebar .progress-ring strong { font-size: 10px; }
+  .learn-sidebar .progress-ring span { font-size: 5px; }
 
   .learn-nav button {
     flex-direction: column;
     gap: 3px;
-    padding-inline: 5px;
+    padding: 8px 4px;
   }
 
   .learn-nav small { display: none; }
@@ -909,9 +969,287 @@ body:has(.topic-overlay) {
 
   .jobs-main,
   .learn-main {
-    padding: 24px 14px 60px;
+    padding: 22px 12px 56px;
   }
 
   .filterbar { grid-template-columns: 1fr; }
   .filterbar .search { grid-column: auto; }
+
+  .jobs-hero,
+  .learn-head,
+  .quiz-head {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .jobs-hero h2,
+  .learn-head h2,
+  .quiz-head h2 {
+    margin: 7px 0;
+    font-size: clamp(27px, 9vw, 34px);
+    line-height: 1.05;
+  }
+
+  .jobs-hero p,
+  .learn-head p,
+  .quiz-head p {
+    font-size: 10px;
+    line-height: 1.55;
+  }
+
+  .streak {
+    width: fit-content;
+    padding: 10px 13px;
+  }
+
+  .linkedin-panel,
+  .linkedin-panel.disconnected {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px 12px;
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .li-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .li-copy {
+    display: grid;
+    gap: 6px;
+  }
+
+  .li-copy h3 { font-size: 14px; }
+  .li-copy p { font-size: 9px; line-height: 1.45; }
+
+  .linkedin-panel > a {
+    grid-column: 2;
+    justify-self: start;
+    margin: 0;
+    font-size: 10px;
+  }
+
+  .filterbar {
+    gap: 7px;
+    margin: 16px 0 10px;
+  }
+
+  .search,
+  .select-wrap {
+    min-width: 0;
+    height: 47px;
+    border-radius: 10px;
+  }
+
+  .search input,
+  .select-wrap select {
+    font-size: 11px;
+  }
+
+  .results-head {
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 2px;
+    font-size: 9px;
+  }
+
+  .results-head small {
+    max-width: 46%;
+    text-align: right;
+    line-height: 1.35;
+  }
+
+  .jobs-list { gap: 8px; }
+
+  .job-card {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 11px;
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .company-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
+
+  .job-title-row { gap: 8px; }
+  .job-card h3 { margin-top: 7px; font-size: 16px; line-height: 1.2; }
+  .job-company { flex-wrap: wrap; line-height: 1.4; }
+  .job-card p { margin: 10px 0; font-size: 9px; line-height: 1.55; }
+  .job-tags { gap: 4px; }
+  .job-tags span { padding: 5px 7px; }
+
+  .job-meta {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 11px;
+  }
+
+  .apply {
+    grid-column: 2;
+    padding-top: 2px;
+    font-size: 9px;
+    text-align: left;
+  }
+
+  .save { padding: 0; }
+
+  .theory-tools .search,
+  .knowledge-tools .search {
+    max-width: none;
+  }
+
+  .track-tabs,
+  .knowledge-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    scrollbar-width: none;
+  }
+
+  .track-tabs::-webkit-scrollbar,
+  .knowledge-tabs::-webkit-scrollbar { display: none; }
+
+  .track-tabs button,
+  .knowledge-tabs button { flex: 0 0 auto; }
+
+  .topic-card {
+    grid-template-columns: 30px minmax(0, 1fr);
+    min-height: 164px;
+    padding: 13px;
+  }
+
+  .topic-card h3 { font-size: 15px; }
+
+  .knowledge-card summary {
+    grid-template-columns: 26px minmax(0, 1fr) 18px;
+    gap: 8px;
+    min-height: 68px;
+    padding: 12px;
+  }
+
+  .knowledge-card summary h3 { font-size: 14px; line-height: 1.25; }
+  .knowledge-answer section { padding: 14px; }
+  .resource-panel { padding: 17px; border-radius: 14px; }
+
+  .quiz-head .new-session-btn {
+    justify-self: start;
+  }
+
+  .quiz-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quiz-exam {
+    min-height: 0;
+    border-radius: 15px;
+    box-shadow: none;
+  }
+
+  .quiz-exam .quiz-category { padding: 14px 16px; }
+  .quiz-prompt { padding: 25px 16px 18px; }
+
+  .quiz-exam .quiz-prompt h3 {
+    margin-top: 10px;
+    font-size: 22px;
+  }
+
+  .quiz-exam .answers {
+    gap: 7px;
+    padding: 0 16px 20px;
+  }
+
+  .quiz-exam .answers button {
+    min-height: 50px;
+    padding: 10px 12px;
+  }
+
+  .quiz-exam .quiz-feedback {
+    flex-wrap: wrap;
+    margin: 0 16px 20px;
+  }
+
+  .quiz-exam .quiz-feedback button {
+    width: 100%;
+  }
+
+  .quiz-side-panel {
+    position: static;
+    padding: 18px;
+    border-radius: 15px;
+  }
+
+  .modal-columns { grid-template-columns: 1fr; }
+
+  .topic-overlay {
+    inset: 112px 0 0;
+    padding: 8px;
+  }
+
+  .topic-overlay .topic-modal {
+    width: 100%;
+    max-height: calc(100vh - 128px);
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .topic-modal h2 { font-size: 25px; }
+
+  #companies-dialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  .dialog-head { gap: 10px; }
+  .dialog-head h2 { font-size: 23px; }
+  .company-grid { max-height: 68vh; }
+}
+
+@media (max-width: 420px) {
+  .topbar { padding-inline: 10px; }
+  .brand-mark { width: 32px; height: 32px; border-radius: 9px; }
+  .settings-button { width: 34px; height: 34px; }
+  .mode-btn { padding-inline: 4px; font-size: 10px; }
+
+  .sidebar,
+  .learn-sidebar { padding-inline: 10px; }
+
+  .sidebar .side-nav button > span,
+  .learn-nav button > span { font-size: 13px; }
+
+  .sidebar .side-nav button,
+  .learn-nav b { font-size: 8px; }
+
+  .jobs-main,
+  .learn-main { padding-inline: 10px; }
+
+  .job-card {
+    grid-template-columns: 34px minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .company-logo { width: 34px; height: 34px; }
+  .job-card h3 { font-size: 15px; }
+
+  .apply {
+    grid-column: 1 / -1;
+    margin-top: 3px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+
+  .linkedin-panel > a { grid-column: 1 / -1; }
+  .linkedin-panel { grid-template-columns: 36px minmax(0, 1fr); }
+  .li-icon { width: 36px; height: 36px; }
+
+  .knowledge-card summary { grid-template-columns: 22px minmax(0, 1fr) 16px; }
+  .quiz-exam .quiz-prompt h3 { font-size: 20px; }
 }
