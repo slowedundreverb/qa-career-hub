@@ -1,0 +1,6 @@
+.env
+dist/
+node_modules/
+.vercel/
+.DS_Store
+update-report.json
