@@ -256,7 +256,7 @@ function renderLearn() {
   shell(`<main class="learn-shell">
     <aside class="learn-sidebar">
       <div class="eyebrow">INTERVIEW LAB</div><h1>Тренируйся.<br><em>Отвечай уверенно.</em></h1>
-      <div class="progress-ring" style="--p:${pct}"><div><strong>${pct}%</strong><span>курса</span></div></div>
+      <div class="progress-ring" style="--p:${pct}" aria-label="Пройдено ${done} из ${curriculum.length} тем"><div><strong>${pct}%</strong><span>курса</span><small>${done} / ${curriculum.length} тем</small></div></div>
       <nav class="learn-nav">
         <button data-learn="roadmap" class="${state.learnView==='roadmap'?'active':''}"><span>⌘</span><div><b>Мой маршрут</b><small>${curriculum.length} тем</small></div></button>
         <button data-learn="theory" class="${state.learnView==='theory'?'active':''}"><span>≡</span><div><b>База знаний</b><small>теория и практика</small></div></button>
