@@ -76,62 +76,6 @@
   margin-top: 30px;
 }
 
-/* Segmented course dial: the first lime segment stays visible even at 0%. */
-.learn-sidebar .progress-ring {
-  --progress-stop: min(100%, max(2.4%, calc(var(--p) * 1%)));
-  position: relative;
-  isolation: isolate;
-  width: 132px;
-  height: 132px;
-  background: conic-gradient(from -90deg, var(--lime) 0 var(--progress-stop), #3b4a45 var(--progress-stop) 100%);
-  box-shadow: 0 18px 38px rgba(4,12,10,.24), 0 0 0 1px rgba(223,244,123,.08);
-}
-
-.learn-sidebar .progress-ring::before {
-  z-index: 1;
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle at 38% 30%, #263631 0, var(--navy) 68%);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.035), 0 6px 20px rgba(0,0,0,.2);
-}
-
-.learn-sidebar .progress-ring::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: 50%;
-  background: repeating-conic-gradient(from -90deg, transparent 0 9deg, var(--navy) 9deg 11deg);
-  -webkit-mask: radial-gradient(circle, transparent 0 62%, #000 63% 100%);
-  mask: radial-gradient(circle, transparent 0 62%, #000 63% 100%);
-  pointer-events: none;
-}
-
-.learn-sidebar .progress-ring div {
-  z-index: 3;
-  gap: 1px;
-}
-
-.learn-sidebar .progress-ring strong {
-  font-size: 27px;
-  letter-spacing: -.05em;
-}
-
-.learn-sidebar .progress-ring span {
-  color: #aebbb6;
-  font-size: 7px;
-  letter-spacing: 1.2px;
-}
-
-.learn-sidebar .progress-ring small {
-  margin-top: 7px;
-  color: var(--lime);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: .7px;
-  text-transform: uppercase;
-}
-
 .settings-wrap {
   position: relative;
   width: 300px;
@@ -432,6 +376,50 @@ body:has(.topic-overlay) {
   top: 0;
   float: right;
   z-index: 2;
+}
+
+.topic-modal > .complete-btn {
+  position: static;
+  float: none;
+  width: 100%;
+  height: auto;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 24px;
+  padding: 13px 18px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 11px;
+  background: var(--navy);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.topic-modal > .complete-btn:hover {
+  background: #24342f;
+}
+
+.topic-modal > .complete-btn.complete {
+  background: var(--green);
+}
+
+.complete-btn .complete-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 6px;
+  color: var(--lime);
+  font-size: 11px;
+  line-height: 1;
 }
 
 .quiz-head {
@@ -867,10 +855,6 @@ body:has(.topic-overlay) {
 
   .learn-sidebar .progress-ring span {
     font-size: 6px;
-  }
-
-  .learn-sidebar .progress-ring small {
-    display: none;
   }
 
   .learn-nav {

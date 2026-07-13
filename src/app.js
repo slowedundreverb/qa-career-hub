@@ -256,7 +256,7 @@ function renderLearn() {
   shell(`<main class="learn-shell">
     <aside class="learn-sidebar">
       <div class="eyebrow">INTERVIEW LAB</div><h1>Тренируйся.<br><em>Отвечай уверенно.</em></h1>
-      <div class="progress-ring" style="--p:${pct}" aria-label="Пройдено ${done} из ${curriculum.length} тем"><div><strong>${pct}%</strong><span>курса</span><small>${done} / ${curriculum.length} тем</small></div></div>
+      <div class="progress-ring" style="--p:${pct}"><div><strong>${pct}%</strong><span>курса</span></div></div>
       <nav class="learn-nav">
         <button data-learn="roadmap" class="${state.learnView==='roadmap'?'active':''}"><span>⌘</span><div><b>Мой маршрут</b><small>${curriculum.length} тем</small></div></button>
         <button data-learn="theory" class="${state.learnView==='theory'?'active':''}"><span>≡</span><div><b>База знаний</b><small>теория и практика</small></div></button>
@@ -304,7 +304,8 @@ function topicCard(t,i,roadmap) {
 
 function topicModal(t) {
   if(!t) return '';
-  return `<div class="topic-overlay" id="topic-overlay"><section class="topic-modal" role="dialog" aria-modal="true" aria-labelledby="topic-title"><button id="close-topic" aria-label="Закрыть конспект">×</button><span class="track">${t.track} · ${t.duration} минут</span><h2 id="topic-title">${t.title}</h2><div class="key-callout"><span>!</span><div><b>Формулировка для интервью</b><p>${t.key}</p></div></div><section><h3>Короткий ответ</h3><p>${t.summary}</p></section><section><h3>Разбор</h3><p>${t.theory}</p></section><div class="modal-columns"><section><h3>Вопрос на интервью</h3><p>${t.interview}</p></section><section><h3>Практика</h3><p>${t.exercise}</p></section></div><button class="complete-btn ${state.completed.has(t.id)?'complete':''}" data-complete="${t.id}">${state.completed.has(t.id)?'✓ Тема пройдена':'Отметить как пройденную'}</button></section></div>`;
+  const complete=state.completed.has(t.id);
+  return `<div class="topic-overlay" id="topic-overlay"><section class="topic-modal" role="dialog" aria-modal="true" aria-labelledby="topic-title"><button id="close-topic" aria-label="Закрыть конспект">×</button><span class="track">${t.track} · ${t.duration} минут</span><h2 id="topic-title">${t.title}</h2><div class="key-callout"><span>!</span><div><b>Формулировка для интервью</b><p>${t.key}</p></div></div><section><h3>Короткий ответ</h3><p>${t.summary}</p></section><section><h3>Разбор</h3><p>${t.theory}</p></section><div class="modal-columns"><section><h3>Вопрос на интервью</h3><p>${t.interview}</p></section><section><h3>Практика</h3><p>${t.exercise}</p></section></div><button class="complete-btn ${complete?'complete':''}" data-complete="${t.id}"><span class="complete-icon" aria-hidden="true">${complete?'✓':''}</span><span>${complete?'Тема пройдена':'Отметить как пройденную'}</span></button></section></div>`;
 }
 
 function quizView() {
