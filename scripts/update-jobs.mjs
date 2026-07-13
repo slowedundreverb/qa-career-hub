@@ -26,6 +26,13 @@ const sources = [
   { type:'greenhouse', token:'orioninnovation', company:'Orion Innovation', industry:'Banking tech' },
   { type:'greenhouse', token:'jetbrains', company:'JetBrains', industry:'Developer tools' },
   { type:'greenhouse', token:'brainrocketltd', company:'BrainRocket', industry:'Fintech / iGaming' },
+  { type:'greenhouse', token:'clickhouse', company:'ClickHouse', industry:'Data infrastructure' },
+  { type:'lever', token:'actian', company:'Actian', industry:'Data infrastructure' },
+  { type:'greenhouse', token:'dkbcodefactory', company:'DKB Code Factory', industry:'Banking / fintech' },
+  { type:'greenhouse', token:'sportygroup', company:'Sporty Group', industry:'Sports / iGaming' },
+  { type:'greenhouse', token:'letsgetchecked', company:'LetsGetChecked', industry:'HealthTech' },
+  { type:'greenhouse', token:'shifttechnology', company:'Shift Technology', industry:'Insurtech' },
+  { type:'greenhouse', token:'idnow', company:'IDnow', industry:'Identity / fintech' },
   { type:'greenhouse', token:'robinhood', company:'Robinhood', industry:'Fintech' },
   { type:'greenhouse', token:'justmarkets', company:'JustMarkets', industry:'Fintech / trading' },
   { type:'greenhouse', token:'rumble-external', company:'Rumble', industry:'MediaTech' },
@@ -88,11 +95,15 @@ const sources = [
   ]},
   { type:'direct', company:'paytech', industry:'Payments', jobs:[
     { title:'QA Manual (Payment Integrations)', location:'Limassol, Cyprus', format:'Hybrid', level:'Middle', description:'Manual QA for payment integrations in a fintech product team.', technologies:['API','Postman','SQL'], url:'https://www.pay.tech/careers' }
+  ]},
+  { type:'direct', company:'Voyage Privé', industry:'TravelTech', jobs:[
+    { title:'QA Engineer - Full Remote or Hybrid', location:'France / Remote', format:'Remote', level:'Senior', description:'QA automation for an international travel platform using Playwright, TypeScript, Cucumber, XRay and CI/CD.', technologies:['Playwright','TypeScript','CI/CD'], url:'https://jobs.smartrecruiters.com/VoyagePriv/744000097543255-qa-engineer-full-remote-or-hybrid-m-f-d-' }
   ]}
 ];
 
 const qa = /\b(qa|quality assurance|quality engineer|test engineer|software tester|sdet|test automation|automation engineer|quality analyst)\b/i;
 const softwareSignal = /software|web|mobile|api|automation|selenium|playwright|cypress|appium|backend|frontend|application|platform|product|javascript|typescript|python|java/i;
+const explicitSoftwareQATitle = /\b(qa|sdet|software test|test automation|quality assurance engineer)\b/i;
 const regions = {
   Cyprus: /cyprus|limassol|nicosia/i,
   UAE: /uae|dubai|abu dhabi|united arab emirates/i,
@@ -156,7 +167,7 @@ async function fetchSource(source) {
 const report={generatedAt:new Date().toISOString(),sources:[],companies:[],errors:[]};
 const all=[];
 for(const source of sources){
-  try{const rows=await fetchSource(source);const accepted=rows.filter(j=>qa.test(j.title)&&softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`));all.push(...accepted);report.sources.push({...source,status:'ok',seen:rows.length,accepted:accepted.length});console.log(`✓ ${source.company}: ${accepted.length}/${rows.length}`);}
+  try{const rows=await fetchSource(source);const accepted=rows.filter(j=>qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`)));all.push(...accepted);report.sources.push({...source,status:'ok',seen:rows.length,accepted:accepted.length});console.log(`✓ ${source.company}: ${accepted.length}/${rows.length}`);}
   catch(error){report.sources.push({...source,status:'error',error:error.message});report.errors.push(`${source.company}: ${error.message}`);console.warn(`× ${source.company}: ${error.message}`);}
 }
 

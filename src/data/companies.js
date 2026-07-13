@@ -127,7 +127,15 @@ export const companies = [
   ['Bank of Cyprus','Cyprus','Nicosia / hybrid','Banking','https://www.bankofcyprus.com/en-gb/group/careers/'],
   ['Trust Insurance Cyprus','Cyprus','Nicosia','Insurtech','https://www.trustcyprusinsurance.com/en/career/quality-assurance-engineer/'],
   ['ISX Financial','Cyprus','Nicosia','Payments','https://isx.financial/careers/'],
-  ['paytech','Cyprus','Limassol','Payments','https://www.pay.tech/careers']
+  ['paytech','Cyprus','Limassol','Payments','https://www.pay.tech/careers'],
+  ['ClickHouse','Europe','Germany / Spain / Netherlands · remote','Data infrastructure','https://job-boards.greenhouse.io/clickhouse'],
+  ['Actian','Europe','Remote','Data infrastructure','https://jobs.lever.co/actian'],
+  ['DKB Code Factory','Europe','Berlin / Valencia','Banking / fintech','https://job-boards.greenhouse.io/dkbcodefactory'],
+  ['Sporty Group','Europe','Remote','Sports / iGaming','https://job-boards.greenhouse.io/sportygroup'],
+  ['LetsGetChecked','Ireland','Dublin','HealthTech','https://job-boards.greenhouse.io/letsgetchecked'],
+  ['Shift Technology','France','Paris / hybrid','Insurtech','https://job-boards.greenhouse.io/shifttechnology'],
+  ['IDnow','France / Germany','Rennes / remote-friendly','Identity / fintech','https://job-boards.greenhouse.io/idnow'],
+  ['Voyage Privé','France','Remote / hybrid','TravelTech','https://jobs.smartrecruiters.com/VoyagePriv/744000097543255-qa-engineer-full-remote-or-hybrid-m-f-d-']
 ].map(([name,country,city,industry,careerUrl], index) => ({
   id: `c${index + 1}`, name, country, city, industry, careerUrl,
   priority: country.includes('Cyprus') ? 'high' : country === 'Europe' ? 'medium' : 'normal',

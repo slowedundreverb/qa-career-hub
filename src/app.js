@@ -104,6 +104,7 @@ function filteredJobs() {
   return jobs.filter(j => {
     const hay = `${j.title} ${j.company} ${j.industry||''} ${j.location} ${(j.technologies || []).join(' ')}`.toLowerCase();
     const country = state.location.startsWith('country:') ? state.location.slice(8) : '';
+    const europeRemote = j.format === 'Remote' && /europe|global|worldwide|anywhere/i.test(j.location);
     return (!state.favoritesOnly || state.favorites.has(j.id)) &&
       (!state.jobSearch || hay.includes(state.jobSearch.toLowerCase())) &&
       (state.type === 'all' || jobType(j) === state.type) &&
@@ -111,7 +112,7 @@ function filteredJobs() {
       (state.company === 'all' || j.company === state.company) &&
       (state.format === 'all' || j.format === state.format) &&
       (state.level === 'all' || j.level === state.level) &&
-      (state.location === 'all' || j.region?.toLowerCase() === state.location || (state.location === 'remote' && j.format === 'Remote') || (country && j.location.toLowerCase().includes(country))) &&
+      (state.location === 'all' || j.region?.toLowerCase() === state.location || (state.location === 'remote' && j.format === 'Remote') || (country && (j.location.toLowerCase().includes(country) || europeRemote))) &&
       j.status !== 'closed';
   }).sort((a,b) => state.sort === 'fit' ? (b.matchScore||0)-(a.matchScore||0) : new Date(b.lastChecked||0)-new Date(a.lastChecked||0));
 }
@@ -145,7 +146,7 @@ function renderJobs() {
       <div class="filterbar">
         <label class="search"><span>⌕</span><input id="job-search" value="${esc(state.jobSearch)}" placeholder="Должность, компания или технология" /></label>
         ${select('job-industry',[['all','Все отрасли'],['fintech','Fintech / банки'],...industries.map(x=>[x,x])],state.industry)}
-        ${select('job-location',[['all','Вся география'],['remote','Только remote'],...focusCountries.map(x=>[`country:${x.toLowerCase()}`,x]),...regions.map(x=>[x.toLowerCase(),x])],state.location)}
+        ${select('job-location',[['all','Вся география'],['remote','Только remote'],...focusCountries.map(x=>[`country:${x.toLowerCase()}`,`${x} + remote EU`]),...regions.map(x=>[x.toLowerCase(),x])],state.location)}
         ${select('job-company',[['all','Все компании'],...employers.map(x=>[x,x])],state.company)}
         ${select('job-type',[['all','Все роли'],['manual','Manual QA'],['aqa','Automation'],['java','Java AQA'],['sdet','SDET']],state.type)}
         ${select('job-level',[['all','Любой уровень'],['Junior','Junior'],['Middle','Middle'],['Senior','Senior'],['Lead','Lead']],state.level)}
