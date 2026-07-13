@@ -5,6 +5,12 @@ import { questions } from './data/questions.js';
 
 const app = document.querySelector('#app');
 const saved = JSON.parse(localStorage.getItem('qa-hub-state') || '{}');
+const cachedJobs = JSON.parse(sessionStorage.getItem('qa-hub-jobs') || 'null');
+if (cachedJobs?.jobs?.length && new Date(cachedJobs.meta?.generatedAt || 0) > new Date(jobMeta.generatedAt || 0)) {
+  jobs.splice(0, jobs.length, ...cachedJobs.jobs);
+  linkedinJobs.splice(0, linkedinJobs.length, ...(cachedJobs.linkedinJobs || []));
+  Object.assign(jobMeta, cachedJobs.meta);
+}
 const state = {
   mode: location.hash.includes('learn') ? 'learn' : 'jobs',
   learnView: saved.learnView || 'roadmap',
@@ -19,6 +25,19 @@ const state = {
 };
 
 const esc = (s='') => String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const cleanJobText = (value='') => {
+  const decoder=document.createElement('textarea');
+  decoder.innerHTML=String(value);
+  let text=decoder.value.replace(/<[^>]*>/g,' ');
+  const hasMarkupDebris=/(?:^|\s)\/(?:p|div|span|strong|em|ul|ol|li|h[1-6]|section)(?=\s|$)|\b(?:class|data-[\w-]+|style|lang)\s*=/i.test(text);
+  if(hasMarkupDebris){
+    text=text
+      .replace(/\b(?:class|data-[\w-]+|style|lang)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s]+)?/gi,' ')
+      .replace(/(?:^|\s)\/?(?:p|div|span|strong|em|ul|ol|li|h[1-6]|section|br)(?=\s|$)/gi,' ')
+      .replace(/\b(?:nbsp|quot)\b/gi,' ');
+  }
+  return text.replace(/\s+/g,' ').trim();
+};
 const initials = name => name.split(/\s+/).map(x => x[0]).join('').slice(0,2).toUpperCase();
 const date = value => value ? new Intl.DateTimeFormat('ru', { day:'2-digit', month:'short' }).format(new Date(value)) : '—';
 const save = () => localStorage.setItem('qa-hub-state', JSON.stringify({
@@ -26,6 +45,11 @@ const save = () => localStorage.setItem('qa-hub-state', JSON.stringify({
   quiz: state.quiz, quizCategory: state.quizCategory, learnView: state.learnView
 }));
 const shuffle = arr => [...arr].sort(() => Math.random() - .5);
+const sourceWarning = count => count % 10 === 1 && count % 100 !== 11
+  ? `${count} источник требует перепроверки`
+  : count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 12 || count % 100 > 14)
+    ? `${count} источника требуют перепроверки`
+    : `${count} источников требуют перепроверки`;
 
 function shell(content) {
   state.settingsOpen=false;
@@ -176,7 +200,7 @@ function jobCard(j) {
     <div class="company-logo" style="--h:${(j.company.length*31)%360}">${esc(initials(j.company))}</div>
     <div class="job-content"><div class="job-title-row"><div><span class="fit ${j.matchScore>=85?'great':''}">${j.matchScore||70}% совпадение</span><h3>${esc(j.title)}</h3></div><button class="save ${fav?'saved':''}" data-favorite="${esc(j.id)}" aria-label="Сохранить">${fav?'♥':'♡'}</button></div>
       <div class="job-company"><b>${esc(j.company)}</b><span>·</span><span>${esc(j.location)}</span></div>
-      <p>${esc(j.description || 'Описание и требования доступны на официальной странице работодателя.')}</p>
+      <p>${esc(cleanJobText(j.description) || 'Описание и требования доступны на официальной странице работодателя.')}</p>
       <div class="tag-cloud job-tags">${(j.technologies||[]).slice(0,6).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
       <div class="job-meta"><span>${esc(j.industry||'Technology')}</span><span>${esc(j.region||'Global')}</span><span>${j.format||'Не указан'}</span><span>${j.level||'Уровень не указан'}</span><span>проверено ${date(j.lastChecked)}</span><span class="status-dot">${j.status==='active'?'активна':'перепроверить'}</span></div>
     </div>
@@ -212,12 +236,17 @@ async function refreshJobs(){
     const response=await fetch('/api/refresh-jobs',{method:'POST'});
     const result=await response.json().catch(()=>({}));
     if(!response.ok) throw new Error(result.error||'Refresh unavailable');
-    status.textContent=`найдено ${result.count} · обновляем страницу`;
-    toast(`Готово: ${result.count} активных вакансий`);
-    setTimeout(()=>location.reload(),900);
-  }catch{
+    if(!Array.isArray(result.jobs)) throw new Error('Invalid refresh response');
+    jobs.splice(0,jobs.length,...result.jobs);
+    linkedinJobs.splice(0,linkedinJobs.length,...(result.linkedinJobs||[]));
+    Object.assign(jobMeta,result.meta||{generatedAt:new Date().toISOString()});
+    sessionStorage.setItem('qa-hub-jobs',JSON.stringify({jobs:result.jobs,linkedinJobs:result.linkedinJobs||[],meta:jobMeta}));
+    renderJobs();
+    toast(`Готово: ${result.count} активных вакансий${result.warnings?` · ${sourceWarning(result.warnings)}`:''}`);
+  }catch(error){
+    console.error('Job refresh failed',error);
     box.classList.remove('refreshing'); button.disabled=false; status.textContent='не удалось обновить';
-    toast('Локальный сервер обновления недоступен. Запустите npm run update:jobs');
+    toast('Не удалось обновить вакансии. Попробуйте ещё раз позже');
   }
 }
 

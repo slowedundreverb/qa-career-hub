@@ -1,9 +1,9 @@
 import { createServer } from 'node:http';
-import { spawn } from 'node:child_process';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { collectJobs } from './update-jobs.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const base = process.argv[2] === 'dist' ? join(root, 'dist') : root;
@@ -11,23 +11,15 @@ const port = Number(process.env.PORT || 4173);
 const types = { '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml' };
 let refreshPromise = null;
 
-function runScript(name) {
-  return new Promise((resolveRun, rejectRun) => {
-    const child = spawn(process.execPath, [join(root, 'scripts', name)], { cwd: root });
-    let output = '';
-    let error = '';
-    child.stdout.on('data', chunk => { output += chunk; });
-    child.stderr.on('data', chunk => { error += chunk; });
-    child.on('error', rejectRun);
-    child.on('close', code => code === 0 ? resolveRun(output) : rejectRun(new Error(error || output || `${name} failed`)));
-  });
-}
-
 async function refreshSnapshot() {
-  const output = await runScript('update-jobs.mjs');
-  await runScript('build.mjs');
-  const count = Number(output.match(/Готово:\s*(\d+)\s*активных/)?.[1] || 0);
-  return { count, updatedAt: new Date().toISOString() };
+  const result=await collectJobs();
+  return {
+    jobs:result.jobs,
+    linkedinJobs:result.linkedinJobs,
+    meta:result.meta,
+    count:result.jobs.length,
+    warnings:result.report.errors.length
+  };
 }
 
 const server = createServer(async (req,res) => {

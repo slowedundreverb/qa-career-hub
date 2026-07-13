@@ -3,7 +3,8 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { companies } from '../src/data/companies.js';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const scriptPath = fileURLToPath(import.meta.url);
+const root = resolve(dirname(scriptPath), '..');
 const envPath = resolve(root, '.env');
 try {
   for (const line of (await readFile(envPath,'utf8')).split(/\r?\n/)) {
@@ -116,7 +117,19 @@ const regions = {
   Global: /remote|global|worldwide|anywhere/i
 };
 const regionOf = location => Object.entries(regions).find(([,pattern])=>pattern.test(location))?.[0] || 'Other';
-const strip = html => String(html||'').replace(/<[^>]*>/g,' ').replace(/&[a-z]+;/gi,' ').replace(/\s+/g,' ').trim();
+const strip = html => String(html||'')
+  .replace(/&amp;/gi,'&')
+  .replace(/&lt;/gi,'<')
+  .replace(/&gt;/gi,'>')
+  .replace(/&quot;|&#34;/gi,'"')
+  .replace(/&#39;|&apos;/gi,"'")
+  .replace(/&#x([0-9a-f]+);/gi,(_,code)=>String.fromCodePoint(Number.parseInt(code,16)))
+  .replace(/&#(\d+);/g,(_,code)=>String.fromCodePoint(Number(code)))
+  .replace(/<[^>]*>/g,' ')
+  .replace(/&nbsp;/gi,' ')
+  .replace(/&[a-z]+;|&#\d+;/gi,' ')
+  .replace(/\s+/g,' ')
+  .trim();
 const techNames=['Java','Selenium','Appium','TestNG','JUnit','Maven','Gradle','REST Assured','Postman','API','SQL','PostgreSQL','Kafka','Redis','Docker','Kubernetes','CI/CD','Playwright','Cypress','Python','JavaScript','TypeScript','Mobile','iOS','Android'];
 const tech = text => techNames.filter(x => new RegExp(x.replace('/','\\/'),'i').test(text));
 const level = title => /lead|staff|principal/i.test(title)?'Lead':/senior|sr\.?/i.test(title)?'Senior':/junior|graduate|entry/i.test(title)?'Junior':'Middle';
@@ -164,31 +177,59 @@ async function fetchSource(source) {
   });
 }
 
-const report={generatedAt:new Date().toISOString(),sources:[],companies:[],errors:[]};
-const all=[];
-for(const source of sources){
-  try{const rows=await fetchSource(source);const accepted=rows.filter(j=>qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`)));all.push(...accepted);report.sources.push({...source,status:'ok',seen:rows.length,accepted:accepted.length});console.log(`✓ ${source.company}: ${accepted.length}/${rows.length}`);}
-  catch(error){report.sources.push({...source,status:'error',error:error.message});report.errors.push(`${source.company}: ${error.message}`);console.warn(`× ${source.company}: ${error.message}`);}
-}
+export async function collectJobs({checkCompanies=false}={}) {
+  const report={generatedAt:new Date().toISOString(),sources:[],companies:[],errors:[]};
+  const all=[];
 
-// Проверки независимы и идут параллельно: медленный сайт не удерживает весь snapshot.
-report.companies = await Promise.all(companies.map(async company => {
-  try {
-    const response=await fetch(company.careerUrl,{method:'HEAD',redirect:'follow',signal:AbortSignal.timeout(5000),headers:{'user-agent':'QA-Career-Hub/1.0'}});
-    return {name:company.name,url:company.careerUrl,status:response.ok?'reachable':'recheck',http:response.status,checkedAt:new Date().toISOString()};
-  } catch(error) {
-    return {name:company.name,url:company.careerUrl,status:'recheck',error:error.message,checkedAt:new Date().toISOString()};
+  // Источники независимы: проверяем их одновременно, чтобы функция Vercel не ждала их по очереди.
+  const sourceResults=await Promise.all(sources.map(async source=>{
+    try {
+      const rows=await fetchSource(source);
+      const accepted=rows.filter(j=>qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`)));
+      return {source,rows,accepted};
+    } catch(error) {
+      return {source,error};
+    }
+  }));
+
+  for(const result of sourceResults){
+    if(result.error){
+      report.sources.push({...result.source,status:'error',error:result.error.message});
+      report.errors.push(`${result.source.company}: ${result.error.message}`);
+      console.warn(`× ${result.source.company}: ${result.error.message}`);
+      continue;
+    }
+    all.push(...result.accepted);
+    report.sources.push({...result.source,status:'ok',seen:result.rows.length,accepted:result.accepted.length});
+    console.log(`✓ ${result.source.company}: ${result.accepted.length}/${result.rows.length}`);
   }
-}));
 
-let linkedinJobs=[];let linkedinConnected=false;
-if(process.env.LINKEDIN_API_URL&&process.env.LINKEDIN_API_TOKEN){
-  try{const data=await fetchJSON(process.env.LINKEDIN_API_URL,{authorization:`Bearer ${process.env.LINKEDIN_API_TOKEN}`});linkedinJobs=(Array.isArray(data)?data:data.jobs||[]).slice(0,10);linkedinConnected=true;}
-  catch(error){report.errors.push(`LinkedIn adapter: ${error.message}`);}
+  if(checkCompanies){
+    report.companies = await Promise.all(companies.map(async company => {
+      try {
+        const response=await fetch(company.careerUrl,{method:'HEAD',redirect:'follow',signal:AbortSignal.timeout(5000),headers:{'user-agent':'QA-Career-Hub/1.0'}});
+        return {name:company.name,url:company.careerUrl,status:response.ok?'reachable':'recheck',http:response.status,checkedAt:new Date().toISOString()};
+      } catch(error) {
+        return {name:company.name,url:company.careerUrl,status:'recheck',error:error.message,checkedAt:new Date().toISOString()};
+      }
+    }));
+  }
+
+  let linkedinJobs=[];let linkedinConnected=false;
+  if(process.env.LINKEDIN_API_URL&&process.env.LINKEDIN_API_TOKEN){
+    try{const data=await fetchJSON(process.env.LINKEDIN_API_URL,{authorization:`Bearer ${process.env.LINKEDIN_API_TOKEN}`});linkedinJobs=(Array.isArray(data)?data:data.jobs||[]).slice(0,10);linkedinConnected=true;}
+    catch(error){report.errors.push(`LinkedIn adapter: ${error.message}`);}
+  }
+
+  const jobs=[...new Map(all.map(j=>[`${j.company}|${j.title}|${j.location}`.toLowerCase(),j])).values()].sort((a,b)=>(b.matchScore||0)-(a.matchScore||0));
+  const companyStatus=checkCompanies?` Career URL: ${report.companies.filter(x=>x.status==='reachable').length}/${companies.length}.`:'';
+  const meta={generatedAt:report.generatedAt,linkedinConnected,message:`Проверено ATS: ${report.sources.filter(x=>x.status==='ok').length}/${sources.length}.${companyStatus} Ошибки не остановили остальные источники.`};
+  return {jobs,linkedinJobs,meta,report};
 }
 
-const deduped=[...new Map(all.map(j=>[`${j.company}|${j.title}|${j.location}`.toLowerCase(),j])).values()].sort((a,b)=>(b.matchScore||0)-(a.matchScore||0));
-const meta={generatedAt:report.generatedAt,linkedinConnected,message:`Проверено ATS: ${report.sources.filter(x=>x.status==='ok').length}/${sources.length}. Career URL: ${report.companies.filter(x=>x.status==='reachable').length}/${companies.length}. Ошибки не остановили остальные источники.`};
-await writeFile(resolve(root,'src/data/jobs.js'),`// Автоматически создано scripts/update-jobs.mjs\nexport const jobs = ${JSON.stringify(deduped,null,2)};\nexport const linkedinJobs = ${JSON.stringify(linkedinJobs,null,2)};\nexport const jobMeta = ${JSON.stringify(meta,null,2)};\n`);
-await writeFile(resolve(root,'update-report.json'),JSON.stringify(report,null,2));
-console.log(`\nГотово: ${deduped.length} активных QA-вакансий. LinkedIn API: ${linkedinConnected?'подключён':'не подключён'}.`);
+if(process.argv[1]&&resolve(process.argv[1])===scriptPath){
+  const result=await collectJobs({checkCompanies:true});
+  await writeFile(resolve(root,'src/data/jobs.js'),`// Автоматически создано scripts/update-jobs.mjs\nexport const jobs = ${JSON.stringify(result.jobs,null,2)};\nexport const linkedinJobs = ${JSON.stringify(result.linkedinJobs,null,2)};\nexport const jobMeta = ${JSON.stringify(result.meta,null,2)};\n`);
+  await writeFile(resolve(root,'update-report.json'),JSON.stringify(result.report,null,2));
+  console.log(`\nГотово: ${result.jobs.length} активных QA-вакансий. LinkedIn API: ${result.meta.linkedinConnected?'подключён':'не подключён'}.`);
+}
