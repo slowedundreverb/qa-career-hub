@@ -137,6 +137,8 @@
   border-radius: 16px;
   background: var(--paper);
   box-shadow: 0 24px 70px rgba(20,32,28,.18);
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
 }
 
 .settings-menu.open {
@@ -182,6 +184,52 @@
   background: #ffe9df;
 }
 
+.settings-section + .settings-section {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.settings-refresh {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid #bad3c9;
+  border-radius: 9px;
+  background: #edf7f1;
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.settings-refresh:hover {
+  border-color: var(--green);
+  background: #e3f3ea;
+}
+
+.settings-refresh:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.settings-refresh svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.settings-vacancies.refreshing .settings-refresh svg {
+  animation: refresh-spin .8s linear infinite;
+}
+
 .update-box button {
   flex: 0 0 auto;
   width: 34px;
@@ -222,10 +270,105 @@
   animation: pulse-refresh 1.2s ease-in-out infinite;
 }
 
+.about-mark {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #53635e;
+  border-radius: 50%;
+  color: var(--lime);
+  font: 700 12px "Space Grotesk";
+}
+
 #companies-dialog[open] {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.about-dialog {
+  width: min(780px, 88vw);
+  max-height: 82vh;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.about-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 24px 0;
+}
+
+.about-features article {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #faf9f5;
+}
+
+.about-features article > span {
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.about-features h3 {
+  margin: 20px 0 8px;
+  font-size: 16px;
+}
+
+.about-features p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.about-author {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--navy);
+  color: white;
+}
+
+.about-avatar {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--lime);
+  color: var(--navy);
+  font-weight: 800;
+}
+
+.about-author div {
+  display: grid;
+  gap: 3px;
+}
+
+.about-author small {
+  color: var(--lime);
+  font-size: 7px;
+  letter-spacing: 1.2px;
+}
+
+.about-author strong {
+  font: 700 16px "Space Grotesk";
+}
+
+.about-author p {
+  margin: 0;
+  color: #aeb8b3;
+  font-size: 9px;
 }
 
 #companies-dialog .dialog-head {
@@ -1542,6 +1685,26 @@ body:has(.topic-overlay) {
 
   .version-content h2 {
     font-size: 18px;
+  }
+
+  .about-dialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .about-features {
+    grid-template-columns: 1fr;
+    margin: 18px 0;
+  }
+
+  .about-features h3 {
+    margin-top: 10px;
+  }
+
+  .about-author {
+    align-items: flex-start;
   }
 
   .jobs-list { gap: 8px; }

@@ -106,10 +106,20 @@ function shell(content) {
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.63 15 1.7 1.7 0 0 0 3.08 14H3v-4h.08A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63 1.7 1.7 0 0 0 10 3.08V3h4v.08A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9 1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>
         </button>
         <section class="settings-menu" id="settings-menu" aria-label="Меню настроек">
-          <span class="kicker">НАСТРОЙКИ</span><h3>Прогресс обучения</h3>
-          <p>Автоматически сохраняется в этом браузере.</p>
-          <div class="settings-progress"><span>${state.completed.size} / ${curriculum.length} тем</span><span>${state.quizStats.answered} ответов</span></div>
-          <button class="settings-reset" id="reset-training-progress">Сбросить прогресс</button>
+          <div class="settings-section">
+            <span class="kicker">ОБУЧЕНИЕ</span><h3>Прогресс обучения</h3>
+            <p>Автоматически сохраняется в этом браузере.</p>
+            <div class="settings-progress"><span>${state.completed.size} / ${curriculum.length} тем</span><span>${state.quizStats.answered} ответов</span></div>
+            <button class="settings-reset" id="reset-training-progress">Сбросить прогресс</button>
+          </div>
+          <div class="settings-section settings-vacancies" id="settings-vacancies">
+            <span class="kicker">ВАКАНСИИ</span><h3>Актуальность вакансий</h3>
+            <p id="settings-update-status">${jobMeta.generatedAt ? `Последняя проверка: ${date(jobMeta.generatedAt)}` : 'Данные ещё не проверялись'}</p>
+            <button class="settings-refresh" id="settings-refresh-jobs">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg>
+              <span>Проверить актуальность</span>
+            </button>
+          </div>
         </section>
       </div>
     </header>
@@ -131,6 +141,7 @@ function bindGlobal() {
     settingsButton.setAttribute('aria-expanded',String(state.settingsOpen));
   });
   document.querySelector('#reset-training-progress')?.addEventListener('click',resetTrainingProgress);
+  document.querySelector('#settings-refresh-jobs')?.addEventListener('click',refreshJobs);
 }
 
 document.addEventListener('click',e=>{
@@ -207,7 +218,7 @@ function renderJobs() {
         <button id="show-companies"><span>◫</span> Компании <b>${watchlist.length}</b></button>
         <button id="show-favorites" class="${state.favoritesOnly?'active':''}"><span>♡</span> Сохранённые <b>${state.favorites.size}</b></button>
       </div>
-      <div class="update-box" id="update-box"><span class="pulse"></span><div><b>Снимок вакансий</b><small id="update-status">${jobMeta.generatedAt ? `обновлён ${date(jobMeta.generatedAt)}` : 'ещё не создан'}</small></div><button id="refresh-jobs" aria-label="Обновить вакансии" title="Обновить вакансии"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg></button></div>
+      <div class="update-box about-box"><span class="about-mark">i</span><div><b>О проекте</b><small>возможности и автор</small></div><button id="show-about" aria-label="Открыть информацию о проекте" title="О проекте">→</button></div>
     </aside>
     <section class="jobs-main">
       <div class="jobs-hero">
@@ -231,7 +242,7 @@ function renderJobs() {
       <div class="results-head"><span><b>${list.length}</b> вакансий после фильтрации</span><small>Только официальные страницы работодателей</small></div>
       <div class="jobs-list">${list.length ? list.map(jobCard).join('') : emptyJobs()}</div>
     </section>
-  </main>${companiesDrawer()}`);
+  </main>${companiesDrawer()}${aboutDialog()}`);
   bindJobs();
 }
 
@@ -260,6 +271,18 @@ function jobCard(j) {
 }
 
 const emptyJobs = () => `<div class="empty-state"><span>⌁</span><h3>${jobs.length ? 'Ничего не найдено' : 'Данные вакансий ещё не обновлены'}</h3><p>${jobs.length ? 'Измените фильтры или поисковый запрос.' : 'В терминале проекта выполните npm run update:jobs. Каждый источник проверяется независимо.'}</p>${jobs.length?'<button id="reset-filters">Сбросить фильтры</button>':''}</div>`;
+
+function aboutDialog() {
+  return `<dialog id="about-dialog" class="about-dialog">
+    <div class="dialog-head"><div><span class="eyebrow">ABOUT QA/HUB</span><h2>Карьерный центр для QA</h2><p>Один интерфейс для поиска следующей роли и системной подготовки к интервью.</p></div><button id="close-about" aria-label="Закрыть информацию о проекте">×</button></div>
+    <div class="about-features">
+      <article><span>01</span><h3>Искать вакансии</h3><p>Фильтровать международные QA-позиции и переходить только на официальные страницы работодателей.</p></article>
+      <article><span>02</span><h3>Следить за компаниями</h3><p>Сохранять карьерные сайты интересных компаний и возвращаться к ним из личного watchlist.</p></article>
+      <article><span>03</span><h3>Готовиться к интервью</h3><p>Проходить маршрут тем, повторять базу знаний и тренироваться на вопросах с объяснениями.</p></article>
+    </div>
+    <footer class="about-author"><span class="about-avatar">ГП</span><div><small>СОЗДАТЕЛЬ ПРОЕКТА</small><strong>Глеб Провоторов</strong><p>QA Engineer · идея, продукт и развитие QA Career Hub</p></div></footer>
+  </dialog>`;
+}
 
 function companiesDrawer() {
   const watchlist=watchedCompanies();
@@ -337,6 +360,7 @@ function bindJobs() {
   document.querySelectorAll('[data-favorite]').forEach(b=>b.addEventListener('click',()=>{ state.favorites.has(b.dataset.favorite)?state.favorites.delete(b.dataset.favorite):state.favorites.add(b.dataset.favorite); save(); renderJobs(); }));
   document.querySelector('#reset-filters')?.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',jobSearchDraft:'',type:'all',industry:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();});
   const dialog=document.querySelector('#companies-dialog'); document.querySelector('#show-companies')?.addEventListener('click',()=>dialog.showModal()); document.querySelector('#close-dialog')?.addEventListener('click',()=>dialog.close());
+  const about=document.querySelector('#about-dialog'); document.querySelector('#show-about')?.addEventListener('click',()=>about.showModal()); document.querySelector('#close-about')?.addEventListener('click',()=>about.close());
   const companyScroll=document.querySelector('.companies-dialog-body');
   companyScroll?.addEventListener('keydown',e=>{
     const destinations={
@@ -353,15 +377,14 @@ function bindJobs() {
   document.querySelectorAll('[data-remove-company]').forEach(button=>button.addEventListener('click',()=>removeWatchedCompany(button.dataset.removeCompany)));
   document.querySelector('#show-all-jobs')?.addEventListener('click',()=>{state.favoritesOnly=false;renderJobs();});
   document.querySelector('#show-favorites')?.addEventListener('click',()=>{state.favoritesOnly=true;state.jobSearch='';state.jobSearchDraft='';renderJobs();});
-  document.querySelector('#refresh-jobs')?.addEventListener('click',refreshJobs);
 }
 
 async function refreshJobs(){
-  const box=document.querySelector('#update-box');
-  const button=document.querySelector('#refresh-jobs');
-  const status=document.querySelector('#update-status');
-  if(!box||!button||!status) return;
-  box.classList.add('refreshing'); button.disabled=true; status.textContent='проверяем источники…';
+  const panel=document.querySelector('#settings-vacancies');
+  const button=document.querySelector('#settings-refresh-jobs');
+  const status=document.querySelector('#settings-update-status');
+  if(!panel||!button||!status) return;
+  panel.classList.add('refreshing'); button.disabled=true; status.textContent='Проверяем официальные источники…';
   try{
     const response=await fetch('/api/refresh-jobs',{method:'POST'});
     const result=await response.json().catch(()=>({}));
@@ -371,38 +394,46 @@ async function refreshJobs(){
     linkedinJobs.splice(0,linkedinJobs.length,...(result.linkedinJobs||[]));
     Object.assign(jobMeta,result.meta||{generatedAt:new Date().toISOString()});
     sessionStorage.setItem('qa-hub-jobs',JSON.stringify({jobs:result.jobs,linkedinJobs:result.linkedinJobs||[],meta:jobMeta}));
-    renderJobs();
+    state.settingsOpen=false;
+    render();
     toast(`Готово: ${result.count} активных вакансий${result.warnings?` · ${sourceWarning(result.warnings)}`:''}`);
   }catch(error){
     console.error('Job refresh failed',error);
-    box.classList.remove('refreshing'); button.disabled=false; status.textContent='не удалось обновить';
+    panel.classList.remove('refreshing'); button.disabled=false; status.textContent='Не удалось проверить данные';
     toast('Не удалось обновить вакансии. Попробуйте ещё раз позже');
   }
 }
 
 const versionNotes = {
-  aeee763: 'Создали первую версию QA Career Hub с вакансиями и подготовкой к интервью.',
-  '38fadf8': 'Расширили подборку европейских вакансий и исправили работу сохранённых позиций.',
-  '0cae886': 'Настроили корректную папку сборки для публикации на Vercel.',
-  '310311a': 'Исключили локальные файлы окружения Vercel из репозитория.',
-  '89d73bd': 'Добавили адаптивные раскладки для мобильных устройств и сжатых окон.',
-  '6067610': 'Подключили обновление вакансий из интерфейса в опубликованной версии.',
-  '3095560': 'Вернули сегментированный круговой индикатор прогресса обучения.',
-  '685222b': 'Исправили кнопку завершения темы и её расположение внутри конспекта.',
-  '72735fc': 'Добавили новые карьерные сайты и пользовательский список компаний для отслеживания.',
-  'a01dc24': 'Вернули прокрутку списка компаний и заметный индикатор скролла.'
+  aeee763: 'Created the first QA Career Hub with international vacancies and interview preparation.',
+  '38fadf8': 'Expanded the European vacancy collection and fixed saved job behavior.',
+  '0cae886': 'Configured the correct production output directory for Vercel.',
+  '310311a': 'Excluded local Vercel environment files from the repository.',
+  '89d73bd': 'Added responsive layouts for mobile devices and compact windows.',
+  '6067610': 'Enabled live vacancy refresh from the published application.',
+  '3095560': 'Restored the segmented circular learning progress indicator.',
+  '685222b': 'Fixed the topic completion control and its position inside the study notes.',
+  '72735fc': 'Added new career sites and a personal company watchlist.',
+  'a01dc24': 'Restored scrolling in the company directory and added a visible scrollbar.',
+  '301fdd6': 'Fixed company scrolling, explicit search submission, complete company filters, and commit-based version history.',
+  f36134a: 'Replaced the Versions label with the public version number and removed repository links.'
+};
+
+const versionTitles = {
+  f36134a: 'Show public version without commit links'
 };
 
 function renderVersions() {
   const commits=versionHistory.commits||[];
   const cards=commits.map((commit,index)=>{
     const note=versionNotes[commit.shortSha]||commit.message;
+    const title=versionTitles[commit.shortSha]||commit.message;
     const formattedDate=new Intl.DateTimeFormat('ru',{day:'numeric',month:'long',year:'numeric'}).format(new Date(commit.date));
     return `<article class="version-card ${index===0?'current':''}">
       <div class="version-rail"><span></span><i></i></div>
       <div class="version-content">
         <div class="version-meta"><b>v${esc(commit.version)}</b>${index===0?'<em>Текущая версия</em>':''}<time datetime="${esc(commit.date)}">${esc(formattedDate)}</time></div>
-        <h2>${esc(commit.message)}</h2>
+        <h2>${esc(title)}</h2>
         <p>${esc(note)}</p>
       </div>
     </article>`;
