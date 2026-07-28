@@ -34,6 +34,7 @@ const sources = [
   { type:'greenhouse', token:'letsgetchecked', company:'LetsGetChecked', industry:'HealthTech' },
   { type:'greenhouse', token:'shifttechnology', company:'Shift Technology', industry:'Insurtech' },
   { type:'greenhouse', token:'idnow', company:'IDnow', industry:'Identity / fintech' },
+  { type:'greenhouse', token:'platacard', company:'Plata', industry:'Digital banking', qaSpecialization:'QA' },
   { type:'greenhouse', token:'robinhood', company:'Robinhood', industry:'Fintech' },
   { type:'greenhouse', token:'justmarkets', company:'JustMarkets', industry:'Fintech / trading' },
   { type:'greenhouse', token:'rumble-external', company:'Rumble', industry:'MediaTech' },
@@ -65,7 +66,6 @@ const sources = [
   { type:'ashby', token:'masabi', company:'Masabi', industry:'Payments' },
   { type:'ashby', token:'gen-digital', company:'MoneyLion / Gen Digital', industry:'Fintech' },
   { type:'ashby', token:'Ferovinum', company:'Ferovinum', industry:'Fintech' },
-  { type:'ashby', token:'whatnot', company:'Whatnot', industry:'E-commerce' },
   { type:'ashby', token:'Playbook', company:'Playbook', industry:'Consumer tech' },
   { type:'ashby', token:'infiterra', company:'Infiterra', industry:'SaaS' },
   { type:'ashby', token:'block-labs', company:'Block Labs', industry:'Web3 / iGaming' },
@@ -87,6 +87,9 @@ const sources = [
   { type:'ashby', token:'blockstream', company:'Blockstream', industry:'Fintech / blockchain' },
   { type:'direct', company:'Exness', industry:'Fintech / trading', jobs:[
     { title:'QA Engineer (AML Team)', location:'Limassol, Cyprus', format:'On-site', level:'Middle', description:'QA Automation Engineer for AML, client verification, screening and compliance services.', technologies:['API','Java','SQL'], url:'https://exness-careers.com/jobs/4846255101/?gh_jid=4846255101' }
+  ]},
+  { type:'direct', company:'TradingView', industry:'Fintech / trading', jobs:[
+    { title:'Senior Mobile QA Engineer', location:'Cyprus', format:'Hybrid', level:'Senior', description:'Mobile QA for TradingView\'s native iOS and Android apps, including functional, UI, usability and localization testing plus Kotlin/Swift test automation in CI/CD.', technologies:['Mobile','iOS','Android','CI/CD'], url:'https://tradingview.teamtailor.com/jobs/7669723-senior-mobile-qa-engineer' }
   ]},
   { type:'direct', company:'Trust Insurance Cyprus', industry:'Insurtech', jobs:[
     { title:'Quality Assurance (QA) Engineer', location:'Nicosia, Cyprus', format:'On-site', level:'Middle', description:'Software quality assurance role at the Cyprus head office.', technologies:['API','SQL'], url:'https://www.trustcyprusinsurance.com/en/career/quality-assurance-engineer/' }
@@ -142,14 +145,53 @@ async function fetchJSON(url, headers={}) {
   return response.json();
 }
 
+async function probeUrl(url,{timeout=12000}={}) {
+  try {
+    const response=await fetch(url,{
+      method:'GET',
+      redirect:'follow',
+      signal:AbortSignal.timeout(timeout),
+      headers:{
+        'user-agent':'Mozilla/5.0 (compatible; QA-Career-Hub/1.0; +vacancy-link-audit)',
+        accept:'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8',
+        range:'bytes=0-4095'
+      }
+    });
+    await response.body?.cancel().catch(()=>{});
+    const protectedStatus=[401,403,405,429].includes(response.status);
+    return {
+      status:response.ok?'reachable':protectedStatus?'protected':[404,410].includes(response.status)?'broken':'recheck',
+      http:response.status,
+      finalUrl:response.url,
+      checkedAt:new Date().toISOString()
+    };
+  } catch(error) {
+    if(error.cause?.code==='UND_ERR_HEADERS_OVERFLOW'){
+      return {status:'protected',reason:'response headers exceed the automated client limit',checkedAt:new Date().toISOString()};
+    }
+    return {status:'recheck',error:error.message,checkedAt:new Date().toISOString()};
+  }
+}
+
+async function mapWithConcurrency(items,limit,worker) {
+  const results=new Array(items.length);
+  let cursor=0;
+  async function run() {
+    while(cursor<items.length){
+      const index=cursor++;
+      results[index]=await worker(items[index],index);
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(limit,items.length)},run));
+  return results;
+}
+
 async function fetchSource(source) {
   if(source.type==='direct') {
     const rows=[];
     for(const [index,j] of source.jobs.entries()) {
-      try {
-        const response=await fetch(j.url,{redirect:'follow',signal:AbortSignal.timeout(18000),headers:{'user-agent':'QA-Career-Hub/1.0 (+personal job research)'}});
-        if(response.status===404||response.status===410) continue;
-      } catch {}
+      const check=await probeUrl(j.url,{timeout:18000});
+      if(check.status==='broken') continue;
       rows.push({id:`direct-${source.company}-${index}`.toLowerCase().replace(/[^a-z0-9]+/g,'-'),title:j.title,company:source.company,industry:source.industry,region:regionOf(j.location),location:j.location,format:j.format,level:j.level,description:j.description,requirements:j.description,technologies:j.technologies||tech(j.description),publishedAt:null,lastChecked:new Date().toISOString(),source:'Official career page',url:j.url,status:'active',matchScore:score(j.title,j.description,j.location)});
     }
     return rows;
@@ -173,7 +215,9 @@ async function fetchSource(source) {
   const data=await fetchJSON(`https://boards-api.greenhouse.io/v1/boards/${source.token}/jobs?content=true`);
   return (data.jobs||[]).map(j=>{
     const description=strip(j.content);const location=j.location?.name||'Not specified';
-    return {id:`gh-${j.id}`,title:j.title,company:source.company,industry:source.industry,region:regionOf(location),location,format:format(location),level:level(j.title),description:description.slice(0,260),requirements:description.slice(0,520),technologies:tech(description),publishedAt:j.updated_at||null,lastChecked:new Date().toISOString(),source:'Greenhouse · official ATS',url:j.absolute_url,status:'active',matchScore:score(j.title,description,location)};
+    const specialization=j.metadata?.find(item=>item.name==='Specialization')?.value||null;
+    const workModel=j.metadata?.find(item=>item.name==='work_model')?.value||'';
+    return {id:`gh-${j.id}`,title:j.title,company:source.company,industry:source.industry,region:regionOf(location),location,format:format(`${workModel} ${location}`),level:level(j.title),description:description.slice(0,260),requirements:description.slice(0,520),technologies:tech(description),specialization,publishedAt:j.updated_at||null,lastChecked:new Date().toISOString(),source:'Greenhouse · official ATS',url:j.absolute_url,status:'active',matchScore:score(j.title,description,location)};
   });
 }
 
@@ -181,16 +225,18 @@ export async function collectJobs({checkCompanies=false}={}) {
   const report={generatedAt:new Date().toISOString(),sources:[],companies:[],errors:[]};
   const all=[];
 
-  // Источники независимы: проверяем их одновременно, чтобы функция Vercel не ждала их по очереди.
-  const sourceResults=await Promise.all(sources.map(async source=>{
+  // Источники независимы, но ограничиваем параллельность, чтобы не терять ответы из-за перегрузки соединений.
+  const sourceResults=await mapWithConcurrency(sources,12,async source=>{
     try {
       const rows=await fetchSource(source);
-      const accepted=rows.filter(j=>qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`)));
+      const accepted=rows.filter(j=>source.qaSpecialization
+        ? j.specialization?.toLowerCase()===source.qaSpecialization.toLowerCase()
+        : qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`)));
       return {source,rows,accepted};
     } catch(error) {
       return {source,error};
     }
-  }));
+  });
 
   for(const result of sourceResults){
     if(result.error){
@@ -204,17 +250,6 @@ export async function collectJobs({checkCompanies=false}={}) {
     console.log(`✓ ${result.source.company}: ${result.accepted.length}/${result.rows.length}`);
   }
 
-  if(checkCompanies){
-    report.companies = await Promise.all(companies.map(async company => {
-      try {
-        const response=await fetch(company.careerUrl,{method:'HEAD',redirect:'follow',signal:AbortSignal.timeout(5000),headers:{'user-agent':'QA-Career-Hub/1.0'}});
-        return {name:company.name,url:company.careerUrl,status:response.ok?'reachable':'recheck',http:response.status,checkedAt:new Date().toISOString()};
-      } catch(error) {
-        return {name:company.name,url:company.careerUrl,status:'recheck',error:error.message,checkedAt:new Date().toISOString()};
-      }
-    }));
-  }
-
   let linkedinJobs=[];let linkedinConnected=false;
   if(process.env.LINKEDIN_API_URL&&process.env.LINKEDIN_API_TOKEN){
     try{const data=await fetchJSON(process.env.LINKEDIN_API_URL,{authorization:`Bearer ${process.env.LINKEDIN_API_TOKEN}`});linkedinJobs=(Array.isArray(data)?data:data.jobs||[]).slice(0,10);linkedinConnected=true;}
@@ -222,8 +257,33 @@ export async function collectJobs({checkCompanies=false}={}) {
   }
 
   const jobs=[...new Map(all.map(j=>[`${j.company}|${j.title}|${j.location}`.toLowerCase(),j])).values()].sort((a,b)=>(b.matchScore||0)-(a.matchScore||0));
-  const companyStatus=checkCompanies?` Career URL: ${report.companies.filter(x=>x.status==='reachable').length}/${companies.length}.`:'';
-  const meta={generatedAt:report.generatedAt,linkedinConnected,message:`Проверено ATS: ${report.sources.filter(x=>x.status==='ok').length}/${sources.length}.${companyStatus} Ошибки не остановили остальные источники.`};
+  const coveredCompanies=report.sources.filter(x=>x.status==='ok').map(x=>x.company);
+
+  if(checkCompanies){
+    const counts=jobs.reduce((result,job)=>{
+      const key=job.company.toLowerCase();
+      result.set(key,(result.get(key)||0)+1);
+      return result;
+    },new Map());
+    report.companies=await mapWithConcurrency(companies,10,async company=>({
+      name:company.name,
+      url:company.careerUrl,
+      vacancyCount:counts.get(company.name.toLowerCase())||0,
+      ...(await probeUrl(company.careerUrl))
+    }));
+    report.jobLinks=await mapWithConcurrency(jobs,12,async job=>({
+      id:job.id,
+      company:job.company,
+      title:job.title,
+      url:job.url,
+      ...(await probeUrl(job.url))
+    }));
+  }
+
+  const validCareerLinks=checkCompanies?report.companies.filter(x=>['reachable','protected'].includes(x.status)).length:0;
+  const validJobLinks=checkCompanies?report.jobLinks.filter(x=>['reachable','protected'].includes(x.status)).length:0;
+  const companyStatus=checkCompanies?` Career URL: ${validCareerLinks}/${companies.length}. Vacancy URL: ${validJobLinks}/${jobs.length}.`:'';
+  const meta={generatedAt:report.generatedAt,linkedinConnected,coveredCompanies,message:`Проверено ATS: ${report.sources.filter(x=>x.status==='ok').length}/${sources.length}.${companyStatus} Ошибки не остановили остальные источники.`};
   return {jobs,linkedinJobs,meta,report};
 }
 

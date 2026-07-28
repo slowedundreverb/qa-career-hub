@@ -494,6 +494,20 @@
   height: 100%;
 }
 
+.company-entry > a > em {
+  flex: 0 0 auto;
+  min-width: 48px;
+  margin-left: 2px;
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: #edf1ed;
+  color: #65706c;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 800;
+  text-align: center;
+}
+
 .company-entry.custom > a {
   padding-right: 42px;
   border-color: #a9cabd;

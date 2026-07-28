@@ -203,9 +203,11 @@ function renderJobs() {
     counts.set(key,(counts.get(key)||0)+1);
     return counts;
   },new Map());
+  const coveredEmployers=new Set((jobMeta.coveredCompanies||[]).map(companyKey));
   const employerOptions=employers.map(name=>{
     const count=employerCounts.get(companyKey(name))||0;
-    return [name,count?`${name} · ${count}`:`${name} · нет вакансий`,count===0];
+    const checked=coveredEmployers.has(companyKey(name));
+    return [name,count?`${name} · ${count}`:checked?`${name} · 0 QA-вакансий`:`${name} · только career-ссылка`,count===0];
   });
   const focusCountries=['Germany','Spain','Netherlands','Italy','France','Ireland'];
   shell(`<main class="jobs-layout">
@@ -286,10 +288,17 @@ function aboutDialog() {
 
 function companiesDrawer() {
   const watchlist=watchedCompanies();
+  const companyCounts=jobs.filter(job=>job.status!=='closed').reduce((counts,job)=>{
+    const key=companyKey(job.company);
+    counts.set(key,(counts.get(key)||0)+1);
+    return counts;
+  },new Map());
+  const coveredEmployers=new Set((jobMeta.coveredCompanies||[]).map(companyKey));
   const card=(c,isCustom=false)=>`<article class="company-entry ${isCustom?'custom':''}">
     <a href="${esc(c.careerUrl)}" target="_blank" rel="noreferrer">
       <span class="company-logo small">${esc(initials(c.name))}</span>
       <div><b>${esc(c.name)}</b><small>${isCustom?'Добавлено вами':`${esc(c.city)} · ${esc(c.industry)}`}</small></div><i>${isCustom?'Ваш список':c.priority==='high'?'Кипр':'↗'}</i>
+      ${isCustom?'':`<em>${companyCounts.get(companyKey(c.name))||0}${coveredEmployers.has(companyKey(c.name))?' QA':' · ссылка'}</em>`}
     </a>
     ${isCustom?`<button type="button" data-remove-company="${esc(c.id)}" aria-label="Удалить ${esc(c.name)} из отслеживания">×</button>`:''}
   </article>`;
