@@ -159,9 +159,14 @@ function bindMobileNavigation() {
   let revealTimer=0;
   let expandTimer=0;
   let fullHeight=0;
+  let hasScrolledAfterCollapse=false;
+  let lastScrollY=window.scrollY;
+
+  const compactHeight=()=>window.matchMedia('(max-width: 620px)').matches?84:88;
 
   const reset=()=>{
     compact=false;
+    hasScrolledAfterCollapse=false;
     clearTimeout(collapseTimer);
     clearTimeout(revealTimer);
     clearTimeout(expandTimer);
@@ -183,6 +188,7 @@ function bindMobileNavigation() {
     clearTimeout(revealTimer);
     clearTimeout(expandTimer);
     if(next){
+      hasScrolledAfterCollapse=false;
       fullHeight=banner.getBoundingClientRect().height;
       spacer.style.height=`${fullHeight}px`;
       banner.classList.add('is-fixed');
@@ -192,7 +198,8 @@ function bindMobileNavigation() {
         collapseTimer=window.setTimeout(()=>{
           if(!compact) return;
           banner.classList.add('is-condensed');
-        },110);
+          spacer.style.height=`${compactHeight()}px`;
+        },220);
       });
       return;
     }
@@ -201,14 +208,14 @@ function bindMobileNavigation() {
     revealTimer=window.setTimeout(()=>{
       if(compact) return;
       banner.classList.remove('is-collapsing');
-    },210);
+    },260);
     expandTimer=window.setTimeout(()=>{
       if(compact) return;
       banner.classList.remove('is-fixed');
       spacer.classList.remove('active');
       spacer.style.height='';
       measure();
-    },360);
+    },460);
   };
 
   const update=()=>{
@@ -218,7 +225,15 @@ function bindMobileNavigation() {
       reset();
       return;
     }
-    setCompact(window.scrollY>triggerY);
+    const currentScrollY=window.scrollY;
+    if(!compact){
+      if(currentScrollY>triggerY) setCompact(true);
+    }else{
+      if(currentScrollY>triggerY+8) hasScrolledAfterCollapse=true;
+      const movingUp=currentScrollY<lastScrollY-1;
+      if(hasScrolledAfterCollapse&&movingUp&&currentScrollY<=triggerY) setCompact(false);
+    }
+    lastScrollY=currentScrollY;
   };
 
   const scheduleUpdate=()=>{
