@@ -1939,22 +1939,70 @@ body:has(.topic-overlay) {
 }
 
 .mode-switch {
-  gap: 5px;
-  background: transparent;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  overflow: hidden;
+  padding: 4px;
+  background: #e8e5de;
+}
+
+.mode-switch::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border: 1px solid #d8d5ce;
+  border-radius: 11px;
+  background: var(--paper);
+  box-shadow: 0 3px 12px rgba(28,43,38,.08);
+  transition: transform .3s cubic-bezier(.22,.8,.3,1);
+}
+
+.mode-switch.show-learn::before {
+  transform: translateX(100%);
 }
 
 .mode-btn,
 .mode-btn.active {
-  border: 1px solid var(--line);
-  background: var(--paper);
+  position: relative;
+  z-index: 1;
+  border: 0;
+  background: transparent;
   color: var(--ink);
   box-shadow: none;
 }
 
 .mode-btn:hover,
 .mode-btn.active {
-  border-color: #a8c9bb;
-  background: #fff;
+  border: 0;
+  background: transparent;
+}
+
+.learn-search-form {
+  padding-right: 5px;
+}
+
+.learn-search-button {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 15px;
+  transition: .18s ease;
+}
+
+.learn-search-button:hover {
+  background: var(--green);
 }
 
 .sidebar .side-nav button,
@@ -2044,5 +2092,47 @@ body:has(.topic-overlay) {
     width: auto;
     height: auto;
     padding: 7px;
+  }
+}
+
+@media (max-width: 620px) {
+  .sidebar {
+    min-height: 0;
+    display: block;
+    padding: 8px 10px;
+  }
+
+  .sidebar > .eyebrow,
+  .sidebar .update-box {
+    display: none;
+  }
+
+  .sidebar .side-nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, .8fr) minmax(0, 1fr);
+    min-height: 0;
+    margin: 0;
+    padding: 4px;
+    overflow: visible;
+  }
+
+  .sidebar .side-nav button {
+    min-width: 0;
+    min-height: 40px;
+    flex-direction: row;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 5px;
+    white-space: nowrap;
+    font-size: 8.5px;
+  }
+
+  .sidebar .side-nav button > span {
+    flex: 0 0 auto;
+  }
+
+  .sidebar .side-nav .nav-icon {
+    width: 13px;
+    height: 13px;
   }
 }

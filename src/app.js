@@ -21,7 +21,7 @@ const state = {
   learnView: saved.learnView || 'roadmap',
   jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit',
   favoritesOnly: false,
-  track: 'Все', theorySearch: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: saved.quizCategory || 'Все',
+  track: 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: saved.quizCategory || 'Все',
   completed: new Set(saved.completed || []),
   favorites: new Set(saved.favorites || []),
   quiz: saved.quiz?.set?.length === 10 ? saved.quiz : null,
@@ -107,7 +107,7 @@ function shell(content) {
       <a class="brand" href="#jobs" data-mode="jobs" aria-label="QA Career Hub">
         <span class="brand-mark">Q</span><span>QA<span class="brand-accent">/</span>HUB</span>
       </a>
-      <nav class="mode-switch" aria-label="Главные разделы">
+      <nav class="mode-switch ${state.mode === 'learn' ? 'show-learn' : 'show-jobs'}" aria-label="Главные разделы">
         <button class="mode-btn ${state.mode === 'jobs' ? 'active' : ''}" data-mode="jobs"><span>01</span> Вакансии</button>
         <button class="mode-btn ${state.mode === 'learn' ? 'active' : ''}" data-mode="learn"><span>02</span> Подготовка</button>
       </nav>
@@ -493,7 +493,7 @@ function renderLearn() {
 function theoryView(roadmap=false) {
   const filtered = curriculum.filter(t => (state.track==='Все'||t.track===state.track) && `${t.title} ${t.summary} ${t.theory}`.toLowerCase().includes(state.theorySearch.toLowerCase()));
   return `<div class="learn-head"><div><span class="eyebrow">${roadmap?'ПЛАН ПОДГОТОВКИ':'БАЗА ЗНАНИЙ'}</span><h2>${roadmap?'QA-интервью: от основ к практике':'Коротко. По делу. Для интервью.'}</h2><p>${roadmap?'Повторяйте ключевые темы, закрепляйте знания и выбирайте собственную траекторию.':'Ищите по теме, фильтруйте трек и отмечайте пройденное.'}</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
-  <div class="theory-tools"><label class="search"><span>⌕</span><input id="theory-search" value="${esc(state.theorySearch)}" placeholder="Найти определение или тему" /></label><div class="track-tabs">${tracks.map(t=>`<button data-track="${t}" class="${state.track===t?'active':''}">${t}</button>`).join('')}</div></div>
+  <div class="theory-tools"><form class="search learn-search-form"><input id="theory-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти определение или тему" aria-label="Поиск по плану подготовки" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="track-tabs">${tracks.map(t=>`<button data-track="${t}" class="${state.track===t?'active':''}">${t}</button>`).join('')}</div></div>
   <div class="topic-grid">${filtered.map((t,i)=>topicCard(t,i,roadmap)).join('')}</div>${!filtered.length?'<div class="empty-state"><h3>Темы не найдены</h3><p>Измените запрос или выберите другой трек.</p></div>':''}
   ${state.selectedTopic?topicModal(curriculum.find(t=>t.id===state.selectedTopic)):''}`;
 }
@@ -514,7 +514,7 @@ function knowledgeView() {
     ['Data','PostgreSQL Tutorial','SQL, joins, transactions и aggregates','https://www.postgresql.org/docs/current/tutorial-sql.html']
   ];
   return `<div class="learn-head knowledge-head"><div><span class="eyebrow">БАЗА ЗНАНИЙ</span><h2>Вопрос. Ответ. Почему.</h2><p>${baseQuestions.length} коротких разборов для повторения перед интервью.</p></div></div>
-    <div class="knowledge-tools"><label class="search"><span>⌕</span><input id="knowledge-search" value="${esc(state.theorySearch)}" placeholder="Найти вопрос, термин или ответ" /></label><div class="knowledge-tabs">${categories.map(c=>`<button data-knowledge-category="${c}" class="${state.knowledgeCategory===c?'active':''}">${c}</button>`).join('')}</div></div>
+    <div class="knowledge-tools"><form class="search learn-search-form"><input id="knowledge-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти вопрос, термин или ответ" aria-label="Поиск по базе знаний" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="knowledge-tabs">${categories.map(c=>`<button data-knowledge-category="${c}" class="${state.knowledgeCategory===c?'active':''}">${c}</button>`).join('')}</div></div>
     <div class="knowledge-layout"><section class="knowledge-list">${filtered.map((q,i)=>`<details class="knowledge-card" ${i===0?'open':''}><summary><span>${String(i+1).padStart(2,'0')}</span><div><small>${q.category}</small><h3>${q.prompt}</h3></div><b>+</b></summary><div class="knowledge-answer"><section><span>Короткий ответ</span><p>${q.answer}</p></section><section><span>Почему так</span><p>${q.explanation}</p></section></div></details>`).join('')||'<div class="empty-state"><h3>Ничего не найдено</h3><p>Измените запрос или категорию.</p></div>'}</section>
     <aside class="resource-panel"><span class="kicker">ПОЛЕЗНО ПОЧИТАТЬ</span><h3>Официальные источники</h3><div class="resource-list">${resources.map(([tag,title,description,url])=>`<a href="${url}" target="_blank" rel="noreferrer"><small>${tag}</small><b>${title}</b><span>${description}</span><i>↗</i></a>`).join('')}</div></aside></div>`;
 }
@@ -563,8 +563,14 @@ function startQuiz(renderNow=true) {
 function bindLearn() {
   document.querySelectorAll('[data-learn]').forEach(b=>b.addEventListener('click',()=>{state.learnView=b.dataset.learn;state.selectedTopic=null;save();renderLearn();window.scrollTo(0,0);}));
   document.querySelectorAll('[data-track]').forEach(b=>b.addEventListener('click',()=>{state.track=b.dataset.track;state.selectedTopic=null;renderLearn();}));
-  document.querySelector('#theory-search')?.addEventListener('input',e=>{state.theorySearch=e.target.value;state.selectedTopic=null;clearTimeout(window._theoryT);window._theoryT=setTimeout(renderLearn,180);});
-  document.querySelector('#knowledge-search')?.addEventListener('input',e=>{state.theorySearch=e.target.value;clearTimeout(window._knowledgeT);window._knowledgeT=setTimeout(renderLearn,180);});
+  document.querySelectorAll('#theory-search,#knowledge-search').forEach(input=>input.addEventListener('input',e=>{state.theorySearchDraft=e.target.value;}));
+  document.querySelectorAll('.learn-search-form').forEach(form=>form.addEventListener('submit',e=>{
+    e.preventDefault();
+    state.theorySearchDraft=form.querySelector('input').value;
+    state.theorySearch=state.theorySearchDraft;
+    state.selectedTopic=null;
+    renderLearn();
+  }));
   document.querySelectorAll('[data-knowledge-category]').forEach(b=>b.addEventListener('click',()=>{state.knowledgeCategory=b.dataset.knowledgeCategory;renderLearn();}));
   document.querySelectorAll('[data-topic]').forEach(c=>c.addEventListener('click',()=>{state.selectedTopic=c.dataset.topic;renderLearn();}));
   document.querySelector('#close-topic')?.addEventListener('click',()=>{state.selectedTopic=null;renderLearn();});
