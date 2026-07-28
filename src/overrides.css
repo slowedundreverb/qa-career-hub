@@ -299,6 +299,28 @@
   min-height: 0;
   max-height: none;
   flex: 1;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-color: #9eaaa5 transparent;
+  scrollbar-width: thin;
+}
+
+#companies-dialog::-webkit-scrollbar,
+.company-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+#companies-dialog::-webkit-scrollbar-track,
+.company-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#companies-dialog::-webkit-scrollbar-thumb,
+.company-grid::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #9eaaa5;
+  background-clip: padding-box;
 }
 
 .company-entry {
@@ -1408,6 +1430,18 @@ body:has(.topic-overlay) {
   .dialog-head { gap: 10px; }
   .dialog-head h2 { font-size: 23px; }
   .company-grid { max-height: none; }
+}
+
+@media (max-height: 650px) {
+  #companies-dialog[open] {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  #companies-dialog .company-grid {
+    flex: none;
+    overflow: visible;
+  }
 }
 
 @media (max-width: 420px) {
