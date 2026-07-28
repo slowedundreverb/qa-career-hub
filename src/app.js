@@ -30,6 +30,17 @@ const state = {
 };
 
 const esc = (s='') => String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const navIcon = name => {
+  const paths = {
+    jobs: '<path d="M4 8h16v11H4z"/><path d="M9 8V5h6v3M4 12h16"/>',
+    companies: '<path d="M5 20V5h10v15M15 10h4v10M8 8h4M8 12h4M8 16h4"/>',
+    favorites: '<path d="M20.8 5.8a5.2 5.2 0 0 0-7.4 0L12 7.2l-1.4-1.4a5.2 5.2 0 1 0-7.4 7.4L12 22l8.8-8.8a5.2 5.2 0 0 0 0-7.4Z"/>',
+    roadmap: '<circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h4a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H8a4 4 0 0 0-4 4v0"/>',
+    knowledge: '<path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H11v17H7.5A3.5 3.5 0 0 0 4 22V5.5ZM20 5.5A3.5 3.5 0 0 0 16.5 2H13v17h3.5A3.5 3.5 0 0 1 20 22V5.5Z"/>',
+    quiz: '<path d="M4 4h16v12H9l-5 4V4Z"/><path d="m9 10 2 2 4-4"/>'
+  };
+  return `<svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">${paths[name]}</svg>`;
+};
 const cleanJobText = (value='') => {
   const decoder=document.createElement('textarea');
   decoder.innerHTML=String(value);
@@ -213,14 +224,14 @@ function renderJobs() {
   shell(`<main class="jobs-layout">
     <aside class="sidebar">
       <div class="eyebrow">CAREER CONTROL</div>
-      <h1>Найдите роль,<br><em>которая подходит.</em></h1>
+      <h1>Найдите роль,<br><em>подходящую вам.</em></h1>
       <p class="lead">Международные QA-вакансии с официальных страниц работодателей.</p>
       <div class="side-nav">
-        <button id="show-all-jobs" class="${state.favoritesOnly?'':'active'}"><span>⌁</span> Найденные вакансии <b>${active}</b></button>
-        <button id="show-companies"><span>◫</span> Компании <b>${watchlist.length}</b></button>
-        <button id="show-favorites" class="${state.favoritesOnly?'active':''}"><span>♡</span> Сохранённые <b>${state.favorites.size}</b></button>
+        <button id="show-all-jobs" class="${state.favoritesOnly?'':'active'}"><span>${navIcon('jobs')}</span> Найденные вакансии <b>${active}</b></button>
+        <button id="show-companies"><span>${navIcon('companies')}</span> Компании <b>${watchlist.length}</b></button>
+        <button id="show-favorites" class="${state.favoritesOnly?'active':''}"><span>${navIcon('favorites')}</span> Сохранённые <b>${state.favorites.size}</b></button>
       </div>
-      <div class="update-box about-box"><span class="about-mark">i</span><div><b>О проекте</b><small>возможности и автор</small></div><button id="show-about" aria-label="Открыть информацию о проекте" title="О проекте">→</button></div>
+      <div class="update-box about-box"><button id="show-about" aria-label="Открыть информацию о проекте">${navIcon('knowledge')}<span>О проекте</span></button></div>
     </aside>
     <section class="jobs-main">
       <div class="jobs-hero">
@@ -466,12 +477,12 @@ function renderLearn() {
   const pct = Math.round(done / curriculum.length * 100);
   shell(`<main class="learn-shell">
     <aside class="learn-sidebar">
-      <div class="eyebrow">INTERVIEW LAB</div><h1>Тренируйся.<br><em>Отвечай уверенно.</em></h1>
+      <div class="eyebrow">INTERVIEW LAB</div><h1><span>Готовьтесь.</span><em>Практикуйтесь.</em><span>Отвечайте.</span></h1>
       <div class="progress-ring" style="--p:${pct}"><div><strong>${pct}%</strong><span>курса</span></div></div>
       <nav class="learn-nav">
-        <button data-learn="roadmap" class="${state.learnView==='roadmap'?'active':''}"><span>⌘</span><div><b>Мой маршрут</b><small>${curriculum.length} тем</small></div></button>
-        <button data-learn="theory" class="${state.learnView==='theory'?'active':''}"><span>≡</span><div><b>База знаний</b><small>теория и практика</small></div></button>
-        <button data-learn="quiz" class="${state.learnView==='quiz'?'active':''}"><span>⚡</span><div><b>Тренажёр</b><small>${questions.length} вопросов</small></div></button>
+        <button data-learn="roadmap" class="${state.learnView==='roadmap'?'active':''}"><span>${navIcon('roadmap')}</span><div><b>План подготовки</b><small>${curriculum.length} тем</small></div></button>
+        <button data-learn="theory" class="${state.learnView==='theory'?'active':''}"><span>${navIcon('knowledge')}</span><div><b>База знаний</b><small>теория и практика</small></div></button>
+        <button data-learn="quiz" class="${state.learnView==='quiz'?'active':''}"><span>${navIcon('quiz')}</span><div><b>Тренажёр</b><small>${questions.length} вопросов</small></div></button>
       </nav>
     </aside>
     <section class="learn-main">${state.learnView==='quiz'?quizView():state.learnView==='theory'?knowledgeView():theoryView(true)}</section>
@@ -481,7 +492,7 @@ function renderLearn() {
 
 function theoryView(roadmap=false) {
   const filtered = curriculum.filter(t => (state.track==='Все'||t.track===state.track) && `${t.title} ${t.summary} ${t.theory}`.toLowerCase().includes(state.theorySearch.toLowerCase()));
-  return `<div class="learn-head"><div><span class="eyebrow">${roadmap?'ПЛАН ПОДГОТОВКИ':'БАЗА ЗНАНИЙ'}</span><h2>${roadmap?'От уверенного Manual к Java AQA':'Коротко. По делу. Для интервью.'}</h2><p>${roadmap?'Закрепите QA core и двигайтесь к устойчивой автоматизации в удобном порядке.':'Ищите по теме, фильтруйте трек и отмечайте пройденное.'}</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
+  return `<div class="learn-head"><div><span class="eyebrow">${roadmap?'ПЛАН ПОДГОТОВКИ':'БАЗА ЗНАНИЙ'}</span><h2>${roadmap?'QA-интервью: от основ к практике':'Коротко. По делу. Для интервью.'}</h2><p>${roadmap?'Повторяйте ключевые темы, закрепляйте знания и выбирайте собственную траекторию.':'Ищите по теме, фильтруйте трек и отмечайте пройденное.'}</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
   <div class="theory-tools"><label class="search"><span>⌕</span><input id="theory-search" value="${esc(state.theorySearch)}" placeholder="Найти определение или тему" /></label><div class="track-tabs">${tracks.map(t=>`<button data-track="${t}" class="${state.track===t?'active':''}">${t}</button>`).join('')}</div></div>
   <div class="topic-grid">${filtered.map((t,i)=>topicCard(t,i,roadmap)).join('')}</div>${!filtered.length?'<div class="empty-state"><h3>Темы не найдены</h3><p>Измените запрос или выберите другой трек.</p></div>':''}
   ${state.selectedTopic?topicModal(curriculum.find(t=>t.id===state.selectedTopic)):''}`;
@@ -538,7 +549,7 @@ function quizView() {
         <div class="quiz-score"><div><strong>${accuracy}%</strong><span>общая точность</span></div><div><strong>${state.quizStats.answered}</strong><span>ответов дано</span></div></div>
         <div class="quiz-session-dots">${Array.from({length:10},(_,i)=>`<i class="${i<state.quiz.index?'passed':i===state.quiz.index?'current':''}"></i>`).join('')}</div>
         <p class="quiz-side-label">Темы вопросов</p><div class="quiz-topic-picker">${quizCategories.map(c=>`<button data-quiz-category="${c}" class="${state.quizCategory===c?'active':''}">${c}</button>`).join('')}</div>
-        <div class="quiz-tip"><span>60 сек</span><p>Дайте короткий ответ, затем добавьте пример из банковского или mobile-проекта.</p></div>
+        <div class="quiz-tip"><span>60 сек</span><p>Сформулируйте короткий ответ и подкрепите его примером из собственного опыта.</p></div>
       </aside>
     </div>`;
 }

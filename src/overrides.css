@@ -1925,3 +1925,124 @@ body:has(.topic-overlay) {
   .knowledge-card summary { grid-template-columns: 22px minmax(0, 1fr) 16px; }
   .quiz-exam .quiz-prompt h3 { font-size: 20px; }
 }
+
+/* Consistent navigation: one icon language, one surface language. */
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mode-switch {
+  gap: 5px;
+  background: transparent;
+}
+
+.mode-btn,
+.mode-btn.active {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.mode-btn:hover,
+.mode-btn.active {
+  border-color: #a8c9bb;
+  background: #fff;
+}
+
+.sidebar .side-nav button,
+.learn-nav button {
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.055);
+  color: #f5f8f6;
+}
+
+.sidebar .side-nav button:hover,
+.sidebar .side-nav button.active,
+.learn-nav button:hover,
+.learn-nav button.active {
+  border-color: rgba(223,244,123,.58);
+  background: rgba(255,255,255,.1);
+  color: #fff;
+}
+
+.sidebar .side-nav button > span,
+.learn-nav button > span {
+  display: grid;
+  place-items: center;
+  color: inherit;
+}
+
+.sidebar .side-nav button b {
+  background: rgba(255,255,255,.1);
+  color: #fff;
+}
+
+.learn-sidebar h1 {
+  display: grid;
+  gap: 0;
+}
+
+.learn-sidebar h1 span,
+.learn-sidebar h1 em {
+  display: block;
+}
+
+.about-box {
+  padding-top: 14px;
+}
+
+.sidebar .about-box button {
+  width: auto;
+  height: auto;
+  display: inline-flex;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 7px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #b8c2be;
+  box-shadow: none;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sidebar .about-box button:hover {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+}
+
+.sidebar .about-box .nav-icon {
+  width: 15px;
+  height: 15px;
+}
+
+@media (max-width: 900px) {
+  .sidebar .side-nav button.active,
+  .learn-nav button.active {
+    border-color: rgba(223,244,123,.58);
+    background: rgba(255,255,255,.1);
+    color: #fff;
+  }
+
+  .sidebar .side-nav button.active b {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+  }
+
+  .sidebar .about-box button {
+    width: auto;
+    height: auto;
+    padding: 7px;
+  }
+}
