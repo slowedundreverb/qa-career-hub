@@ -5,6 +5,9 @@ import { questions } from './data/questions.js';
 
 const app = document.querySelector('#app');
 const saved = JSON.parse(localStorage.getItem('qa-hub-state') || '{}');
+const storedCustomCompanies = JSON.parse(localStorage.getItem('qa-hub-custom-companies') || '[]');
+const customCompanies = Array.isArray(storedCustomCompanies) ? storedCustomCompanies : [];
+let companyWatchMessage = '';
 const cachedJobs = JSON.parse(sessionStorage.getItem('qa-hub-jobs') || 'null');
 if (cachedJobs?.jobs?.length && new Date(cachedJobs.meta?.generatedAt || 0) > new Date(jobMeta.generatedAt || 0)) {
   jobs.splice(0, jobs.length, ...cachedJobs.jobs);
@@ -39,6 +42,20 @@ const cleanJobText = (value='') => {
   return text.replace(/\s+/g,' ').trim();
 };
 const initials = name => name.split(/\s+/).map(x => x[0]).join('').slice(0,2).toUpperCase();
+const watchedCompanies = () => [...customCompanies, ...companies];
+const saveCustomCompanies = () => localStorage.setItem('qa-hub-custom-companies', JSON.stringify(customCompanies));
+const websiteName = url => {
+  const hostname=new URL(url).hostname.replace(/^www\./,'');
+  const stem=hostname.split('.')[0].replace(/[-_]+/g,' ');
+  return stem.replace(/\b\w/g,char=>char.toUpperCase());
+};
+const normalizeWebsite = value => {
+  const candidate=/^https?:\/\//i.test(value.trim())?value.trim():`https://${value.trim()}`;
+  const url=new URL(candidate);
+  if(!['http:','https:'].includes(url.protocol)) throw new Error('Unsupported protocol');
+  url.hash='';
+  return url.href;
+};
 const date = value => value ? new Intl.DateTimeFormat('ru', { day:'2-digit', month:'short' }).format(new Date(value)) : '—';
 const save = () => localStorage.setItem('qa-hub-state', JSON.stringify({
   completed:[...state.completed], favorites:[...state.favorites], quizStats: state.quizStats,
@@ -144,6 +161,7 @@ function filteredJobs() {
 function renderJobs() {
   const list = filteredJobs();
   const active = jobs.filter(j => j.status === 'active').length;
+  const watchlist=watchedCompanies();
   const cyprus = jobs.filter(j => /cyprus|limassol|nicosia/i.test(j.location)).length;
   const industries=[...new Set(jobs.map(j=>j.industry||'Technology'))].sort((a,b)=>a.localeCompare(b));
   const regions=[...new Set(jobs.map(j=>j.region||'Other'))].sort((a,b)=>a.localeCompare(b));
@@ -156,7 +174,7 @@ function renderJobs() {
       <p class="lead">Международные QA-вакансии с официальных страниц работодателей.</p>
       <div class="side-nav">
         <button id="show-all-jobs" class="${state.favoritesOnly?'':'active'}"><span>⌁</span> Найденные вакансии <b>${active}</b></button>
-        <button id="show-companies"><span>◫</span> Компании <b>${companies.length}</b></button>
+        <button id="show-companies"><span>◫</span> Компании <b>${watchlist.length}</b></button>
         <button id="show-favorites" class="${state.favoritesOnly?'active':''}"><span>♡</span> Сохранённые <b>${state.favorites.size}</b></button>
       </div>
       <div class="update-box" id="update-box"><span class="pulse"></span><div><b>Снимок вакансий</b><small id="update-status">${jobMeta.generatedAt ? `обновлён ${date(jobMeta.generatedAt)}` : 'ещё не создан'}</small></div><button id="refresh-jobs" aria-label="Обновить вакансии" title="Обновить вакансии"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"/></svg></button></div>
@@ -164,7 +182,7 @@ function renderJobs() {
     <section class="jobs-main">
       <div class="jobs-hero">
         <div><div class="eyebrow">${new Date().toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long'})}</div><h2>Подходящие вакансии</h2><p>${active ? `Есть ${active} активных позиций, ${cyprus} — с фокусом на Кипр.` : 'Запустите обновление, чтобы наполнить агрегатор официальными вакансиями.'}</p></div>
-        <div class="hero-stats"><div><strong>${active}</strong><span>активных</span></div><div><strong>${companies.length}</strong><span>компаний</span></div><div><strong>${state.favorites.size}</strong><span>сохранено</span></div></div>
+        <div class="hero-stats"><div><strong>${active}</strong><span>активных</span></div><div><strong>${watchlist.length}</strong><span>компаний</span></div><div><strong>${state.favorites.size}</strong><span>сохранено</span></div></div>
       </div>
       ${linkedinBlock()}
       <div class="filterbar">
@@ -211,7 +229,64 @@ function jobCard(j) {
 const emptyJobs = () => `<div class="empty-state"><span>⌁</span><h3>${jobs.length ? 'Ничего не найдено' : 'Данные вакансий ещё не обновлены'}</h3><p>${jobs.length ? 'Измените фильтры или поисковый запрос.' : 'В терминале проекта выполните npm run update:jobs. Каждый источник проверяется независимо.'}</p>${jobs.length?'<button id="reset-filters">Сбросить фильтры</button>':''}</div>`;
 
 function companiesDrawer() {
-  return `<dialog id="companies-dialog"><div class="dialog-head"><div><span class="eyebrow">WATCHLIST</span><h2>${companies.length} компаний под наблюдением</h2><p>Иностранные работодатели с официальными career-страницами. Компании с явной связью с рынком РФ не включались.</p></div><button id="close-dialog">×</button></div><div class="company-grid">${companies.map(c=>`<a href="${c.careerUrl}" target="_blank" rel="noreferrer"><span class="company-logo small">${initials(c.name)}</span><div><b>${c.name}</b><small>${c.city} · ${c.industry}</small></div><i>${c.priority==='high'?'Кипр':'↗'}</i></a>`).join('')}</div></dialog>`;
+  const watchlist=watchedCompanies();
+  const card=(c,isCustom=false)=>`<article class="company-entry ${isCustom?'custom':''}">
+    <a href="${esc(c.careerUrl)}" target="_blank" rel="noreferrer">
+      <span class="company-logo small">${esc(initials(c.name))}</span>
+      <div><b>${esc(c.name)}</b><small>${isCustom?'Добавлено вами':`${esc(c.city)} · ${esc(c.industry)}`}</small></div><i>${isCustom?'Ваш список':c.priority==='high'?'Кипр':'↗'}</i>
+    </a>
+    ${isCustom?`<button type="button" data-remove-company="${esc(c.id)}" aria-label="Удалить ${esc(c.name)} из отслеживания">×</button>`:''}
+  </article>`;
+  return `<dialog id="companies-dialog">
+    <div class="dialog-head"><div><span class="eyebrow">WATCHLIST</span><h2>${watchlist.length} компаний под наблюдением</h2><p>Официальные career-страницы и сайты, которые вы добавили самостоятельно.</p></div><button id="close-dialog" aria-label="Закрыть список компаний">×</button></div>
+    <form class="company-watch-form" id="company-watch-form">
+      <div><span class="kicker">СВОЙ ИСТОЧНИК</span><b>Добавить сайт для отслеживания</b></div>
+      <label><span>Название — необязательно</span><input id="company-watch-name" autocomplete="organization" placeholder="Например, Acme Bank"></label>
+      <label><span>Ссылка на вакансии</span><input id="company-watch-url" type="text" inputmode="url" autocomplete="url" required placeholder="careers.company.com"></label>
+      <button type="submit">Добавить</button>
+      <p class="company-watch-message" id="company-watch-message" role="status">${esc(companyWatchMessage)}</p>
+    </form>
+    <div class="company-grid">${customCompanies.map(c=>card(c,true)).join('')}${companies.map(c=>card(c)).join('')}</div>
+  </dialog>`;
+}
+
+function addWatchedCompany(event){
+  event.preventDefault();
+  const nameInput=document.querySelector('#company-watch-name');
+  const urlInput=document.querySelector('#company-watch-url');
+  try{
+    const careerUrl=normalizeWebsite(urlInput?.value||'');
+    const duplicate=watchedCompanies().some(company=>{
+      try{return normalizeWebsite(company.careerUrl).replace(/\/$/,'')===careerUrl.replace(/\/$/,'');}
+      catch{return false;}
+    });
+    if(duplicate){
+      const feedback=document.querySelector('#company-watch-message');
+      if(feedback){feedback.textContent='Этот сайт уже есть в списке';feedback.classList.add('error');}
+      urlInput?.focus();
+      return;
+    }
+    const name=(nameInput?.value||'').trim()||websiteName(careerUrl);
+    customCompanies.unshift({id:`custom-${Date.now()}`,name,careerUrl,country:'Custom',city:'Ваш источник',industry:'Отслеживание',priority:'normal',status:'monitoring'});
+    saveCustomCompanies();
+    companyWatchMessage=`${name} добавлен в отслеживание`;
+    renderJobs();
+    document.querySelector('#companies-dialog')?.showModal();
+  }catch{
+    const feedback=document.querySelector('#company-watch-message');
+    if(feedback){feedback.textContent='Введите корректную ссылку на сайт';feedback.classList.add('error');}
+    urlInput?.focus();
+  }
+}
+
+function removeWatchedCompany(id){
+  const index=customCompanies.findIndex(company=>company.id===id);
+  if(index<0) return;
+  const [removed]=customCompanies.splice(index,1);
+  saveCustomCompanies();
+  companyWatchMessage=`${removed.name} удалён из отслеживания`;
+  renderJobs();
+  document.querySelector('#companies-dialog')?.showModal();
 }
 
 function bindJobs() {
@@ -221,6 +296,8 @@ function bindJobs() {
   document.querySelectorAll('[data-favorite]').forEach(b=>b.addEventListener('click',()=>{ state.favorites.has(b.dataset.favorite)?state.favorites.delete(b.dataset.favorite):state.favorites.add(b.dataset.favorite); save(); renderJobs(); }));
   document.querySelector('#reset-filters')?.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',type:'all',industry:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();});
   const dialog=document.querySelector('#companies-dialog'); document.querySelector('#show-companies')?.addEventListener('click',()=>dialog.showModal()); document.querySelector('#close-dialog')?.addEventListener('click',()=>dialog.close());
+  document.querySelector('#company-watch-form')?.addEventListener('submit',addWatchedCompany);
+  document.querySelectorAll('[data-remove-company]').forEach(button=>button.addEventListener('click',()=>removeWatchedCompany(button.dataset.removeCompany)));
   document.querySelector('#show-all-jobs')?.addEventListener('click',()=>{state.favoritesOnly=false;renderJobs();});
   document.querySelector('#show-favorites')?.addEventListener('click',()=>{state.favoritesOnly=true;state.jobSearch='';renderJobs();});
   document.querySelector('#refresh-jobs')?.addEventListener('click',refreshJobs);
