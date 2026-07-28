@@ -1960,11 +1960,23 @@ body:has(.topic-overlay) {
   border-radius: 11px;
   background: var(--paper);
   box-shadow: 0 3px 12px rgba(28,43,38,.08);
-  transition: transform .3s cubic-bezier(.22,.8,.3,1);
+  transition: transform .3s cubic-bezier(.22,.8,.3,1), opacity .2s ease;
 }
 
 .mode-switch.show-learn::before {
   transform: translateX(100%);
+}
+
+.mode-switch.is-muted::before {
+  opacity: 0;
+}
+
+.mode-switch.is-muted .mode-btn {
+  color: #858b87;
+}
+
+.mode-switch.switching {
+  pointer-events: none;
 }
 
 .mode-btn,

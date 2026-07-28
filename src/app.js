@@ -107,7 +107,7 @@ function shell(content) {
       <a class="brand" href="#jobs" data-mode="jobs" aria-label="QA Career Hub">
         <span class="brand-mark">Q</span><span>QA<span class="brand-accent">/</span>HUB</span>
       </a>
-      <nav class="mode-switch ${state.mode === 'learn' ? 'show-learn' : 'show-jobs'}" aria-label="Главные разделы">
+      <nav class="mode-switch ${state.mode === 'learn' ? 'show-learn' : state.mode === 'jobs' ? 'show-jobs' : 'is-muted'}" aria-label="Главные разделы">
         <button class="mode-btn ${state.mode === 'jobs' ? 'active' : ''}" data-mode="jobs"><span>01</span> Вакансии</button>
         <button class="mode-btn ${state.mode === 'learn' ? 'active' : ''}" data-mode="learn"><span>02</span> Подготовка</button>
       </nav>
@@ -141,7 +141,22 @@ function shell(content) {
 
 function bindGlobal() {
   document.querySelectorAll('[data-mode]').forEach(el => el.addEventListener('click', e => {
-    e.preventDefault(); state.mode = el.dataset.mode; state.selectedTopic=null; location.hash = state.mode; render();
+    e.preventDefault();
+    const targetMode=el.dataset.mode;
+    if(targetMode===state.mode) return;
+    const switcher=document.querySelector('.mode-switch');
+    const animated=['jobs','learn'].includes(targetMode);
+    const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(animated&&switcher){
+      switcher.classList.remove('show-jobs','show-learn','is-muted');
+      switcher.classList.add(targetMode==='learn'?'show-learn':'show-jobs','switching');
+      document.querySelectorAll('.mode-btn').forEach(button=>button.classList.toggle('active',button.dataset.mode===targetMode));
+    }
+    window.setTimeout(()=>{
+      state.mode=targetMode;
+      state.selectedTopic=null;
+      location.hash=targetMode;
+    },animated&&!reduceMotion?300:0);
   }));
   const settingsButton=document.querySelector('#settings-button');
   const settingsMenu=document.querySelector('#settings-menu');
@@ -385,7 +400,13 @@ function bindJobs() {
   document.querySelectorAll('[data-favorite]').forEach(b=>b.addEventListener('click',()=>{ state.favorites.has(b.dataset.favorite)?state.favorites.delete(b.dataset.favorite):state.favorites.add(b.dataset.favorite); save(); renderJobs(); }));
   document.querySelector('#reset-filters')?.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',jobSearchDraft:'',type:'all',industry:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();});
   const dialog=document.querySelector('#companies-dialog'); document.querySelector('#show-companies')?.addEventListener('click',()=>dialog.showModal()); document.querySelector('#close-dialog')?.addEventListener('click',()=>dialog.close());
-  const about=document.querySelector('#about-dialog'); document.querySelector('#show-about')?.addEventListener('click',()=>about.showModal()); document.querySelector('#close-about')?.addEventListener('click',()=>about.close());
+  const about=document.querySelector('#about-dialog');
+  const switcher=document.querySelector('.mode-switch');
+  const muteSwitcher=()=>switcher?.classList.add('is-muted');
+  const restoreSwitcher=()=>switcher?.classList.remove('is-muted');
+  document.querySelector('#show-about')?.addEventListener('click',()=>{muteSwitcher();about.showModal();});
+  document.querySelector('#close-about')?.addEventListener('click',()=>about.close());
+  about?.addEventListener('close',restoreSwitcher);
   const companyScroll=document.querySelector('.companies-dialog-body');
   companyScroll?.addEventListener('keydown',e=>{
     const destinations={
