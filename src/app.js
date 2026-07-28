@@ -19,7 +19,7 @@ const modeFromHash = () => location.hash.includes('versions') ? 'versions' : loc
 const state = {
   mode: modeFromHash(),
   learnView: saved.learnView || 'roadmap',
-  jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit',
+  jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit', jobFiltersOpen: false,
   favoritesOnly: false,
   track: 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: saved.quizCategory || 'Все',
   completed: new Set(saved.completed || []),
@@ -215,6 +215,7 @@ function renderJobs() {
     return counts;
   },new Map());
   const coveredEmployers=new Set((jobMeta.coveredCompanies||[]).map(companyKey));
+  const activeFilterCount=[state.industry,state.location,state.company,state.type,state.level,state.format].filter(value=>value!=='all').length;
   const employerOptions=employers.map(name=>{
     const count=employerCounts.get(companyKey(name))||0;
     const checked=coveredEmployers.has(companyKey(name));
@@ -239,18 +240,21 @@ function renderJobs() {
         <div class="hero-stats"><div><strong>${active}</strong><span>активных</span></div><div><strong>${watchlist.length}</strong><span>компаний</span></div><div><strong>${state.favorites.size}</strong><span>сохранено</span></div></div>
       </div>
       ${linkedinBlock()}
-      <div class="filterbar">
+      <div class="filterbar ${state.jobFiltersOpen?'filters-open':''}">
         <form class="search job-search-form" id="job-search-form">
           <input id="job-search" value="${esc(state.jobSearchDraft)}" placeholder="Должность, компания или технология" aria-label="Поиск вакансий" />
           <button class="job-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button>
         </form>
-        ${select('job-industry',[['all','Все отрасли'],['fintech','Fintech / банки'],...industries.map(x=>[x,x])],state.industry)}
-        ${select('job-location',[['all','Вся география'],['remote','Только remote'],...focusCountries.map(x=>[`country:${x.toLowerCase()}`,`${x} + remote EU`]),...regions.map(x=>[x.toLowerCase(),x])],state.location)}
-        ${select('job-company',[['all',`Все компании · ${employers.length}`],...employerOptions],state.company)}
-        ${select('job-type',[['all','Все роли'],['manual','Manual QA'],['aqa','Automation'],['java','Java AQA'],['sdet','SDET']],state.type)}
-        ${select('job-level',[['all','Любой уровень'],['Junior','Junior'],['Middle','Middle'],['Senior','Senior'],['Lead','Lead']],state.level)}
-        ${select('job-format',[['all','Любой формат'],['Remote','Remote'],['Hybrid','Hybrid'],['On-site','Офис']],state.format)}
-        ${select('job-sort',[['updated','Сначала свежие'],['fit','По совпадению']],state.sort)}
+        <button class="mobile-filter-toggle" id="mobile-filter-toggle" type="button" aria-expanded="${state.jobFiltersOpen}" aria-controls="job-filter-options"><span>${state.jobFiltersOpen?'Скрыть':'Фильтры'}</span>${activeFilterCount?`<b>${activeFilterCount}</b>`:''}</button>
+        <div class="filter-options" id="job-filter-options">
+          ${select('job-industry',[['all','Все отрасли'],['fintech','Fintech / банки'],...industries.map(x=>[x,x])],state.industry)}
+          ${select('job-location',[['all','Вся география'],['remote','Только remote'],...focusCountries.map(x=>[`country:${x.toLowerCase()}`,`${x} + remote EU`]),...regions.map(x=>[x.toLowerCase(),x])],state.location)}
+          ${select('job-company',[['all',`Все компании · ${employers.length}`],...employerOptions],state.company)}
+          ${select('job-type',[['all','Все роли'],['manual','Manual QA'],['aqa','Automation'],['java','Java AQA'],['sdet','SDET']],state.type)}
+          ${select('job-level',[['all','Любой уровень'],['Junior','Junior'],['Middle','Middle'],['Senior','Senior'],['Lead','Lead']],state.level)}
+          ${select('job-format',[['all','Любой формат'],['Remote','Remote'],['Hybrid','Hybrid'],['On-site','Офис']],state.format)}
+          ${select('job-sort',[['updated','Сначала свежие'],['fit','По совпадению']],state.sort)}
+        </div>
       </div>
       <div class="results-head"><span><b>${list.length}</b> вакансий после фильтрации</span><small>Только официальные страницы работодателей</small></div>
       <div class="jobs-list">${list.length ? list.map(jobCard).join('') : emptyJobs()}</div>
@@ -376,6 +380,7 @@ function bindJobs() {
     state.jobSearch=state.jobSearchDraft.trim();
     renderJobs();
   });
+  document.querySelector('#mobile-filter-toggle')?.addEventListener('click',()=>{state.jobFiltersOpen=!state.jobFiltersOpen;renderJobs();});
   [['job-type','type'],['job-industry','industry'],['job-company','company'],['job-location','location'],['job-level','level'],['job-format','format'],['job-sort','sort']].forEach(([id,key])=>document.querySelector(`#${id}`)?.addEventListener('change',e=>rerenderWith(key,e.target.value)));
   document.querySelectorAll('[data-favorite]').forEach(b=>b.addEventListener('click',()=>{ state.favorites.has(b.dataset.favorite)?state.favorites.delete(b.dataset.favorite):state.favorites.add(b.dataset.favorite); save(); renderJobs(); }));
   document.querySelector('#reset-filters')?.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',jobSearchDraft:'',type:'all',industry:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();});
