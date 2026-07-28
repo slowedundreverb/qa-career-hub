@@ -140,22 +140,110 @@ function shell(content) {
   bindMobileNavigation();
 }
 
-let mobileNavigationHandler;
+let mobileNavigationCleanup;
 
 function bindMobileNavigation() {
-  if (mobileNavigationHandler) {
-    window.removeEventListener('scroll', mobileNavigationHandler);
-    window.removeEventListener('resize', mobileNavigationHandler);
-  }
+  mobileNavigationCleanup?.();
   const banner=document.querySelector('.sidebar, .learn-sidebar');
   if(!banner) return;
-  mobileNavigationHandler=()=>{
-    const compact=window.matchMedia('(max-width: 900px)').matches && window.scrollY>96;
-    banner.classList.toggle('is-condensed',compact);
+
+  const topbar=document.querySelector('.topbar');
+  const spacer=document.createElement('div');
+  spacer.className='mobile-navigation-spacer';
+  banner.after(spacer);
+
+  let compact=false;
+  let triggerY=0;
+  let frame=0;
+  let collapseTimer=0;
+  let revealTimer=0;
+  let expandTimer=0;
+  let fullHeight=0;
+
+  const reset=()=>{
+    compact=false;
+    clearTimeout(collapseTimer);
+    clearTimeout(revealTimer);
+    clearTimeout(expandTimer);
+    banner.classList.remove('is-collapsing','is-condensed','is-fixed');
+    spacer.classList.remove('active');
+    spacer.style.height='';
   };
-  mobileNavigationHandler();
-  window.addEventListener('scroll',mobileNavigationHandler,{passive:true});
-  window.addEventListener('resize',mobileNavigationHandler,{passive:true});
+
+  const measure=()=>{
+    if(compact||!window.matchMedia('(max-width: 900px)').matches) return;
+    const topbarHeight=topbar?.getBoundingClientRect().height||0;
+    triggerY=window.scrollY+banner.getBoundingClientRect().top-topbarHeight+14;
+  };
+
+  const setCompact=next=>{
+    if(next===compact) return;
+    compact=next;
+    clearTimeout(collapseTimer);
+    clearTimeout(revealTimer);
+    clearTimeout(expandTimer);
+    if(next){
+      fullHeight=banner.getBoundingClientRect().height;
+      spacer.style.height=`${fullHeight}px`;
+      banner.classList.add('is-fixed');
+      spacer.classList.add('active');
+      requestAnimationFrame(()=>{
+        banner.classList.add('is-collapsing');
+        collapseTimer=window.setTimeout(()=>{
+          if(!compact) return;
+          banner.classList.add('is-condensed');
+        },110);
+      });
+      return;
+    }
+    spacer.style.height=`${fullHeight}px`;
+    banner.classList.remove('is-condensed');
+    revealTimer=window.setTimeout(()=>{
+      if(compact) return;
+      banner.classList.remove('is-collapsing');
+    },210);
+    expandTimer=window.setTimeout(()=>{
+      if(compact) return;
+      banner.classList.remove('is-fixed');
+      spacer.classList.remove('active');
+      spacer.style.height='';
+      measure();
+    },360);
+  };
+
+  const update=()=>{
+    frame=0;
+    const mobile=window.matchMedia('(max-width: 900px)').matches;
+    if(!mobile){
+      reset();
+      return;
+    }
+    setCompact(window.scrollY>triggerY);
+  };
+
+  const scheduleUpdate=()=>{
+    if(frame) return;
+    frame=requestAnimationFrame(update);
+  };
+
+  const resize=()=>{
+    if(!compact) measure();
+    scheduleUpdate();
+  };
+
+  measure();
+  update();
+  window.addEventListener('scroll',scheduleUpdate,{passive:true});
+  window.addEventListener('resize',resize,{passive:true});
+  mobileNavigationCleanup=()=>{
+    cancelAnimationFrame(frame);
+    clearTimeout(collapseTimer);
+    clearTimeout(revealTimer);
+    clearTimeout(expandTimer);
+    window.removeEventListener('scroll',scheduleUpdate);
+    window.removeEventListener('resize',resize);
+    spacer.remove();
+  };
 }
 
 function bindGlobal() {
