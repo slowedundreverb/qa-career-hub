@@ -1224,6 +1224,14 @@ body:has(.topic-overlay) {
     padding: 34px 24px 26px;
   }
 
+  .sidebar h1 {
+    font-size: 36px;
+  }
+
+  .learn-sidebar h1 {
+    font-size: 32px;
+  }
+
   .jobs-main,
   .learn-main {
     padding: 34px 30px 70px;
@@ -2022,6 +2030,10 @@ body:has(.topic-overlay) {
 }
 
 .mobile-filter-toggle {
+  display: none;
+}
+
+.mobile-navigation-spacer {
   display: none;
 }
 
