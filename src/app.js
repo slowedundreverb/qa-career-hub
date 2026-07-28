@@ -8,16 +8,18 @@ const saved = JSON.parse(localStorage.getItem('qa-hub-state') || '{}');
 const storedCustomCompanies = JSON.parse(localStorage.getItem('qa-hub-custom-companies') || '[]');
 const customCompanies = Array.isArray(storedCustomCompanies) ? storedCustomCompanies : [];
 let companyWatchMessage = '';
+let versionHistory = { repository: '', commits: [], loading: true };
 const cachedJobs = JSON.parse(sessionStorage.getItem('qa-hub-jobs') || 'null');
 if (cachedJobs?.jobs?.length && new Date(cachedJobs.meta?.generatedAt || 0) > new Date(jobMeta.generatedAt || 0)) {
   jobs.splice(0, jobs.length, ...cachedJobs.jobs);
   linkedinJobs.splice(0, linkedinJobs.length, ...(cachedJobs.linkedinJobs || []));
   Object.assign(jobMeta, cachedJobs.meta);
 }
+const modeFromHash = () => location.hash.includes('versions') ? 'versions' : location.hash.includes('learn') ? 'learn' : 'jobs';
 const state = {
-  mode: location.hash.includes('learn') ? 'learn' : 'jobs',
+  mode: modeFromHash(),
   learnView: saved.learnView || 'roadmap',
-  jobSearch: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit',
+  jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit',
   favoritesOnly: false,
   track: 'Все', theorySearch: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: saved.quizCategory || 'Все',
   completed: new Set(saved.completed || []),
@@ -43,6 +45,7 @@ const cleanJobText = (value='') => {
 };
 const initials = name => name.split(/\s+/).map(x => x[0]).join('').slice(0,2).toUpperCase();
 const watchedCompanies = () => [...customCompanies, ...companies];
+const companyKey = name => String(name).replace(/\.US$/,'').replace(/\s*\/\s*Gen Digital$/,'').trim().toLowerCase();
 const saveCustomCompanies = () => localStorage.setItem('qa-hub-custom-companies', JSON.stringify(customCompanies));
 const websiteName = url => {
   const hostname=new URL(url).hostname.replace(/^www\./,'');
@@ -68,6 +71,17 @@ const sourceWarning = count => count % 10 === 1 && count % 100 !== 11
     ? `${count} источника требуют перепроверки`
     : `${count} источников требуют перепроверки`;
 
+async function loadVersionHistory() {
+  try {
+    const response=await fetch('./versions.json',{cache:'no-store'});
+    if(!response.ok) throw new Error('Version history unavailable');
+    versionHistory={...(await response.json()),loading:false};
+  } catch {
+    versionHistory={repository:'https://github.com/slowedundreverb/qa-career-hub',commits:[],loading:false};
+  }
+  if(state.mode==='versions') renderVersions();
+}
+
 function shell(content) {
   state.settingsOpen=false;
   app.innerHTML = `
@@ -81,6 +95,7 @@ function shell(content) {
         <button class="mode-btn ${state.mode === 'learn' ? 'active' : ''}" data-mode="learn"><span>02</span> Подготовка</button>
       </nav>
       <div class="settings-wrap">
+        <a class="versions-button ${state.mode==='versions'?'active':''}" href="#versions" aria-label="История версий">Версии</a>
         <button class="settings-button" id="settings-button" aria-label="Настройки" aria-expanded="false" aria-controls="settings-menu">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.63 15 1.7 1.7 0 0 0 3.08 14H3v-4h.08A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63 1.7 1.7 0 0 0 10 3.08V3h4v.08A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9 1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>
         </button>
@@ -150,7 +165,7 @@ function filteredJobs() {
       (!state.jobSearch || hay.includes(state.jobSearch.toLowerCase())) &&
       (state.type === 'all' || jobType(j) === state.type) &&
       (state.industry === 'all' || (state.industry === 'fintech' ? /fintech|bank|payment|financial|trading|mortgage|insurtech/i.test(j.industry||'') : j.industry === state.industry)) &&
-      (state.company === 'all' || j.company === state.company) &&
+      (state.company === 'all' || companyKey(j.company) === companyKey(state.company)) &&
       (state.format === 'all' || j.format === state.format) &&
       (state.level === 'all' || j.level === state.level) &&
       (state.location === 'all' || j.region?.toLowerCase() === state.location || (state.location === 'remote' && j.format === 'Remote') || (country && (j.location.toLowerCase().includes(country) || europeRemote))) &&
@@ -165,7 +180,16 @@ function renderJobs() {
   const cyprus = jobs.filter(j => /cyprus|limassol|nicosia/i.test(j.location)).length;
   const industries=[...new Set(jobs.map(j=>j.industry||'Technology'))].sort((a,b)=>a.localeCompare(b));
   const regions=[...new Set(jobs.map(j=>j.region||'Other'))].sort((a,b)=>a.localeCompare(b));
-  const employers=[...new Set(jobs.map(j=>j.company))].sort((a,b)=>a.localeCompare(b));
+  const employers=[...new Set(watchlist.map(company=>company.name))].sort((a,b)=>a.localeCompare(b));
+  const employerCounts=jobs.filter(job=>job.status!=='closed').reduce((counts,job)=>{
+    const key=companyKey(job.company);
+    counts.set(key,(counts.get(key)||0)+1);
+    return counts;
+  },new Map());
+  const employerOptions=employers.map(name=>{
+    const count=employerCounts.get(companyKey(name))||0;
+    return [name,count?`${name} · ${count}`:`${name} · нет вакансий`,count===0];
+  });
   const focusCountries=['Germany','Spain','Netherlands','Italy','France','Ireland'];
   shell(`<main class="jobs-layout">
     <aside class="sidebar">
@@ -186,10 +210,13 @@ function renderJobs() {
       </div>
       ${linkedinBlock()}
       <div class="filterbar">
-        <label class="search"><span>⌕</span><input id="job-search" value="${esc(state.jobSearch)}" placeholder="Должность, компания или технология" /></label>
+        <form class="search job-search-form" id="job-search-form">
+          <input id="job-search" value="${esc(state.jobSearchDraft)}" placeholder="Должность, компания или технология" aria-label="Поиск вакансий" />
+          <button class="job-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button>
+        </form>
         ${select('job-industry',[['all','Все отрасли'],['fintech','Fintech / банки'],...industries.map(x=>[x,x])],state.industry)}
         ${select('job-location',[['all','Вся география'],['remote','Только remote'],...focusCountries.map(x=>[`country:${x.toLowerCase()}`,`${x} + remote EU`]),...regions.map(x=>[x.toLowerCase(),x])],state.location)}
-        ${select('job-company',[['all','Все компании'],...employers.map(x=>[x,x])],state.company)}
+        ${select('job-company',[['all',`Все компании · ${employers.length}`],...employerOptions],state.company)}
         ${select('job-type',[['all','Все роли'],['manual','Manual QA'],['aqa','Automation'],['java','Java AQA'],['sdet','SDET']],state.type)}
         ${select('job-level',[['all','Любой уровень'],['Junior','Junior'],['Middle','Middle'],['Senior','Senior'],['Lead','Lead']],state.level)}
         ${select('job-format',[['all','Любой формат'],['Remote','Remote'],['Hybrid','Hybrid'],['On-site','Офис']],state.format)}
@@ -202,7 +229,7 @@ function renderJobs() {
   bindJobs();
 }
 
-const select = (id, opts, current) => `<label class="select-wrap"><select id="${id}">${opts.map(([v,l])=>`<option value="${esc(v)}" ${v===current?'selected':''}>${esc(l)}</option>`).join('')}</select><span>⌄</span></label>`;
+const select = (id, opts, current) => `<label class="select-wrap"><select id="${id}">${opts.map(([v,l,disabled])=>`<option value="${esc(v)}" ${v===current?'selected':''} ${disabled?'disabled':''}>${esc(l)}</option>`).join('')}</select><span>⌄</span></label>`;
 
 function linkedinBlock() {
   if (!jobMeta.linkedinConnected) return `<section class="linkedin-panel disconnected">
@@ -239,14 +266,16 @@ function companiesDrawer() {
   </article>`;
   return `<dialog id="companies-dialog">
     <div class="dialog-head"><div><span class="eyebrow">WATCHLIST</span><h2>${watchlist.length} компаний под наблюдением</h2><p>Официальные career-страницы и сайты, которые вы добавили самостоятельно.</p></div><button id="close-dialog" aria-label="Закрыть список компаний">×</button></div>
-    <form class="company-watch-form" id="company-watch-form">
-      <div><span class="kicker">СВОЙ ИСТОЧНИК</span><b>Добавить сайт для отслеживания</b></div>
-      <label><span>Название — необязательно</span><input id="company-watch-name" autocomplete="organization" placeholder="Например, Acme Bank"></label>
-      <label><span>Ссылка на вакансии</span><input id="company-watch-url" type="text" inputmode="url" autocomplete="url" required placeholder="careers.company.com"></label>
-      <button type="submit">Добавить</button>
-      <p class="company-watch-message" id="company-watch-message" role="status">${esc(companyWatchMessage)}</p>
-    </form>
-    <div class="company-grid">${customCompanies.map(c=>card(c,true)).join('')}${companies.map(c=>card(c)).join('')}</div>
+    <div class="companies-dialog-body" role="region" aria-label="Список компаний" tabindex="0">
+      <form class="company-watch-form" id="company-watch-form">
+        <div><span class="kicker">СВОЙ ИСТОЧНИК</span><b>Добавить сайт для отслеживания</b></div>
+        <label><span>Название — необязательно</span><input id="company-watch-name" autocomplete="organization" placeholder="Например, Acme Bank"></label>
+        <label><span>Ссылка на вакансии</span><input id="company-watch-url" type="text" inputmode="url" autocomplete="url" required placeholder="careers.company.com"></label>
+        <button type="submit">Добавить</button>
+        <p class="company-watch-message" id="company-watch-message" role="status">${esc(companyWatchMessage)}</p>
+      </form>
+      <div class="company-grid">${customCompanies.map(c=>card(c,true)).join('')}${companies.map(c=>card(c)).join('')}</div>
+    </div>
   </dialog>`;
 }
 
@@ -283,6 +312,7 @@ function removeWatchedCompany(id){
   const index=customCompanies.findIndex(company=>company.id===id);
   if(index<0) return;
   const [removed]=customCompanies.splice(index,1);
+  if(state.company===removed.name) state.company='all';
   saveCustomCompanies();
   companyWatchMessage=`${removed.name} удалён из отслеживания`;
   renderJobs();
@@ -291,15 +321,32 @@ function removeWatchedCompany(id){
 
 function bindJobs() {
   const rerenderWith = (key, value) => { state[key] = value; renderJobs(); };
-  document.querySelector('#job-search')?.addEventListener('input', e => { state.jobSearch=e.target.value; clearTimeout(window._jobT); window._jobT=setTimeout(renderJobs,220); });
+  document.querySelector('#job-search')?.addEventListener('input',e=>{state.jobSearchDraft=e.target.value;});
+  document.querySelector('#job-search-form')?.addEventListener('submit',e=>{
+    e.preventDefault();
+    state.jobSearch=state.jobSearchDraft.trim();
+    renderJobs();
+  });
   [['job-type','type'],['job-industry','industry'],['job-company','company'],['job-location','location'],['job-level','level'],['job-format','format'],['job-sort','sort']].forEach(([id,key])=>document.querySelector(`#${id}`)?.addEventListener('change',e=>rerenderWith(key,e.target.value)));
   document.querySelectorAll('[data-favorite]').forEach(b=>b.addEventListener('click',()=>{ state.favorites.has(b.dataset.favorite)?state.favorites.delete(b.dataset.favorite):state.favorites.add(b.dataset.favorite); save(); renderJobs(); }));
-  document.querySelector('#reset-filters')?.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',type:'all',industry:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();});
+  document.querySelector('#reset-filters')?.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',jobSearchDraft:'',type:'all',industry:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();});
   const dialog=document.querySelector('#companies-dialog'); document.querySelector('#show-companies')?.addEventListener('click',()=>dialog.showModal()); document.querySelector('#close-dialog')?.addEventListener('click',()=>dialog.close());
+  const companyScroll=document.querySelector('.companies-dialog-body');
+  companyScroll?.addEventListener('keydown',e=>{
+    const destinations={
+      PageDown:companyScroll.scrollTop+companyScroll.clientHeight*.85,
+      PageUp:companyScroll.scrollTop-companyScroll.clientHeight*.85,
+      Home:0,
+      End:companyScroll.scrollHeight
+    };
+    if(!(e.key in destinations)) return;
+    e.preventDefault();
+    companyScroll.scrollTo({top:destinations[e.key],behavior:'smooth'});
+  });
   document.querySelector('#company-watch-form')?.addEventListener('submit',addWatchedCompany);
   document.querySelectorAll('[data-remove-company]').forEach(button=>button.addEventListener('click',()=>removeWatchedCompany(button.dataset.removeCompany)));
   document.querySelector('#show-all-jobs')?.addEventListener('click',()=>{state.favoritesOnly=false;renderJobs();});
-  document.querySelector('#show-favorites')?.addEventListener('click',()=>{state.favoritesOnly=true;state.jobSearch='';renderJobs();});
+  document.querySelector('#show-favorites')?.addEventListener('click',()=>{state.favoritesOnly=true;state.jobSearch='';state.jobSearchDraft='';renderJobs();});
   document.querySelector('#refresh-jobs')?.addEventListener('click',refreshJobs);
 }
 
@@ -325,6 +372,49 @@ async function refreshJobs(){
     box.classList.remove('refreshing'); button.disabled=false; status.textContent='не удалось обновить';
     toast('Не удалось обновить вакансии. Попробуйте ещё раз позже');
   }
+}
+
+const versionNotes = {
+  aeee763: 'Создали первую версию QA Career Hub с вакансиями и подготовкой к интервью.',
+  '38fadf8': 'Расширили подборку европейских вакансий и исправили работу сохранённых позиций.',
+  '0cae886': 'Настроили корректную папку сборки для публикации на Vercel.',
+  '310311a': 'Исключили локальные файлы окружения Vercel из репозитория.',
+  '89d73bd': 'Добавили адаптивные раскладки для мобильных устройств и сжатых окон.',
+  '6067610': 'Подключили обновление вакансий из интерфейса в опубликованной версии.',
+  '3095560': 'Вернули сегментированный круговой индикатор прогресса обучения.',
+  '685222b': 'Исправили кнопку завершения темы и её расположение внутри конспекта.',
+  '72735fc': 'Добавили новые карьерные сайты и пользовательский список компаний для отслеживания.',
+  'a01dc24': 'Вернули прокрутку списка компаний и заметный индикатор скролла.'
+};
+
+function renderVersions() {
+  const commits=versionHistory.commits||[];
+  const cards=commits.map((commit,index)=>{
+    const note=versionNotes[commit.shortSha]||commit.message;
+    const formattedDate=new Intl.DateTimeFormat('ru',{day:'numeric',month:'long',year:'numeric'}).format(new Date(commit.date));
+    const commitUrl=versionHistory.repository?`${versionHistory.repository}/commit/${commit.sha}`:'#';
+    return `<article class="version-card ${index===0?'current':''}">
+      <div class="version-rail"><span></span><i></i></div>
+      <div class="version-content">
+        <div class="version-meta"><b>v${esc(commit.version)}</b>${index===0?'<em>Текущая версия</em>':''}<time datetime="${esc(commit.date)}">${esc(formattedDate)}</time></div>
+        <h2>${esc(commit.message)}</h2>
+        <p>${esc(note)}</p>
+        <a href="${esc(commitUrl)}" target="_blank" rel="noreferrer"><code>${esc(commit.shortSha)}</code> Открыть коммит ↗</a>
+      </div>
+    </article>`;
+  }).join('');
+  shell(`<main class="versions-page">
+    <section class="versions-hero">
+      <a href="#${state.mode==='versions'?'jobs':state.mode}" class="versions-back">← Вернуться к сайту</a>
+      <span class="eyebrow">CHANGELOG</span>
+      <h1>История версий</h1>
+      <p>Каждый релиз связан с реальным Git-коммитом. Здесь видно, что менялось от первой версии до текущей.</p>
+      <div class="versions-summary"><strong>${commits.length}</strong><span>версий опубликовано</span></div>
+    </section>
+    <section class="versions-list">
+      ${versionHistory.loading?'<div class="version-empty">Загружаем историю обновлений…</div>':cards||'<div class="version-empty">История коммитов пока недоступна.</div>'}
+    </section>
+  </main>`);
 }
 
 function renderLearn() {
@@ -432,7 +522,8 @@ function bindLearn() {
 }
 
 function toast(message){const t=document.querySelector('#toast');if(!t)return;t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
-function render(){ state.mode==='jobs'?renderJobs():renderLearn(); window.scrollTo(0,0); }
-window.addEventListener('hashchange',()=>{state.mode=location.hash.includes('learn')?'learn':'jobs';render();});
+function render(){ state.mode==='versions'?renderVersions():state.mode==='jobs'?renderJobs():renderLearn(); window.scrollTo(0,0); }
+window.addEventListener('hashchange',()=>{state.mode=modeFromHash();render();});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.selectedTopic){state.selectedTopic=null;renderLearn();}});
+loadVersionHistory();
 render();
