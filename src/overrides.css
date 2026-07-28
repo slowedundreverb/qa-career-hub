@@ -2187,3 +2187,134 @@ body:has(.topic-overlay) {
     width: 100%;
   }
 }
+
+/* Mobile section banners share one layout, then collapse into a sticky navigation bar. */
+@media (max-width: 900px) {
+  .sidebar,
+  .learn-sidebar {
+    position: sticky;
+    top: 74px;
+    z-index: 16;
+    grid-template-areas:
+      "label utility"
+      "title title"
+      "nav nav";
+    min-height: 250px;
+    overflow: hidden;
+    box-shadow: 0 14px 30px rgba(13, 26, 22, .12);
+    transition:
+      min-height .26s ease,
+      padding .26s ease,
+      gap .26s ease,
+      box-shadow .26s ease;
+  }
+
+  .sidebar h1,
+  .learn-sidebar h1 {
+    grid-area: title;
+    display: grid;
+    align-self: center;
+    min-height: 82px;
+    margin: 0 4px;
+    font-size: clamp(27px, 6vw, 38px);
+    line-height: 1.02;
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity .18s ease,
+      transform .22s ease;
+  }
+
+  .sidebar h1 {
+    color: #fff;
+  }
+
+  .sidebar .lead {
+    display: none;
+  }
+
+  .sidebar.is-condensed,
+  .learn-sidebar.is-condensed {
+    grid-template-areas: "nav";
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 76px;
+    gap: 0;
+    padding: 7px 16px;
+    box-shadow: 0 10px 24px rgba(13, 26, 22, .2);
+  }
+
+  .sidebar.is-condensed > .eyebrow,
+  .sidebar.is-condensed > h1,
+  .sidebar.is-condensed > .update-box,
+  .learn-sidebar.is-condensed > .eyebrow,
+  .learn-sidebar.is-condensed > h1,
+  .learn-sidebar.is-condensed > .progress-ring {
+    display: none;
+  }
+
+  .sidebar.is-condensed .side-nav,
+  .learn-sidebar.is-condensed .learn-nav {
+    min-height: 60px;
+    margin: 0;
+  }
+
+  .sidebar.is-condensed .side-nav button,
+  .learn-sidebar.is-condensed .learn-nav button {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 620px) {
+  .sidebar,
+  .learn-sidebar {
+    top: 112px;
+    min-height: 238px;
+  }
+
+  .sidebar h1,
+  .learn-sidebar h1 {
+    min-height: 72px;
+    font-size: clamp(25px, 8vw, 32px);
+  }
+
+  .sidebar.is-condensed,
+  .learn-sidebar.is-condensed {
+    min-height: 70px;
+    padding: 4px 10px;
+  }
+
+  .sidebar.is-condensed .side-nav,
+  .learn-sidebar.is-condensed .learn-nav {
+    min-height: 62px;
+  }
+
+  .sidebar.is-condensed .side-nav button,
+  .learn-sidebar.is-condensed .learn-nav button {
+    min-height: 52px;
+  }
+
+  .versions-back {
+    display: flex;
+    width: fit-content;
+    margin-bottom: 22px;
+  }
+
+  .versions-hero > .eyebrow {
+    display: block;
+    width: fit-content;
+    margin-bottom: 8px;
+  }
+
+  .dialog-head > button,
+  .topic-modal > button:first-child {
+    flex: 0 0 38px;
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    line-height: 1;
+  }
+}

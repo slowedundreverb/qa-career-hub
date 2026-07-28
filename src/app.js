@@ -137,6 +137,25 @@ function shell(content) {
     ${content}
     <div id="toast" class="toast" role="status"></div>`;
   bindGlobal();
+  bindMobileNavigation();
+}
+
+let mobileNavigationHandler;
+
+function bindMobileNavigation() {
+  if (mobileNavigationHandler) {
+    window.removeEventListener('scroll', mobileNavigationHandler);
+    window.removeEventListener('resize', mobileNavigationHandler);
+  }
+  const banner=document.querySelector('.sidebar, .learn-sidebar');
+  if(!banner) return;
+  mobileNavigationHandler=()=>{
+    const compact=window.matchMedia('(max-width: 900px)').matches && window.scrollY>96;
+    banner.classList.toggle('is-condensed',compact);
+  };
+  mobileNavigationHandler();
+  window.addEventListener('scroll',mobileNavigationHandler,{passive:true});
+  window.addEventListener('resize',mobileNavigationHandler,{passive:true});
 }
 
 function bindGlobal() {
@@ -302,7 +321,7 @@ function jobCard(j) {
   </article>`;
 }
 
-const emptyJobs = () => `<div class="empty-state"><span>⌁</span><h3>${jobs.length ? 'Ничего не найдено' : 'Данные вакансий ещё не обновлены'}</h3><p>${jobs.length ? 'Измените фильтры или поисковый запрос.' : 'В терминале проекта выполните npm run update:jobs. Каждый источник проверяется независимо.'}</p>${jobs.length?'<button id="reset-filters">Сбросить фильтры</button>':''}</div>`;
+const emptyJobs = () => `<div class="empty-state"><h3>${jobs.length ? 'Ничего не найдено' : 'Данные вакансий ещё не обновлены'}</h3><p>${jobs.length ? 'Измените фильтры или поисковый запрос.' : 'В терминале проекта выполните npm run update:jobs. Каждый источник проверяется независимо.'}</p>${jobs.length?'<button id="reset-filters">Сбросить фильтры</button>':''}</div>`;
 
 function aboutDialog() {
   return `<dialog id="about-dialog" class="about-dialog">
