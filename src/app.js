@@ -79,6 +79,12 @@ async function loadVersionHistory() {
   } catch {
     versionHistory={repository:'https://github.com/slowedundreverb/qa-career-hub',commits:[],loading:false};
   }
+  const versionButton=document.querySelector('.versions-button');
+  const currentVersion=versionHistory.commits?.[0]?.version;
+  if(versionButton&&currentVersion){
+    versionButton.textContent=`v${currentVersion}`;
+    versionButton.setAttribute('aria-label',`История версий, текущая версия v${currentVersion}`);
+  }
   if(state.mode==='versions') renderVersions();
 }
 
@@ -95,7 +101,7 @@ function shell(content) {
         <button class="mode-btn ${state.mode === 'learn' ? 'active' : ''}" data-mode="learn"><span>02</span> Подготовка</button>
       </nav>
       <div class="settings-wrap">
-        <a class="versions-button ${state.mode==='versions'?'active':''}" href="#versions" aria-label="История версий">Версии</a>
+        <a class="versions-button ${state.mode==='versions'?'active':''}" href="#versions" aria-label="История версий${versionHistory.commits?.[0]?.version?`, текущая версия v${versionHistory.commits[0].version}`:''}">${versionHistory.commits?.[0]?.version?`v${versionHistory.commits[0].version}`:'v…'}</a>
         <button class="settings-button" id="settings-button" aria-label="Настройки" aria-expanded="false" aria-controls="settings-menu">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.63 15 1.7 1.7 0 0 0 3.08 14H3v-4h.08A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63 1.7 1.7 0 0 0 10 3.08V3h4v.08A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9 1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>
         </button>
@@ -392,14 +398,12 @@ function renderVersions() {
   const cards=commits.map((commit,index)=>{
     const note=versionNotes[commit.shortSha]||commit.message;
     const formattedDate=new Intl.DateTimeFormat('ru',{day:'numeric',month:'long',year:'numeric'}).format(new Date(commit.date));
-    const commitUrl=versionHistory.repository?`${versionHistory.repository}/commit/${commit.sha}`:'#';
     return `<article class="version-card ${index===0?'current':''}">
       <div class="version-rail"><span></span><i></i></div>
       <div class="version-content">
         <div class="version-meta"><b>v${esc(commit.version)}</b>${index===0?'<em>Текущая версия</em>':''}<time datetime="${esc(commit.date)}">${esc(formattedDate)}</time></div>
         <h2>${esc(commit.message)}</h2>
         <p>${esc(note)}</p>
-        <a href="${esc(commitUrl)}" target="_blank" rel="noreferrer"><code>${esc(commit.shortSha)}</code> Открыть коммит ↗</a>
       </div>
     </article>`;
   }).join('');

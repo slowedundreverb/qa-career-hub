@@ -1004,18 +1004,6 @@ body:has(.topic-overlay) {
   line-height: 1.6;
 }
 
-.version-content a {
-  color: var(--green);
-  text-decoration: none;
-  font-size: 9px;
-  font-weight: 800;
-}
-
-.version-content code {
-  margin-right: 8px;
-  color: #7b8581;
-}
-
 .version-empty {
   padding: 40px;
   border: 1px dashed var(--line);
