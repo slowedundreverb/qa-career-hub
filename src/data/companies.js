@@ -85,7 +85,7 @@ export const companies = [
   ['Injective Labs','Europe / USA','Remote','Fintech','https://jobs.ashbyhq.com/injective-labs'],
   ['DualEntry','Europe / Canada','Remote','Fintech','https://jobs.ashbyhq.com/dualentry'],
   ['Forward Financing','USA / Canada','Remote','Fintech','https://jobs.ashbyhq.com/Forward%20Financing'],
-  ['Binance','Global','Remote','Fintech','https://www.binance.com/en/careers'],
+  ['Binance','Global','Remote','Fintech','https://www.binance.com/en/careers/job-openings?team=All'],
   ['Clair','USA','Remote','Digital banking','https://jobs.ashbyhq.com/clair'],
   ['Eisen','USA','New York','Banking tech','https://jobs.ashbyhq.com/eisen'],
   ['Titan AI','USA','Remote','Banking tech','https://jobs.ashbyhq.com/titan-ai'],
