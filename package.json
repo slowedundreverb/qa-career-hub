@@ -8,6 +8,7 @@
     "build": "node scripts/build.mjs",
     "preview": "node scripts/serve.mjs dist",
     "discover:linkedin": "node scripts/discover-linkedin-companies.mjs",
+    "archive:company-discovery": "node scripts/archive-company-discovery.mjs",
     "verify:linkedin-discoveries": "node scripts/verify-linkedin-discoveries.mjs",
     "update:jobs": "node scripts/update-jobs.mjs"
   },
