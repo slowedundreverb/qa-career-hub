@@ -37,6 +37,7 @@ const sources = [
   { type:'greenhouse', token:'idnow', company:'IDnow', industry:'Identity / fintech' },
   { type:'greenhouse', token:'platacard', company:'Plata', industry:'Digital banking', qaSpecialization:'QA' },
   { type:'greenhouse', token:'robinhood', company:'Robinhood', industry:'Fintech' },
+  { type:'greenhouse', token:'tanium', company:'Tanium', industry:'Cybersecurity' },
   { type:'deel', token:'klarna', company:'Klarna', industry:'Fintech', includeAllQuality:true },
   { type:'greenhouse', token:'justmarkets', company:'JustMarkets', industry:'Fintech / trading' },
   { type:'greenhouse', token:'rumble-external', company:'Rumble', industry:'MediaTech' },
@@ -304,8 +305,15 @@ function isConcreteJobUrl(url,listingUrl) {
     const path=`${candidate.pathname}${candidate.search}`;
     if(/\/apply(?:\/|\?|$)/i.test(path)) return true;
     if(/(?:jobs?|vacanc(?:y|ies)|positions?|openings?|careers?|roles?)/i.test(path)) {
-      return /[0-9a-f]{8,}|\d{5,}|[?&](?:id|job|pid|gh_jid)=/i.test(path)
-        || path.split('/').filter(Boolean).length>=3;
+      if(/[0-9a-f]{8,}|\d{5,}|[?&](?:id|job|pid|gh_jid)=/i.test(path)) return true;
+      const candidateParts=candidate.pathname.split('/').filter(Boolean);
+      const listingParts=listing.pathname.split('/').filter(Boolean);
+      const isChildPage=candidate.origin===listing.origin
+        && candidateParts.length>listingParts.length
+        && listingParts.every((part,index)=>candidateParts[index]===part);
+      const lastPart=candidateParts.at(-1)||'';
+      return candidateParts.length>=3
+        || (isChildPage&&!/^(?:jobs?|careers?|vacanc(?:y|ies)|positions?|roles?|openings?)$/i.test(lastPart));
     }
     return false;
   } catch { return false; }

@@ -33,6 +33,8 @@ jobs:
         run: npm run discover:linkedin -- --write
       - name: Refresh official vacancy sources
         run: npm run update:jobs
+      - name: Verify LinkedIn discoveries against official roles
+        run: npm run verify:linkedin-discoveries
       - name: Publish changed data
         run: |
           if git diff --quiet; then

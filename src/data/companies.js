@@ -145,7 +145,7 @@ export const companies = [
   ['Shift Technology','France','Paris / hybrid','Insurtech','https://job-boards.greenhouse.io/shifttechnology'],
   ['IDnow','France / Germany','Rennes / remote-friendly','Identity / fintech','https://job-boards.greenhouse.io/idnow'],
   ['Voyage Privé','France','Remote / hybrid','TravelTech','https://jobs.smartrecruiters.com/VoyagePriv/744000097543255-qa-engineer-full-remote-or-hybrid-m-f-d-'],
-  ["SolutionLab","Europe","Vilnius, Vilniaus, Lithuania","IT Services and IT Consulting","https://solutionlab.net/careers"],
+  ["SolutionLab","Lithuania","Vilnius","IT Services and IT Consulting","https://solutionlab.net/careers"],
   ["Ubiquiti Inc.","Global","Remote","Technology, Information and Internet","https://careers.ui.com/"],
   ["Cambridge Mobile Telematics","Global","Remote","Software Development","https://www.cmtelematics.com/who-we-are/join-our-team/"],
   ["Accenture Greece","Global","Remote","Information Technology & Services","https://www.accenture.com/gr-en/careers"],

@@ -5,6 +5,7 @@ import { companies } from '../src/data/companies.js';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const companiesPath=resolve(root,'src/data/companies.js');
+const reportPath=resolve(root,'.linkedin-discovery-report.json');
 const shouldWrite=process.argv.includes('--write');
 const maxNew=12;
 const rolePattern=/\b(?:qa|quality assurance|quality engineer|test engineer|test automation|automation test|sdet|aqa)\b/i;
@@ -178,4 +179,6 @@ if(shouldWrite&&additions.length) {
   await writeFile(companiesPath,`${before}${separator}${rows}\n${source.slice(insertAt)}`);
 }
 
-console.log(JSON.stringify({searched:searches.length,linkedinJobs:discoveredJobs.length,candidates:candidates.length,added:additions.length,write:shouldWrite,companies:additions},null,2));
+const report={generatedAt:new Date().toISOString(),searched:searches.length,linkedinJobs:discoveredJobs.length,candidates:candidates.length,added:additions.length,write:shouldWrite,companies:additions};
+if(shouldWrite) await writeFile(reportPath,JSON.stringify(report,null,2));
+console.log(JSON.stringify(report,null,2));
