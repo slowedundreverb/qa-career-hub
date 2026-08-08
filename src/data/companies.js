@@ -157,6 +157,9 @@ export const companies = [
   ["Siemens","Global","Official QA search","Industrial technology","https://jobs.siemens.com/en_US/externaljobs/SearchJobs/qa%20?listFilterMode=1&folderRecordsPerPage=6&","linkedin"],
   ["icligo","Portugal","Vila Nova de Gaia / hybrid","TravelTech","https://www.icligo.com/en/careers","linkedin"],
   ["Tanium","Poland","Krakow / hybrid","Cybersecurity","https://www.tanium.com/careers?category=engineering","linkedin"],
+  ["Protection Game","Global","Remote","Atividades dos serviços de tecnologia da informação","https://careers.veeam.com/search-jobs?ad=menu-company","linkedin"],
+  ["Avenga","Europe","Praha 8, Prague, Czechia","IT služby a IT poradenství","https://career.avenga.com/","linkedin"],
+  ["Bloomreach","Europe","Czechia","Technology, Information and Internet","https://www.bloomreach.com/en/careers","linkedin"],
 ].map(([name,country,city,industry,careerUrl,discovery], index) => ({
   id: `c${index + 1}`, name, country, city, industry, careerUrl, discovery,
   priority: country.includes('Cyprus') ? 'high' : country === 'Europe' ? 'medium' : 'normal',
