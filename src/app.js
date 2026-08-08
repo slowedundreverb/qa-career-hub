@@ -17,6 +17,7 @@ const state = {
   mode: modeFromHash(),
   learnView: saved.learnView || 'roadmap',
   jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit', jobFiltersOpen: false,
+  companySearch: '', companySearchDraft: '', companyOpenFirst: true,
   favoritesOnly: false,
   track: 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: saved.quizCategory || 'Все',
   completed: new Set(saved.completed || []),
@@ -318,17 +319,27 @@ function companiesDrawer() {
     return counts;
   },new Map());
   const coveredEmployers=new Set((jobMeta.coveredCompanies||[]).map(companyKey));
-  const card=c=>`<article class="company-entry">
+  const query=state.companySearch.toLowerCase();
+  const directory=watchlist
+    .map((company,index)=>({company,index,count:companyCounts.get(companyKey(company.name))||0}))
+    .filter(({company})=>!query||[company.name,company.country,company.city,company.industry].some(value=>String(value||'').toLowerCase().includes(query)))
+    .sort((a,b)=>state.companyOpenFirst?((b.count>0)-(a.count>0)||a.index-b.index):a.index-b.index);
+  const card=({company:c,count})=>`<article class="company-entry">
     <a href="${esc(c.careerUrl)}" target="_blank" rel="noreferrer">
       <span class="company-logo small">${esc(initials(c.name))}</span>
       <div><b>${esc(c.name)}</b><small>${esc(c.city)} · ${esc(c.industry)}</small></div><i>${c.priority==='high'?'Кипр':'↗'}</i>
-      <em>${companyCounts.get(companyKey(c.name))||0}${coveredEmployers.has(companyKey(c.name))?' QA':' · ссылка'}</em>
+      <em>${count}${coveredEmployers.has(companyKey(c.name))?' QA':' · ссылка'}</em>
     </a>
   </article>`;
   return `<dialog id="companies-dialog">
     <div class="dialog-head"><div><span class="eyebrow">COMPANY RADAR</span><h2>${watchlist.length} компаний под наблюдением</h2><p>Проверенные официальные career-страницы работодателей из ежедневного автоматического мониторинга.</p></div><button id="close-dialog" aria-label="Закрыть список компаний">×</button></div>
+    <form class="company-directory-tools" id="company-search-form">
+      <label class="company-directory-search"><span aria-hidden="true">⌕</span><input id="company-search" value="${esc(state.companySearchDraft)}" placeholder="Найти компанию, страну или отрасль" aria-label="Поиск компаний" /><button type="submit" aria-label="Выполнить поиск компаний">Найти</button></label>
+      <button class="company-open-first ${state.companyOpenFirst?'active':''}" id="company-open-first" type="button" aria-pressed="${state.companyOpenFirst}"><span aria-hidden="true">${state.companyOpenFirst?'✓':'↕'}</span> С вакансиями сначала</button>
+    </form>
+    <div class="company-directory-summary"><span><b>${directory.length}</b> из ${watchlist.length} компаний</span>${state.companySearch?`<button id="company-search-reset" type="button">Сбросить поиск</button>`:''}</div>
     <div class="companies-dialog-body" role="region" aria-label="Список компаний" tabindex="0">
-      <div class="company-grid">${companies.map(card).join('')}</div>
+      <div class="company-grid">${directory.length?directory.map(card).join(''):`<div class="company-directory-empty"><b>Компании не найдены</b><span>Измените запрос или сбросьте поиск.</span></div>`}</div>
     </div>
   </dialog>`;
 }
@@ -346,6 +357,11 @@ function bindJobs() {
   document.querySelectorAll('[data-favorite]').forEach(b=>b.addEventListener('click',()=>{ state.favorites.has(b.dataset.favorite)?state.favorites.delete(b.dataset.favorite):state.favorites.add(b.dataset.favorite); save(); renderJobs(); }));
   document.querySelector('#reset-filters')?.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',jobSearchDraft:'',type:'all',industry:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();});
   const dialog=document.querySelector('#companies-dialog'); document.querySelector('#show-companies')?.addEventListener('click',()=>dialog.showModal()); document.querySelector('#close-dialog')?.addEventListener('click',()=>dialog.close());
+  const reopenCompanies=()=>{renderJobs();document.querySelector('#companies-dialog')?.showModal();};
+  document.querySelector('#company-search')?.addEventListener('input',e=>{state.companySearchDraft=e.target.value;});
+  document.querySelector('#company-search-form')?.addEventListener('submit',e=>{e.preventDefault();state.companySearch=state.companySearchDraft.trim();reopenCompanies();});
+  document.querySelector('#company-open-first')?.addEventListener('click',()=>{state.companyOpenFirst=!state.companyOpenFirst;reopenCompanies();});
+  document.querySelector('#company-search-reset')?.addEventListener('click',()=>{state.companySearch='';state.companySearchDraft='';reopenCompanies();});
   const about=document.querySelector('#about-dialog');
   const switcher=document.querySelector('.mode-switch');
   const muteSwitcher=()=>switcher?.classList.add('is-muted');

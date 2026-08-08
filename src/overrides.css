@@ -375,6 +375,120 @@
   flex: 0 0 auto;
 }
 
+.company-directory-tools {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin: 18px 0 10px;
+}
+
+.company-directory-search {
+  min-width: 0;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 5px 5px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #faf9f5;
+}
+
+.company-directory-search > span {
+  color: var(--green);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.company-directory-search input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 10px;
+}
+
+.company-directory-search button,
+.company-open-first {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.company-directory-search button {
+  padding: 0 15px;
+  border-color: var(--navy);
+  background: var(--navy);
+  color: white;
+}
+
+.company-open-first {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+}
+
+.company-open-first span {
+  color: var(--green);
+  font-size: 11px;
+}
+
+.company-open-first.active {
+  border-color: #a8c8bc;
+  background: #edf7f1;
+  color: var(--green);
+}
+
+.company-directory-summary {
+  flex: 0 0 auto;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 8px;
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.company-directory-summary button {
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: var(--green);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.company-directory-empty {
+  grid-column: 1 / -1;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.company-directory-empty b {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.company-directory-empty span {
+  font-size: 9px;
+}
+
 .companies-dialog-body {
   min-height: 0;
   overflow-x: hidden;
@@ -1755,6 +1869,16 @@ body:has(.topic-overlay) {
     max-height: calc(100vh - 16px);
     padding: 18px 14px;
     border-radius: 16px;
+  }
+
+  .company-directory-tools {
+    grid-template-columns: 1fr;
+    margin-top: 14px;
+  }
+
+  .company-open-first {
+    min-height: 42px;
+    justify-content: center;
   }
 
   .dialog-head { gap: 10px; }
