@@ -171,8 +171,11 @@ if(shouldWrite&&additions.length) {
   const source=await readFile(companiesPath,'utf8');
   const marker='].map(([name,country,city,industry,careerUrl], index) => ({';
   const rows=additions.map(company=>`  [${[company.name,company.country,company.city,company.industry,company.careerUrl].map(value=>JSON.stringify(value)).join(',')}],`).join('\n');
-  if(!source.includes(marker)) throw new Error('Company list insertion point not found');
-  await writeFile(companiesPath,source.replace(marker,`${rows}\n${marker}`));
+  const insertAt=source.indexOf(marker);
+  if(insertAt<0) throw new Error('Company list insertion point not found');
+  const before=source.slice(0,insertAt).trimEnd();
+  const separator=before.endsWith(',')?'\n':',\n';
+  await writeFile(companiesPath,`${before}${separator}${rows}\n${source.slice(insertAt)}`);
 }
 
 console.log(JSON.stringify({searched:searches.length,linkedinJobs:discoveredJobs.length,candidates:candidates.length,added:additions.length,write:shouldWrite,companies:additions},null,2));
