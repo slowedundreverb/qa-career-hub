@@ -371,6 +371,22 @@
   font-size: 9px;
 }
 
+.about-telegram {
+  width: fit-content;
+  margin-top: 5px;
+  color: var(--lime);
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.about-telegram:hover,
+.about-telegram:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 #companies-dialog .dialog-head {
   flex: 0 0 auto;
 }

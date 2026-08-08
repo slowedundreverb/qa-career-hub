@@ -307,7 +307,7 @@ function aboutDialog() {
       <article><span>02</span><h3>Изучать компании</h3><p>Открывать проверенные официальные карьерные страницы работодателей из единого каталога.</p></article>
       <article><span>03</span><h3>Готовиться к интервью</h3><p>Проходить маршрут тем, повторять базу знаний и тренироваться на вопросах с объяснениями.</p></article>
     </div>
-    <footer class="about-author"><span class="about-avatar">ГП</span><div><small>СОЗДАТЕЛЬ ПРОЕКТА</small><strong>Глеб Провоторов</strong><p>QA Engineer · идея, продукт и развитие QA Career Hub</p></div></footer>
+    <footer class="about-author"><span class="about-avatar">ГП</span><div><small>СОЗДАТЕЛЬ ПРОЕКТА</small><strong>Глеб Провоторов</strong><p>QA Engineer · идея, продукт и развитие QA Career Hub</p><a class="about-telegram" href="https://t.me/slowedundreverb" target="_blank" rel="noopener noreferrer" aria-label="Telegram Глеба Провоторова">Telegram · @slowedundreverb <span aria-hidden="true">↗</span></a></div></footer>
   </dialog>`;
 }
 
