@@ -305,7 +305,6 @@ function jobCard(j) {
     <header class="job-card-header"><div class="company-logo" style="--h:${(j.company.length*31)%360}">${esc(initials(j.company))}</div><div class="job-card-employer"><b>${esc(j.company)}</b><span>${esc(jobCountry(j))}</span></div><button class="save ${fav?'saved':''}" data-favorite="${esc(j.id)}" aria-label="${fav?'Убрать из сохранённых':'Сохранить вакансию'}">${fav?'♥':'♡'}</button></header>
     <div class="job-content"><div class="job-title-row"><div><span class="fit ${j.matchScore>=85?'great':''}">${j.matchScore||70}% совпадение</span><h3>${esc(j.title)}</h3></div></div>
       <div class="job-company"><span>${esc(j.location)}</span></div>
-      <p>${esc(cleanJobText(j.description) || 'Описание и требования доступны на официальной странице работодателя.')}</p>
       <div class="tag-cloud job-tags">${(j.technologies||[]).slice(0,4).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
       <div class="job-meta"><span>${esc(j.industry||'Technology')}</span><span>${esc(jobCountry(j))}</span><span>${j.format||'Не указан'}</span><span>${j.level||'Уровень не указан'}</span><span>проверено ${date(j.lastChecked)}</span><span class="status-dot">${j.status==='active'?'активна':'перепроверить'}</span></div>
     </div>

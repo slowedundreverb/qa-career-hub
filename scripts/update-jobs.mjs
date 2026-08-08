@@ -37,6 +37,7 @@ const sources = [
   { type:'greenhouse', token:'idnow', company:'IDnow', industry:'Identity / fintech' },
   { type:'greenhouse', token:'platacard', company:'Plata', industry:'Digital banking', qaSpecialization:'QA' },
   { type:'greenhouse', token:'robinhood', company:'Robinhood', industry:'Fintech' },
+  { type:'deel', token:'klarna', company:'Klarna', industry:'Fintech', includeAllQuality:true },
   { type:'greenhouse', token:'justmarkets', company:'JustMarkets', industry:'Fintech / trading' },
   { type:'greenhouse', token:'rumble-external', company:'Rumble', industry:'MediaTech' },
   { type:'greenhouse', token:'dept', company:'DEPT', industry:'Digital services' },
@@ -116,7 +117,7 @@ const sources = [
 
 const qa = /\b(qa|quality assurance|quality engineer|test engineer|software tester|sdet|test automation|automation engineer|quality analyst)\b/i;
 const softwareSignal = /software|web|mobile|api|automation|selenium|playwright|cypress|appium|backend|frontend|application|platform|product|javascript|typescript|python|java/i;
-const explicitSoftwareQATitle = /\b(qa|sdet|software test|test automation|quality assurance engineer)\b/i;
+const explicitSoftwareQATitle = /\b(qa|sdet|software test|test automation|quality (?:assurance )?engineer)\b/i;
 const regions = {
   Cyprus: /cyprus|limassol|nicosia/i,
   UAE: /uae|dubai|abu dhabi|united arab emirates/i,
@@ -132,7 +133,7 @@ const regionOf = location => Object.entries(regions).find(([,pattern])=>pattern.
 const countryPatterns = [
   ['Cyprus', /\b(?:cyprus|limassol|nicosia|paphos|ypsonas|latsia|lefkosia|cy)\b/i],
   ['United Arab Emirates', /\b(?:united arab emirates|uae|dubai|abu dhabi)\b/i],
-  ['United States', /\b(?:united states|usa|u\.s\.|new york|california|san francisco|seattle|boston|austin|chicago|denver|miami|atlanta|arizona|south carolina|tempe)\b/i],
+  ['United States', /\b(?:united states|usa|u\.s\.|new york|california|san francisco|seattle|boston|austin|chicago|denver|miami|atlanta|arizona|south carolina|tempe|menlo park|columbus)\b/i],
   ['United Kingdom', /\b(?:united kingdom|uk|london|manchester|edinburgh|belfast)\b/i],
   ['Canada', /\b(?:canada|toronto|vancouver|montreal|ottawa|calgary)\b/i],
   ['Germany', /\b(?:germany|berlin|munich|hamburg|frankfurt|cologne)\b/i],
@@ -492,6 +493,31 @@ async function fetchSource(source) {
       return toJob(source,{id:`bamboohr-${source.token}-${j.id}`,title:j.jobOpeningName,description,location,url:`https://${source.token}.bamboohr.com/careers/${j.id}`,sourceLabel:'BambooHR · official ATS'});
     });
   }
+  if(source.type==='deel') {
+    const page=await fetchText(`https://jobs.deel.com/${source.token}`);
+    const postings=[];
+    for(const match of page.text.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) {
+      const script=match[1];
+      if(!/self\.__next_f\.push/.test(script)||!/jobPostings/.test(script)) continue;
+      try {
+        const argument=script.match(/^self\.__next_f\.push\((.*)\)$/s)?.[1];
+        if(!argument) continue;
+        const frame=JSON.parse(argument);
+        if(typeof frame?.[1]!=='string') continue;
+        const payload=JSON.parse(frame[1].replace(/^[^:]+:/,''));
+        if(Array.isArray(payload?.[3]?.jobPostings)) postings.push(...payload[3].jobPostings);
+      } catch {}
+    }
+    return [...new Map(postings.map(j=>[j.id,j])).values()].map(j=>{
+      const location=(j.job?.jobLocations||[]).map(item=>item.location?.name).filter(Boolean).join(' / ')||'Not specified';
+      const details=[
+        ...(j.job?.jobDepartments||[]).map(item=>item.department?.name),
+        ...(j.job?.jobTeams||[]).map(item=>item.team?.name),
+        ...(j.job?.jobEmploymentTypes||[]).map(item=>item.employmentType?.name)
+      ].filter(Boolean).join(' · ');
+      return toJob(source,{id:`deel-${source.token}-${j.id}`,title:j.title,description:details,location,url:`https://jobs.deel.com/${source.token}/job-details/${j.id}/overview`,publishedAt:j.updatedAt||j.createdAt||null,sourceLabel:'Deel · official ATS'});
+    });
+  }
   if(source.type==='workday') {
     const rows=[];
     for(const query of ['qa','quality','test']){
@@ -553,6 +579,8 @@ export async function collectJobs({checkCompanies=false}={}) {
       const rows=await fetchSource(source);
       const accepted=rows.filter(j=>source.qaSpecialization
         ? j.specialization?.toLowerCase()===source.qaSpecialization.toLowerCase()
+        : source.includeAllQuality
+          ? qa.test(j.title)
         : qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`)));
       return {source,rows,accepted};
     } catch(error) {

@@ -2498,6 +2498,40 @@ body:has(.topic-overlay) {
   }
 }
 
+/* Preparation progress: full moon-style indicator on desktop, no indicator in the mobile banner. */
+@media (min-width: 901px) {
+  .learn-sidebar .progress-ring {
+    position: relative;
+    width: 126px;
+    height: 126px;
+    margin: 28px auto;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(var(--lime) calc(var(--p) * 1%), #35413e 0);
+  }
+
+  .learn-sidebar .progress-ring::before {
+    width: 100px;
+    height: 100px;
+    background: var(--navy);
+  }
+
+  .learn-sidebar .progress-ring strong {
+    font-size: 27px;
+  }
+
+  .learn-sidebar .progress-ring span {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 900px) {
+  .learn-sidebar .progress-ring {
+    display: none !important;
+  }
+}
+
 /* Vacancy cards: compact editorial tiles with a consistent country label. */
 .jobs-list,
 .job-card,
@@ -2611,8 +2645,8 @@ body:has(.topic-overlay) {
   }
 
   .job-tags {
-    max-height: 30px;
-    overflow: hidden;
+    min-height: 30px;
+    margin: 16px 0;
   }
 
   .job-meta {
