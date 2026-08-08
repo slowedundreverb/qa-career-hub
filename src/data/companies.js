@@ -19,6 +19,7 @@ export const companies = [
   ['Wise','Europe','Remote / hybrid','Fintech','https://wise.jobs/jobs?options=489&page=1'],
   ['Revolut','Europe','Remote / hybrid','Fintech','https://www.revolut.com/careers/'],
   ['SumUp','Europe','Remote / hybrid','Fintech','https://www.sumup.com/careers/positions/?search=&department=Engineering'],
+  ['Sumsub','Europe / Cyprus','Remote','Identity / fintech','https://careers.sumsub.com/jobs'],
   ['Adyen','Europe','Hybrid','Payments','https://careers.adyen.com/vacancies'],
   ['Stripe','Europe','Remote / hybrid','Payments','https://stripe.com/careers/search'],
   ['Checkout.com','Europe','Remote / hybrid','Payments','https://www.checkout.com/jobs'],

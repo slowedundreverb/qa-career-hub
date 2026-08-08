@@ -211,7 +211,7 @@ const strip = html => String(html||'')
 const techNames=['Java','Selenium','Appium','TestNG','JUnit','Maven','Gradle','REST Assured','Postman','API','SQL','PostgreSQL','Kafka','Redis','Docker','Kubernetes','CI/CD','Playwright','Cypress','Python','JavaScript','TypeScript','Mobile','iOS','Android'];
 const tech = text => techNames.filter(x => new RegExp(x.replace('/','\\/'),'i').test(text));
 const level = title => /lead|staff|principal/i.test(title)?'Lead':/senior|sr\.?/i.test(title)?'Senior':/junior|graduate|entry/i.test(title)?'Junior':'Middle';
-const format = text => /remote/i.test(text)?'Remote':/hybrid/i.test(text)?'Hybrid':'On-site';
+const format = text => /remote|telecommute/i.test(text)?'Remote':/hybrid/i.test(text)?'Hybrid':'On-site';
 const score = (title,text,location) => Math.min(98, 62 + (/manual|quality assurance|qa engineer/i.test(title)?12:0) + (/mobile|ios|android/i.test(text)?8:0) + (/api|postman|rest/i.test(text)?7:0) + (/java|selenium|appium/i.test(text)?6:0) + (/cyprus|limassol/i.test(location)?8:0));
 
 async function fetchJSON(url, headers={}) {
@@ -325,7 +325,7 @@ function jsonLdJobs(html,source,pageUrl) {
         const type=Array.isArray(item['@type'])?item['@type'].join(' '):item['@type'];
         if(!/JobPosting/i.test(String(type||''))) continue;
         const title=strip(item.title||item.name);
-        const description=strip(item.description);
+        const description=strip(`${item.jobLocationType||''} ${item.employmentType||''} ${item.description||''}`);
         const locations=[];
         const jobLocations=Array.isArray(item.jobLocation)?item.jobLocation:[item.jobLocation];
         for(const entry of jobLocations.filter(Boolean)){
@@ -333,7 +333,7 @@ function jsonLdJobs(html,source,pageUrl) {
           locations.push([address.addressLocality,address.addressRegion,address.addressCountry?.name||address.addressCountry].filter(Boolean).join(', '));
         }
         const location=locations.filter(Boolean).join(' / ')||item.jobLocationType||source.location||'Not specified';
-        const url=normalizeUrl(item.url||item.sameAs,pageUrl);
+        const url=normalizeUrl(item.url||item.sameAs||pageUrl,pageUrl);
         if(titleSignal.test(title)&&url) rows.push(toJob(source,{id:`jsonld-${url}`,title,description,location,url,publishedAt:item.datePosted||null,sourceLabel:'Official career page · structured listing'}));
       }
     } catch {}
@@ -387,6 +387,9 @@ async function verifyDiscoveredJobs(rows,source) {
       const page=await fetchText(row.url,{timeout:14000});
       const verifiedTitle=pageJobTitle(page.text);
       if(!verifiedTitle) return null;
+      const structuredJobs=jsonLdJobs(page.text,source,page.url);
+      const structured=structuredJobs.find(job=>job.url===page.url)||structuredJobs[0];
+      if(structured) return {...structured,id:row.id,source:'Official career page · verified structured job'};
       const description=strip(page.text).slice(0,4000);
       return toJob(source,{...row,id:row.id,title:verifiedTitle,description,url:page.url,sourceLabel:'Official career page · verified job'});
     } catch {
