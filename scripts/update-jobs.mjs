@@ -38,6 +38,13 @@ const sources = [
   { type:'greenhouse', token:'platacard', company:'Plata', industry:'Digital banking', qaSpecialization:'QA' },
   { type:'greenhouse', token:'robinhood', company:'Robinhood', industry:'Fintech' },
   { type:'greenhouse', token:'tanium', company:'Tanium', industry:'Cybersecurity' },
+  { type:'greenhouse', token:'ubiquiti', company:'Ubiquiti Inc.', industry:'Technology', locationPattern:/Riga|Latvia|Kaunas|Lithuania|Kyiv|Ukraine|Bucharest|Romania|Pilsen|Prague|Czech|Stockholm|Sweden|Europe|Remote/i },
+  { type:'greenhouse', token:'cambridgemobiletelematics', company:'Cambridge Mobile Telematics', industry:'Mobility', locationPattern:/Budapest|Hungary|Europe|Remote/i },
+  { type:'greenhouse', token:'purestorage', company:'Everpure', industry:'Data infrastructure', locationPattern:/Prague|Czech|Europe|Remote/i, titlePattern:/\b(?:AI Quality Automation Engineer|Quality Engineer)\b/i },
+  { type:'ashby', token:'leovegasgroup', company:'LeoVegas Group', industry:'iGaming', locationPattern:/Europe|Sweden|Poland|Malta|United Kingdom|UK|Remote/i },
+  { type:'workday', host:'accenture.wd103.myworkdayjobs.com', tenant:'accenture', site:'AccentureCareers', company:'Accenture Greece', industry:'Technology consulting', queries:['R00315194'], location:'Athens, Greece', titlePattern:/\bManual Test Engineer\b/i, includeAllQuality:true },
+  { type:'workday', host:'agilent.wd5.myworkdayjobs.com', tenant:'agilent', site:'Agilent_Careers', company:'Agilent Technologies', industry:'Life sciences technology', queries:['4039000'], locationPattern:/Germany|Waldbronn|Europe|Remote/i },
+  { type:'workday', host:'analogdevices.wd1.myworkdayjobs.com', tenant:'analogdevices', site:'External', company:'Analog Devices', industry:'Semiconductors', queries:['R264123'], locationPattern:/Ireland|Limerick|Europe|Remote/i },
   { type:'deel', token:'klarna', company:'Klarna', industry:'Fintech', includeAllQuality:true },
   { type:'greenhouse', token:'justmarkets', company:'JustMarkets', industry:'Fintech / trading' },
   { type:'greenhouse', token:'rumble-external', company:'Rumble', industry:'MediaTech' },
@@ -113,7 +120,11 @@ const sources = [
   ]},
   { type:'direct', company:'Voyage Privé', industry:'TravelTech', jobs:[
     { title:'QA Engineer - Full Remote or Hybrid', location:'France / Remote', format:'Remote', level:'Senior', description:'QA automation for an international travel platform using Playwright, TypeScript, Cucumber, XRay and CI/CD.', technologies:['Playwright','TypeScript','CI/CD'], url:'https://jobs.smartrecruiters.com/VoyagePriv/744000097543255-qa-engineer-full-remote-or-hybrid-m-f-d-' }
-  ]}
+  ]},
+  { type:'direct', company:'icligo', industry:'TravelTech', jobs:[
+    { title:'Junior Quality Assurance Engineer (M/F/D)', location:'Vila Nova de Gaia, Porto, Portugal', format:'Hybrid', level:'Middle', description:'Manual and automated testing of web and mobile products, including API, regression, integration and performance testing.', technologies:['API','Postman','Selenium','Cypress','Playwright','CI/CD'], url:'https://www.icligo.com/en/careers' }
+  ]},
+  { type:'pke', company:'PKE', industry:'Technology', url:'https://bewerbung.pke.at/jobportal/programme/onlinebewerbung_uebersicht.asp?template=2', location:'Austria' }
 ];
 
 const qa = /\b(qa|quality assurance|quality engineer|test engineer|software tester|sdet|test automation|automation engineer|quality analyst)\b/i;
@@ -254,7 +265,14 @@ async function fetchText(url,{method='GET',headers={},body,timeout=18000,retries
         const error=new Error(`${response.status} ${response.statusText}`);
         if(![429,500,502,503,504].includes(response.status)) { error.retryable=false; throw error; }
         lastError=error;
-      } else return {text:await response.text(),url:response.url,status:response.status};
+      } else {
+        const charset=response.headers.get('content-type')?.match(/charset=([^;\s]+)/i)?.[1]?.replace(/["']/g,'')||'utf-8';
+        const bytes=await response.arrayBuffer();
+        let decoded;
+        try { decoded=new TextDecoder(charset).decode(bytes); }
+        catch { decoded=new TextDecoder('utf-8').decode(bytes); }
+        return {text:decoded,url:response.url,status:response.status};
+      }
     } catch(error) {
       lastError=error;
       if(error.retryable===false) break;
@@ -358,6 +376,7 @@ function discoveredJobs(html,pageUrl,source) {
   const rows=jsonLdJobs(html,source,pageUrl);
   const anchors=extractAnchors(html,pageUrl);
   for(const anchor of anchors){
+    if(/(?:twitter|x|facebook|linkedin|whatsapp|wechat)\.com$/i.test(new URL(anchor.url).hostname.replace(/^www\./,''))) continue;
     if(!isConcreteJobUrl(anchor.url,pageUrl)) continue;
     let title=anchor.text;
     if(!titleSignal.test(title)) title=headingBefore(html,anchor.index);
@@ -531,7 +550,7 @@ async function fetchSource(source) {
   }
   if(source.type==='workday') {
     const rows=[];
-    for(const query of ['qa','quality','test']){
+    for(const query of source.queries||['qa','quality','test']){
       let offset=0; let total=0;
       do {
         const endpoint=`https://${source.host}/wday/cxs/${source.tenant}/${source.site}/jobs`;
@@ -548,9 +567,24 @@ async function fetchSource(source) {
     }
     return [...new Map(rows.map(row=>[row.url,row])).values()];
   }
+  if(source.type==='pke') {
+    const page=await fetchText(source.url);
+    const rows=[];
+    for(const match of page.text.matchAll(/<a\b[^>]*href=(?:"([^"]*onlinebewerbung_detail[^\"]*)"|'([^']*onlinebewerbung_detail[^']*)')[^>]*>([\s\S]*?)<\/a>/gi)) {
+      const body=match[3];
+      const title=strip(body.match(/<div\b[^>]*class=(?:"[^"]*tablecol1[^"]*"|'[^']*tablecol1[^']*')[^>]*>([\s\S]*?)<\/div>/i)?.[1]||'');
+      if(!titleSignal.test(title)) continue;
+      const location=strip(body.match(/<div\b[^>]*class=(?:"[^"]*tablecol3[^"]*"|'[^']*tablecol3[^']*')[^>]*>([\s\S]*?)<\/div>/i)?.[1]||source.location||'Austria');
+      const url=normalizeUrl(match[1]||match[2],page.url);
+      if(url) rows.push(toJob(source,{id:`pke-${url}`,title,description:`${title} — official PKE vacancy.`,location,url,sourceLabel:'Official PKE career portal'}));
+    }
+    return rows;
+  }
   if(source.type==='career') {
     const first=await fetchText(source.url);
     let rows=discoveredJobs(first.text,first.url,source);
+    const directTitle=pageJobTitle(first.text);
+    if(directTitle) rows.push(toJob(source,{id:`career-${first.url}`,title:directTitle,description:strip(first.text).slice(0,4000),location:source.location||'Not specified',url:first.url,sourceLabel:'Official career page · verified direct job'}));
     const anchors=extractAnchors(first.text,first.url);
     const candidates=anchors
       .filter(anchor=>listingSignal.test(`${anchor.text} ${anchor.url}`)&&(ctaSignal.test(anchor.text)||/jobs?|vacanc|positions?|openings?/i.test(anchor.url)))
@@ -588,11 +622,13 @@ export async function collectJobs({checkCompanies=false}={}) {
   const sourceResults=await mapWithConcurrency(effectiveSources,10,async source=>{
     try {
       const rows=await fetchSource(source);
-      const accepted=rows.filter(j=>source.qaSpecialization
+      const accepted=rows.filter(j=>(!source.locationPattern||source.locationPattern.test(j.location))
+        &&(!source.titlePattern||source.titlePattern.test(j.title))
+        &&(source.qaSpecialization
         ? j.specialization?.toLowerCase()===source.qaSpecialization.toLowerCase()
         : source.includeAllQuality
           ? qa.test(j.title)
-        : qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`)));
+        : qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`))));
       return {source,rows,accepted};
     } catch(error) {
       return {source,error};
