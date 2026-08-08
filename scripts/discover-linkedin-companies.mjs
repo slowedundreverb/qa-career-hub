@@ -2,6 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { companies } from '../src/data/companies.js';
+import { isLikelyDirectJobUrl } from './lib/career-urls.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const companiesPath=resolve(root,'src/data/companies.js');
@@ -204,12 +205,13 @@ async function verifiedOfficialJobUrl(careerUrl,website,job) {
 }
 
 async function careerUrlFor(website) {
-  if(careerPattern.test(new URL(website).pathname)) return website;
+  if(careerPattern.test(new URL(website).pathname)&&!isLikelyDirectJobUrl(website)) return website;
   try {
     const page=await fetchText(website);
     const candidates=extractAnchors(page.html,page.url)
       .filter(anchor=>careerPattern.test(`${anchor.label} ${new URL(anchor.url).pathname}`))
       .filter(anchor=>!/linkedin\.com|facebook\.com|instagram\.com|youtube\.com/i.test(anchor.url))
+      .filter(anchor=>!isLikelyDirectJobUrl(anchor.url))
       .map(anchor=>({...anchor,score:(/careers?|jobs?|vacanc/i.test(new URL(anchor.url).pathname)?3:0)+(/careers?|jobs?|vacanc|open roles?/i.test(anchor.label)?2:0)}))
       .sort((a,b)=>b.score-a.score);
     for(const candidate of candidates.slice(0,4)) {
@@ -277,17 +279,22 @@ for(const job of candidates) {
     const host=new URL(website).hostname.replace(/^www\./,'');
     if(knownHosts.has(host)) continue;
     const listingUrl=await careerUrlFor(website);
+    if(isLikelyDirectJobUrl(listingUrl)) {
+      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason:'The official URL resolves to one job instead of a reusable vacancy listing'});
+      console.warn(`× ${job.company}: official career source is a direct vacancy URL`);
+      continue;
+    }
     const verified=await verifiedOfficialJobUrl(listingUrl,website,job);
     if(!verified) {
       rejected.push({name:job.company,linkedinJob:job.jobUrl,reason:'No matching QA/AQA role was verified on the official company or ATS site'});
       console.warn(`× ${job.company}: official QA vacancy URL was not verified`);
       continue;
     }
-    const careerUrl=verified.url;
+    const careerUrl=listingUrl;
     const [country,city]=geography(job.location,job.remote);
-    additions.push({name:job.company,country,city,industry:industryFrom(profile.html),careerUrl,linkedinJob:job.jobUrl,verifiedRole:verified.title||job.title});
+    additions.push({name:job.company,country,city,industry:industryFrom(profile.html),careerUrl,verifiedJobUrl:verified.url,linkedinJob:job.jobUrl,verifiedRole:verified.title||job.title});
     knownNames.add(companyKey(job.company)); knownHosts.add(host);
-    console.log(`+ ${job.company}: ${careerUrl}`);
+    console.log(`+ ${job.company}: ${careerUrl} (verified via ${verified.url})`);
   } catch(error) {
     console.warn(`× ${job.company}: ${error.message}`);
   }
