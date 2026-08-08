@@ -5,9 +5,6 @@ import { questions } from './data/questions.js';
 
 const app = document.querySelector('#app');
 const saved = JSON.parse(localStorage.getItem('qa-hub-state') || '{}');
-const storedCustomCompanies = JSON.parse(localStorage.getItem('qa-hub-custom-companies') || '[]');
-const customCompanies = Array.isArray(storedCustomCompanies) ? storedCustomCompanies : [];
-let companyWatchMessage = '';
 let versionHistory = { repository: '', commits: [], loading: true };
 const cachedJobs = JSON.parse(sessionStorage.getItem('qa-hub-jobs') || 'null');
 if (cachedJobs?.jobs?.length && new Date(cachedJobs.meta?.generatedAt || 0) > new Date(jobMeta.generatedAt || 0)) {
@@ -56,21 +53,8 @@ const cleanJobText = (value='') => {
 };
 const initials = name => name.split(/\s+/).map(x => x[0]).join('').slice(0,2).toUpperCase();
 const jobCountry = job => job.country || (/cyprus|limassol|nicosia|paphos/i.test(job.location||'') ? 'Cyprus' : /remote|global|worldwide|anywhere/i.test(job.location||'') ? 'Worldwide' : 'Country not specified');
-const watchedCompanies = () => [...customCompanies, ...companies];
+const watchedCompanies = () => companies;
 const companyKey = name => String(name).replace(/\.US$/,'').replace(/\s*\/\s*Gen Digital$/,'').trim().toLowerCase();
-const saveCustomCompanies = () => localStorage.setItem('qa-hub-custom-companies', JSON.stringify(customCompanies));
-const websiteName = url => {
-  const hostname=new URL(url).hostname.replace(/^www\./,'');
-  const stem=hostname.split('.')[0].replace(/[-_]+/g,' ');
-  return stem.replace(/\b\w/g,char=>char.toUpperCase());
-};
-const normalizeWebsite = value => {
-  const candidate=/^https?:\/\//i.test(value.trim())?value.trim():`https://${value.trim()}`;
-  const url=new URL(candidate);
-  if(!['http:','https:'].includes(url.protocol)) throw new Error('Unsupported protocol');
-  url.hash='';
-  return url.href;
-};
 const date = value => value ? new Intl.DateTimeFormat('ru', { day:'2-digit', month:'short' }).format(new Date(value)) : '—';
 const save = () => localStorage.setItem('qa-hub-state', JSON.stringify({
   completed:[...state.completed], favorites:[...state.favorites], quizStats: state.quizStats,
@@ -319,7 +303,7 @@ function aboutDialog() {
     <div class="dialog-head"><div><span class="eyebrow">ABOUT QA/HUB</span><h2>Карьерный центр для QA</h2><p>Один интерфейс для поиска следующей роли и системной подготовки к интервью.</p></div><button id="close-about" aria-label="Закрыть информацию о проекте">×</button></div>
     <div class="about-features">
       <article><span>01</span><h3>Искать вакансии</h3><p>Фильтровать международные QA-позиции и переходить только на официальные страницы работодателей.</p></article>
-      <article><span>02</span><h3>Следить за компаниями</h3><p>Сохранять карьерные сайты интересных компаний и возвращаться к ним из личного watchlist.</p></article>
+      <article><span>02</span><h3>Изучать компании</h3><p>Открывать проверенные официальные карьерные страницы работодателей из единого каталога.</p></article>
       <article><span>03</span><h3>Готовиться к интервью</h3><p>Проходить маршрут тем, повторять базу знаний и тренироваться на вопросах с объяснениями.</p></article>
     </div>
     <footer class="about-author"><span class="about-avatar">ГП</span><div><small>СОЗДАТЕЛЬ ПРОЕКТА</small><strong>Глеб Провоторов</strong><p>QA Engineer · идея, продукт и развитие QA Career Hub</p></div></footer>
@@ -334,67 +318,19 @@ function companiesDrawer() {
     return counts;
   },new Map());
   const coveredEmployers=new Set((jobMeta.coveredCompanies||[]).map(companyKey));
-  const card=(c,isCustom=false)=>`<article class="company-entry ${isCustom?'custom':''}">
+  const card=c=>`<article class="company-entry">
     <a href="${esc(c.careerUrl)}" target="_blank" rel="noreferrer">
       <span class="company-logo small">${esc(initials(c.name))}</span>
-      <div><b>${esc(c.name)}</b><small>${isCustom?'Добавлено вами':`${esc(c.city)} · ${esc(c.industry)}`}</small></div><i>${isCustom?'Ваш список':c.priority==='high'?'Кипр':'↗'}</i>
-      ${isCustom?'':`<em>${companyCounts.get(companyKey(c.name))||0}${coveredEmployers.has(companyKey(c.name))?' QA':' · ссылка'}</em>`}
+      <div><b>${esc(c.name)}</b><small>${esc(c.city)} · ${esc(c.industry)}</small></div><i>${c.priority==='high'?'Кипр':'↗'}</i>
+      <em>${companyCounts.get(companyKey(c.name))||0}${coveredEmployers.has(companyKey(c.name))?' QA':' · ссылка'}</em>
     </a>
-    ${isCustom?`<button type="button" data-remove-company="${esc(c.id)}" aria-label="Удалить ${esc(c.name)} из отслеживания">×</button>`:''}
   </article>`;
   return `<dialog id="companies-dialog">
-    <div class="dialog-head"><div><span class="eyebrow">WATCHLIST</span><h2>${watchlist.length} компаний под наблюдением</h2><p>Официальные career-страницы и сайты, которые вы добавили самостоятельно.</p></div><button id="close-dialog" aria-label="Закрыть список компаний">×</button></div>
+    <div class="dialog-head"><div><span class="eyebrow">COMPANY RADAR</span><h2>${watchlist.length} компаний под наблюдением</h2><p>Проверенные официальные career-страницы работодателей из ежедневного автоматического мониторинга.</p></div><button id="close-dialog" aria-label="Закрыть список компаний">×</button></div>
     <div class="companies-dialog-body" role="region" aria-label="Список компаний" tabindex="0">
-      <form class="company-watch-form" id="company-watch-form">
-        <div><span class="kicker">СВОЙ ИСТОЧНИК</span><b>Добавить сайт для отслеживания</b></div>
-        <label><span>Название — необязательно</span><input id="company-watch-name" autocomplete="organization" placeholder="Например, Acme Bank"></label>
-        <label><span>Ссылка на вакансии</span><input id="company-watch-url" type="text" inputmode="url" autocomplete="url" required placeholder="careers.company.com"></label>
-        <button type="submit">Добавить</button>
-        <p class="company-watch-message" id="company-watch-message" role="status">${esc(companyWatchMessage)}</p>
-      </form>
-      <div class="company-grid">${customCompanies.map(c=>card(c,true)).join('')}${companies.map(c=>card(c)).join('')}</div>
+      <div class="company-grid">${companies.map(card).join('')}</div>
     </div>
   </dialog>`;
-}
-
-function addWatchedCompany(event){
-  event.preventDefault();
-  const nameInput=document.querySelector('#company-watch-name');
-  const urlInput=document.querySelector('#company-watch-url');
-  try{
-    const careerUrl=normalizeWebsite(urlInput?.value||'');
-    const duplicate=watchedCompanies().some(company=>{
-      try{return normalizeWebsite(company.careerUrl).replace(/\/$/,'')===careerUrl.replace(/\/$/,'');}
-      catch{return false;}
-    });
-    if(duplicate){
-      const feedback=document.querySelector('#company-watch-message');
-      if(feedback){feedback.textContent='Этот сайт уже есть в списке';feedback.classList.add('error');}
-      urlInput?.focus();
-      return;
-    }
-    const name=(nameInput?.value||'').trim()||websiteName(careerUrl);
-    customCompanies.unshift({id:`custom-${Date.now()}`,name,careerUrl,country:'Custom',city:'Ваш источник',industry:'Отслеживание',priority:'normal',status:'monitoring'});
-    saveCustomCompanies();
-    companyWatchMessage=`${name} добавлен в отслеживание`;
-    renderJobs();
-    document.querySelector('#companies-dialog')?.showModal();
-  }catch{
-    const feedback=document.querySelector('#company-watch-message');
-    if(feedback){feedback.textContent='Введите корректную ссылку на сайт';feedback.classList.add('error');}
-    urlInput?.focus();
-  }
-}
-
-function removeWatchedCompany(id){
-  const index=customCompanies.findIndex(company=>company.id===id);
-  if(index<0) return;
-  const [removed]=customCompanies.splice(index,1);
-  if(state.company===removed.name) state.company='all';
-  saveCustomCompanies();
-  companyWatchMessage=`${removed.name} удалён из отслеживания`;
-  renderJobs();
-  document.querySelector('#companies-dialog')?.showModal();
 }
 
 function bindJobs() {
@@ -429,8 +365,6 @@ function bindJobs() {
     e.preventDefault();
     companyScroll.scrollTo({top:destinations[e.key],behavior:'smooth'});
   });
-  document.querySelector('#company-watch-form')?.addEventListener('submit',addWatchedCompany);
-  document.querySelectorAll('[data-remove-company]').forEach(button=>button.addEventListener('click',()=>removeWatchedCompany(button.dataset.removeCompany)));
   document.querySelector('#show-all-jobs')?.addEventListener('click',()=>{state.favoritesOnly=false;renderJobs();});
   document.querySelector('#show-favorites')?.addEventListener('click',()=>{state.favoritesOnly=true;state.jobSearch='';state.jobSearchDraft='';renderJobs();});
 }

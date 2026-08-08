@@ -1,0 +1,46 @@
+name: Daily QA company discovery
+
+on:
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-qa-company-discovery
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Discover companies from public LinkedIn searches
+        run: npm run discover:linkedin -- --write
+      - name: Refresh official vacancy sources
+        run: npm run update:jobs
+      - name: Publish changed data
+        run: |
+          if git diff --quiet; then
+            echo "No company or vacancy changes"
+            exit 0
+          fi
+          git config user.name "qa-career-hub-bot"
+          git config user.email "qa-career-hub-bot@users.noreply.github.com"
+          git add src/data/companies.js src/data/jobs.js
+          git commit -m "Update daily QA company discovery"
+          git push
