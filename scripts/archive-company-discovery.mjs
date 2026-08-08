@@ -39,18 +39,49 @@ if(seedCurrent) {
 
 const generatedAt=new Date(report.generatedAt||Date.now()).toISOString();
 const date=generatedAt.slice(0,10);
-const companies=(Array.isArray(report.companies)?report.companies:[])
+const runCompanies=(Array.isArray(report.companies)?report.companies:[])
   .map(cleanCompany)
   .filter(company=>company.name&&company.careerUrl)
   .sort((left,right)=>left.name.localeCompare(right.name,'en'));
-const record={
-  date,
+let previous=null;
+try { previous=JSON.parse(await readFile(resolve(outputDir,'daily',`${date}.json`),'utf8')); } catch {}
+const companyMap=new Map();
+for(const company of [...(previous?.companies||[]),...runCompanies]) {
+  const clean=cleanCompany(company);
+  if(clean.name&&clean.careerUrl) {
+    const key=clean.name.toLowerCase();
+    const existing=companyMap.get(key)||{};
+    companyMap.set(key,Object.fromEntries(Object.entries(clean).map(([field,value])=>[field,value||existing[field]||''])));
+  }
+}
+const companies=[...companyMap.values()].sort((left,right)=>left.name.localeCompare(right.name,'en'));
+const run={
   generatedAt,
   searchedQueries:Number.isFinite(report.searched)?report.searched:null,
   linkedinJobsFound:Number.isFinite(report.linkedinJobs)?report.linkedinJobs:null,
   candidateCompanies:Number.isFinite(report.candidates)?report.candidates:null,
+  addedCount:runCompanies.length,
+  companies:runCompanies.map(company=>company.name)
+};
+const runMap=new Map((previous?.runs||[]).map(item=>[item.generatedAt,item]));
+if(previous?.generatedAt&&!runMap.has(previous.generatedAt)) {
+  runMap.set(previous.generatedAt,{
+    generatedAt:previous.generatedAt,
+    searchedQueries:previous.searchedQueries??null,
+    linkedinJobsFound:previous.linkedinJobsFound??null,
+    candidateCompanies:previous.candidateCompanies??null,
+    addedCount:previous.addedCount||0,
+    companies:(previous.companies||[]).map(company=>company.name)
+  });
+}
+runMap.set(generatedAt,run);
+const record={
+  date,
+  generatedAt,
+  runCount:runMap.size,
   addedCount:companies.length,
-  companies
+  companies,
+  runs:[...runMap.values()].sort((left,right)=>left.generatedAt.localeCompare(right.generatedAt))
 };
 
 const dailyDir=resolve(outputDir,'daily');
@@ -101,4 +132,4 @@ ${companyRows||'| — | — | — | — |'}
 `;
 await writeFile(resolve(outputDir,'README.md'),readme);
 
-console.log(`Archived ${companies.length} added companies for ${date}; ${index.uniqueCompanies.length} unique companies recorded privately.`);
+console.log(`Archived ${runCompanies.length} additions from this run and ${companies.length} total for ${date}; ${index.uniqueCompanies.length} unique companies recorded privately.`);
