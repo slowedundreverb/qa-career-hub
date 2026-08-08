@@ -29,7 +29,22 @@ try {
     commits
   }, null, 2));
 } catch (error) {
-  console.warn(`Version history unavailable: ${error.message}`);
-  await writeFile(resolve(dist, 'versions.json'), JSON.stringify({ repository: '', commits: [] }));
+  console.warn(`Local git history unavailable; loading the public repository history instead: ${error.message}`);
+  try {
+    const response=await fetch('https://api.github.com/repos/slowedundreverb/qa-career-hub/commits?per_page=100',{headers:{accept:'application/vnd.github+json','user-agent':'qa-career-hub-build'}});
+    if(!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    const rows=await response.json();
+    const commits=rows.map((row,index,all)=>({
+      sha:row.sha,
+      shortSha:row.sha.slice(0,7),
+      date:row.commit?.committer?.date||row.commit?.author?.date,
+      message:String(row.commit?.message||'Update').split('\n')[0],
+      version:`1.${all.length-index-1}`
+    }));
+    await writeFile(resolve(dist,'versions.json'),JSON.stringify({repository:'https://github.com/slowedundreverb/qa-career-hub',commits},null,2));
+  } catch(fallbackError) {
+    console.warn(`Version history unavailable: ${fallbackError.message}`);
+    await writeFile(resolve(dist, 'versions.json'), JSON.stringify({ repository: '', commits: [] }));
+  }
 }
 console.log(`Build ready: ${dist}`);
