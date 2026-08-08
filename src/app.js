@@ -1,4 +1,5 @@
 import { companies } from './data/companies.js';
+import { companyLogos } from './data/company-logos.js';
 import { jobs, linkedinJobs, jobMeta } from './data/jobs.js';
 import { curriculum, tracks } from './data/curriculum.js';
 import { questions } from './data/questions.js';
@@ -56,6 +57,10 @@ const initials = name => name.split(/\s+/).map(x => x[0]).join('').slice(0,2).to
 const jobCountry = job => job.country || (/cyprus|limassol|nicosia|paphos/i.test(job.location||'') ? 'Cyprus' : /remote|global|worldwide|anywhere/i.test(job.location||'') ? 'Worldwide' : 'Country not specified');
 const watchedCompanies = () => companies;
 const companyKey = name => String(name).replace(/\.US$/,'').replace(/\s*\/\s*Gen Digital$/,'').trim().toLowerCase();
+const companyLogo = (name, small=false) => {
+  const logo=companyLogos[companyKey(name)];
+  return `<span class="company-logo${small?' small':''}" style="--h:${(name.length*31)%360}"><span>${esc(initials(name))}</span>${logo?`<img src="${esc(logo)}" alt="" loading="lazy" onerror="this.remove()">`:''}</span>`;
+};
 const date = value => value ? new Intl.DateTimeFormat('ru', { day:'2-digit', month:'short' }).format(new Date(value)) : '—';
 const save = () => localStorage.setItem('qa-hub-state', JSON.stringify({
   completed:[...state.completed], favorites:[...state.favorites], quizStats: state.quizStats,
@@ -287,7 +292,7 @@ function linkedinBlock() {
 function jobCard(j) {
   const fav = state.favorites.has(j.id);
   return `<article class="job-card">
-    <header class="job-card-header"><div class="company-logo" style="--h:${(j.company.length*31)%360}">${esc(initials(j.company))}</div><div class="job-card-employer"><b>${esc(j.company)}</b><span>${esc(jobCountry(j))}</span></div><button class="save ${fav?'saved':''}" data-favorite="${esc(j.id)}" aria-label="${fav?'Убрать из сохранённых':'Сохранить вакансию'}">${fav?'♥':'♡'}</button></header>
+    <header class="job-card-header">${companyLogo(j.company)}<div class="job-card-employer"><b>${esc(j.company)}</b><span>${esc(jobCountry(j))}</span></div><button class="save ${fav?'saved':''}" data-favorite="${esc(j.id)}" aria-label="${fav?'Убрать из сохранённых':'Сохранить вакансию'}">${fav?'♥':'♡'}</button></header>
     <div class="job-content"><div class="job-title-row"><div><span class="fit ${j.matchScore>=85?'great':''}">${j.matchScore||70}% совпадение</span><h3>${esc(j.title)}</h3></div></div>
       <div class="job-company"><span>${esc(j.location)}</span></div>
       <div class="tag-cloud job-tags">${(j.technologies||[]).slice(0,4).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
@@ -326,7 +331,7 @@ function companiesDrawer() {
     .sort((a,b)=>state.companyOpenFirst?((b.count>0)-(a.count>0)||a.index-b.index):a.index-b.index);
   const card=({company:c,count})=>`<article class="company-entry">
     <a href="${esc(c.careerUrl)}" target="_blank" rel="noreferrer">
-      <span class="company-logo small">${esc(initials(c.name))}</span>
+      ${companyLogo(c.name,true)}
       <div><b>${esc(c.name)}</b><small>${esc(c.city)} · ${esc(c.industry)}</small></div><i>${c.priority==='high'?'Кипр':'↗'}</i>
       <em>${count}${coveredEmployers.has(companyKey(c.name))?' QA':' · ссылка'}</em>
     </a>

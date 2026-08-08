@@ -10,6 +10,7 @@
     "discover:linkedin": "node scripts/discover-linkedin-companies.mjs",
     "archive:company-discovery": "node scripts/archive-company-discovery.mjs",
     "verify:linkedin-discoveries": "node scripts/verify-linkedin-discoveries.mjs",
+    "update:logos": "node scripts/update-company-logos.mjs",
     "update:jobs": "node scripts/update-jobs.mjs"
   },
   "engines": { "node": ">=20" }

@@ -2132,6 +2132,32 @@ body:has(.topic-overlay) {
   }
 }
 
+.company-logo {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.company-logo > span {
+  position: relative;
+  z-index: 0;
+}
+
+.company-logo > img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 9px;
+  object-fit: contain;
+  background: #fff;
+}
+
+.company-logo.small > img {
+  padding: 6px;
+}
+
 @media (max-width: 900px) {
   .sidebar .side-nav button.active,
   .learn-nav button.active {
