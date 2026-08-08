@@ -19,11 +19,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-08-06T05:36:38-04:00",
-    "lastChecked": "2026-08-08T15:44:54.437Z",
+    "lastChecked": "2026-08-08T16:07:31.543Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/jetbrains/jobs/4695264101",
     "status": "active",
-    "matchScore": 98
+    "matchScore": 98,
+    "country": "Cyprus / Germany / Serbia / Armenia"
   },
   {
     "id": "lever-e9e819fd-6719-42e6-b7b8-09ef3e504752",
@@ -42,11 +43,12 @@ export const jobs = [
       "Mobile"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:55.911Z",
+    "lastChecked": "2026-08-08T16:07:35.031Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.eu.lever.co/xm/e9e819fd-6719-42e6-b7b8-09ef3e504752",
     "status": "active",
-    "matchScore": 97
+    "matchScore": 97,
+    "country": "Cyprus"
   },
   {
     "id": "lever-f7b6802f-a80a-4742-8a6c-a93f51e8f692",
@@ -67,11 +69,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:55.915Z",
+    "lastChecked": "2026-08-08T16:07:35.036Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.eu.lever.co/xm/f7b6802f-a80a-4742-8a6c-a93f51e8f692",
     "status": "active",
-    "matchScore": 97
+    "matchScore": 97,
+    "country": "Cyprus / Greece"
   },
   {
     "id": "lever-2c04043e-a938-4730-9c49-0e71d3927f9e",
@@ -92,11 +95,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:55.916Z",
+    "lastChecked": "2026-08-08T16:07:35.037Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.eu.lever.co/xm/2c04043e-a938-4730-9c49-0e71d3927f9e",
     "status": "active",
-    "matchScore": 97
+    "matchScore": 97,
+    "country": "Cyprus / Greece"
   },
   {
     "id": "career-https-boards-eu-greenhouse-io-gr8tech-jobs-4927211101",
@@ -120,11 +124,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:45:00.140Z",
+    "lastChecked": "2026-08-08T16:07:39.087Z",
     "source": "Official career page · verified job",
     "url": "https://job-boards.eu.greenhouse.io/gr8tech/jobs/4927211101",
     "status": "active",
-    "matchScore": 97
+    "matchScore": 97,
+    "country": "Cyprus"
   },
   {
     "id": "gh-4795218101",
@@ -143,11 +148,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-08-06T05:36:38-04:00",
-    "lastChecked": "2026-08-08T15:44:54.434Z",
+    "lastChecked": "2026-08-08T16:07:31.539Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/jetbrains/jobs/4795218101",
     "status": "active",
-    "matchScore": 96
+    "matchScore": 96,
+    "country": "Cyprus / Germany / Spain / Poland / Serbia / Armenia / Czech Republic"
   },
   {
     "id": "gh-8648964002",
@@ -169,11 +175,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-08-03T16:43:10-04:00",
-    "lastChecked": "2026-08-08T15:44:53.923Z",
+    "lastChecked": "2026-08-08T16:07:31.421Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/gitlab/jobs/8648964002",
     "status": "active",
-    "matchScore": 95
+    "matchScore": 95,
+    "country": "India"
   },
   {
     "id": "gh-4725325101",
@@ -202,11 +209,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-27T05:41:35-04:00",
-    "lastChecked": "2026-08-08T15:44:54.351Z",
+    "lastChecked": "2026-08-08T16:07:31.792Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/sportygroup/jobs/4725325101",
     "status": "active",
-    "matchScore": 95
+    "matchScore": 95,
+    "country": "Worldwide"
   },
   {
     "id": "gh-4847649101",
@@ -230,11 +238,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-06-09T09:58:43-04:00",
-    "lastChecked": "2026-08-08T15:44:54.635Z",
+    "lastChecked": "2026-08-08T16:07:31.914Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/idnow/jobs/4847649101",
     "status": "active",
-    "matchScore": 95
+    "matchScore": 95,
+    "country": "France"
   },
   {
     "id": "lever-28464171-4f88-45fb-91ef-99ac74a04a09",
@@ -257,11 +266,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.237Z",
+    "lastChecked": "2026-08-08T16:07:35.431Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/revealtech/28464171-4f88-45fb-91ef-99ac74a04a09",
     "status": "active",
-    "matchScore": 95
+    "matchScore": 95,
+    "country": "United States"
   },
   {
     "id": "ashby-9c4c1f30-e0e2-4533-a91b-8af60dab0bf7",
@@ -282,11 +292,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": "2026-06-01T20:52:56.572+00:00",
-    "lastChecked": "2026-08-08T15:44:55.160Z",
+    "lastChecked": "2026-08-08T16:07:32.389Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/loancrate/9c4c1f30-e0e2-4533-a91b-8af60dab0bf7",
     "status": "active",
-    "matchScore": 95
+    "matchScore": 95,
+    "country": "United States"
   },
   {
     "id": "ashby-37e3a4e2-cd61-48f1-b2c9-8d5516a905af",
@@ -307,11 +318,12 @@ export const jobs = [
       "Mobile"
     ],
     "publishedAt": "2026-04-15T14:35:05.080+00:00",
-    "lastChecked": "2026-08-08T15:44:55.244Z",
+    "lastChecked": "2026-08-08T16:07:32.570Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/gen-digital/37e3a4e2-cd61-48f1-b2c9-8d5516a905af",
     "status": "active",
-    "matchScore": 95
+    "matchScore": 95,
+    "country": "Malaysia"
   },
   {
     "id": "ashby-cd16c92c-45ab-46a3-952b-3801c715e9db",
@@ -334,11 +346,12 @@ export const jobs = [
       "Mobile"
     ],
     "publishedAt": "2026-08-05T06:27:31.739+00:00",
-    "lastChecked": "2026-08-08T15:44:55.255Z",
+    "lastChecked": "2026-08-08T16:07:32.585Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/gen-digital/cd16c92c-45ab-46a3-952b-3801c715e9db",
     "status": "active",
-    "matchScore": 95
+    "matchScore": 95,
+    "country": "Malaysia"
   },
   {
     "id": "ashby-9b04722b-1e07-47b4-9532-70444d6d0e87",
@@ -358,11 +371,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": "2026-03-16T19:55:08.836+00:00",
-    "lastChecked": "2026-08-08T15:44:55.338Z",
+    "lastChecked": "2026-08-08T16:07:32.742Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/solidgate/9b04722b-1e07-47b4-9532-70444d6d0e87",
     "status": "active",
-    "matchScore": 95
+    "matchScore": 95,
+    "country": "Poland / Ukraine"
   },
   {
     "id": "gh-4907234101",
@@ -386,11 +400,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-08-06T05:36:38-04:00",
-    "lastChecked": "2026-08-08T15:44:54.434Z",
+    "lastChecked": "2026-08-08T16:07:31.539Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/jetbrains/jobs/4907234101",
     "status": "active",
-    "matchScore": 91
+    "matchScore": 91,
+    "country": "Cyprus / Germany"
   },
   {
     "id": "ashby-b43e32c0-5562-4f8b-a26f-c66b5f68c935",
@@ -413,11 +428,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": "2026-07-23T09:07:34.455+00:00",
-    "lastChecked": "2026-08-08T15:44:55.108Z",
+    "lastChecked": "2026-08-08T16:07:32.324Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/kraken.com/b43e32c0-5562-4f8b-a26f-c66b5f68c935",
     "status": "active",
-    "matchScore": 91
+    "matchScore": 91,
+    "country": "Cyprus / Poland / Estonia / Czech Republic / Romania / Bulgaria / Sweden / Hungary / Lithuania / Slovenia / Slovakia / Brazil / Mexico / Argentina / Colombia / South Africa"
   },
   {
     "id": "lever-8cb46466-a83a-4c98-83e1-c7bb72c2aff3",
@@ -439,11 +455,34 @@ export const jobs = [
       "Mobile"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:55.913Z",
+    "lastChecked": "2026-08-08T16:07:35.034Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.eu.lever.co/xm/8cb46466-a83a-4c98-83e1-c7bb72c2aff3",
     "status": "active",
-    "matchScore": 91
+    "matchScore": 91,
+    "country": "Cyprus / Greece"
+  },
+  {
+    "id": "bamboohr-fxpro-855",
+    "title": "Senior QA Engineer",
+    "company": "FxPro",
+    "industry": "Fintech",
+    "region": "Cyprus",
+    "location": "Cyprus, Ypsonas",
+    "format": "On-site",
+    "level": "Senior",
+    "description": "IT Front-End Development / Direct Mobile Full-Time",
+    "requirements": "IT Front-End Development / Direct Mobile Full-Time",
+    "technologies": [
+      "Mobile"
+    ],
+    "publishedAt": null,
+    "lastChecked": "2026-08-08T16:07:34.278Z",
+    "source": "BambooHR · official ATS",
+    "url": "https://fxpro.bamboohr.com/careers/855",
+    "status": "active",
+    "matchScore": 90,
+    "country": "Cyprus"
   },
   {
     "id": "direct-tradingview-0",
@@ -463,11 +502,12 @@ export const jobs = [
       "CI/CD"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.500Z",
+    "lastChecked": "2026-08-08T16:07:35.897Z",
     "source": "Official career page",
     "url": "https://tradingview.teamtailor.com/jobs/7669723-senior-mobile-qa-engineer",
     "status": "active",
-    "matchScore": 90
+    "matchScore": 90,
+    "country": "Cyprus"
   },
   {
     "id": "lever-9a9275b8-0d72-4bbf-9c99-b2889e03d89c",
@@ -486,11 +526,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:54.868Z",
+    "lastChecked": "2026-08-08T16:07:33.671Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/cartrawler/9a9275b8-0d72-4bbf-9c99-b2889e03d89c",
     "status": "active",
-    "matchScore": 89
+    "matchScore": 89,
+    "country": "Ireland"
   },
   {
     "id": "gh-6119375004",
@@ -510,11 +551,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-24T05:38:19-04:00",
-    "lastChecked": "2026-08-08T15:44:55.193Z",
+    "lastChecked": "2026-08-08T16:07:32.214Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/xebiacee/jobs/6119375004",
     "status": "active",
-    "matchScore": 89
+    "matchScore": 89,
+    "country": "Bulgaria"
   },
   {
     "id": "ashby-43ce7bb3-1049-4195-9dca-6054bcab4d7b",
@@ -533,11 +575,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": "2026-07-16T11:14:40.268+00:00",
-    "lastChecked": "2026-08-08T15:44:55.079Z",
+    "lastChecked": "2026-08-08T16:07:32.297Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/ruby-labs/43ce7bb3-1049-4195-9dca-6054bcab4d7b",
     "status": "active",
-    "matchScore": 89
+    "matchScore": 89,
+    "country": "Ukraine"
   },
   {
     "id": "ashby-da108ef0-f0e7-44de-8256-33e1f56bfa26",
@@ -560,11 +603,12 @@ export const jobs = [
       "Mobile"
     ],
     "publishedAt": "2026-06-10T18:55:52.811+00:00",
-    "lastChecked": "2026-08-08T15:44:55.112Z",
+    "lastChecked": "2026-08-08T16:07:32.329Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/injective-labs/da108ef0-f0e7-44de-8256-33e1f56bfa26",
     "status": "active",
-    "matchScore": 89
+    "matchScore": 89,
+    "country": "United States / Brazil / Argentina"
   },
   {
     "id": "ashby-ab32a727-ae02-4d5f-9358-2795f8f563c2",
@@ -581,11 +625,12 @@ export const jobs = [
       "Mobile"
     ],
     "publishedAt": "2026-04-27T08:19:28.526+00:00",
-    "lastChecked": "2026-08-08T15:44:55.313Z",
+    "lastChecked": "2026-08-08T16:07:32.648Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/voodoo/ab32a727-ae02-4d5f-9358-2795f8f563c2",
     "status": "active",
-    "matchScore": 89
+    "matchScore": 89,
+    "country": "France"
   },
   {
     "id": "ashby-b1aad0af-0100-4464-8185-a8329955a2fd",
@@ -606,11 +651,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": "2025-12-15T14:56:35.312+00:00",
-    "lastChecked": "2026-08-08T15:44:55.324Z",
+    "lastChecked": "2026-08-08T16:07:32.727Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/incard/b1aad0af-0100-4464-8185-a8329955a2fd",
     "status": "active",
-    "matchScore": 89
+    "matchScore": 89,
+    "country": "United Kingdom"
   },
   {
     "id": "ashby-e2a6b785-1a7b-4deb-8407-0ebf592a7eb2",
@@ -631,11 +677,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": "2026-06-16T15:30:36.626+00:00",
-    "lastChecked": "2026-08-08T15:44:55.328Z",
+    "lastChecked": "2026-08-08T16:07:32.735Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/aghanim/e2a6b785-1a7b-4deb-8407-0ebf592a7eb2",
     "status": "active",
-    "matchScore": 89
+    "matchScore": 89,
+    "country": "Portugal / Serbia"
   },
   {
     "id": "ashby-abb14328-4e4b-4b23-a526-8618ad98c3a7",
@@ -657,11 +704,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": "2026-06-16T15:30:40.947+00:00",
-    "lastChecked": "2026-08-08T15:44:55.328Z",
+    "lastChecked": "2026-08-08T16:07:32.736Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/aghanim/abb14328-4e4b-4b23-a526-8618ad98c3a7",
     "status": "active",
-    "matchScore": 89
+    "matchScore": 89,
+    "country": "Portugal / Serbia"
   },
   {
     "id": "lever-aa5c6e49-309a-47bb-9755-bae3b65e02c6",
@@ -681,11 +729,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.199Z",
+    "lastChecked": "2026-08-08T16:07:35.543Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/aa5c6e49-309a-47bb-9755-bae3b65e02c6",
     "status": "active",
-    "matchScore": 88
+    "matchScore": 88,
+    "country": "Hong Kong / Japan / Taiwan / Australia"
   },
   {
     "id": "lever-381c2d18-09c8-4797-900b-57e5382d3f2a",
@@ -706,11 +755,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.199Z",
+    "lastChecked": "2026-08-08T16:07:35.543Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/381c2d18-09c8-4797-900b-57e5382d3f2a",
     "status": "active",
-    "matchScore": 88
+    "matchScore": 88,
+    "country": "Hong Kong / Japan / Taiwan / Thailand / Australia"
   },
   {
     "id": "gh-8023914002",
@@ -730,11 +780,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2025-06-04T12:17:05-04:00",
-    "lastChecked": "2026-08-08T15:44:54.953Z",
+    "lastChecked": "2026-08-08T16:07:32.227Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8023914002",
     "status": "active",
-    "matchScore": 87
+    "matchScore": 87,
+    "country": "Canada"
   },
   {
     "id": "gh-7278089002",
@@ -754,11 +805,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2025-01-08T16:19:17-05:00",
-    "lastChecked": "2026-08-08T15:44:54.955Z",
+    "lastChecked": "2026-08-08T16:07:32.228Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/7278089002",
     "status": "active",
-    "matchScore": 87
+    "matchScore": 87,
+    "country": "Canada"
   },
   {
     "id": "ashby-0b315144-1912-482c-85aa-f3d5aa261255",
@@ -782,11 +834,12 @@ export const jobs = [
       "Python"
     ],
     "publishedAt": "2026-07-21T22:50:51.656+00:00",
-    "lastChecked": "2026-08-08T15:44:55.137Z",
+    "lastChecked": "2026-08-08T16:07:32.339Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/dualentry/0b315144-1912-482c-85aa-f3d5aa261255",
     "status": "active",
-    "matchScore": 87
+    "matchScore": 87,
+    "country": "Canada"
   },
   {
     "id": "ashby-c9112496-3376-4d02-a222-d6ff9f424dd1",
@@ -807,11 +860,12 @@ export const jobs = [
       "Python"
     ],
     "publishedAt": "2026-05-27T16:59:41.341+00:00",
-    "lastChecked": "2026-08-08T15:44:55.157Z",
+    "lastChecked": "2026-08-08T16:07:32.382Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/titan-ai/c9112496-3376-4d02-a222-d6ff9f424dd1",
     "status": "active",
-    "matchScore": 87
+    "matchScore": 87,
+    "country": "United States"
   },
   {
     "id": "ashby-4368b13e-4058-4831-bb73-0bd9a619a4a6",
@@ -832,11 +886,12 @@ export const jobs = [
       "Python"
     ],
     "publishedAt": "2026-05-27T17:00:49.621+00:00",
-    "lastChecked": "2026-08-08T15:44:55.157Z",
+    "lastChecked": "2026-08-08T16:07:32.382Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/titan-ai/4368b13e-4058-4831-bb73-0bd9a619a4a6",
     "status": "active",
-    "matchScore": 87
+    "matchScore": 87,
+    "country": "United States"
   },
   {
     "id": "ashby-d6f84ea2-ef82-4d20-a1b8-2e81002f3cd5",
@@ -863,11 +918,12 @@ export const jobs = [
       "JavaScript"
     ],
     "publishedAt": "2026-07-20T15:57:28.569+00:00",
-    "lastChecked": "2026-08-08T15:44:55.171Z",
+    "lastChecked": "2026-08-08T16:07:32.408Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/hamsa/d6f84ea2-ef82-4d20-a1b8-2e81002f3cd5",
     "status": "active",
-    "matchScore": 87
+    "matchScore": 87,
+    "country": "Singapore"
   },
   {
     "id": "ashby-9483da43-5a6a-4c01-afd1-45476c624916",
@@ -886,11 +942,12 @@ export const jobs = [
       "Playwright"
     ],
     "publishedAt": "2025-12-17T15:05:13.427+00:00",
-    "lastChecked": "2026-08-08T15:44:55.294Z",
+    "lastChecked": "2026-08-08T16:07:32.588Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/govworx/9483da43-5a6a-4c01-afd1-45476c624916",
     "status": "active",
-    "matchScore": 87
+    "matchScore": 87,
+    "country": "Worldwide"
   },
   {
     "id": "gh-4777935101",
@@ -917,11 +974,62 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-08-06T05:36:38-04:00",
-    "lastChecked": "2026-08-08T15:44:54.434Z",
+    "lastChecked": "2026-08-08T16:07:31.539Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/jetbrains/jobs/4777935101",
     "status": "active",
-    "matchScore": 84
+    "matchScore": 84,
+    "country": "Cyprus / Germany / Spain / Poland / Serbia / Armenia / Czech Republic"
+  },
+  {
+    "id": "lever-2603f3c0-75cb-4d49-b8de-cb4ade0e8b39",
+    "title": "Binance Accelerator Program - QA",
+    "company": "Binance",
+    "industry": "Fintech",
+    "region": "Asia-Pacific",
+    "location": "Asia / Hong Kong / Taiwan, Taipei",
+    "format": "Remote",
+    "level": "Middle",
+    "description": "Binance is a leading global blockchain ecosystem behind the world’s largest cryptocurrency exchange by trading volume and registered users. Binance is trusted by more than 320 million people in 100+ countries for its industry-leading security, transparency, tr",
+    "requirements": "Binance is a leading global blockchain ecosystem behind the world’s largest cryptocurrency exchange by trading volume and registered users. Binance is trusted by more than 320 million people in 100+ countries for its industry-leading security, transparency, trading engine speed, protections for investors, and unmatched portfolio of digital asset products and offerings from trading and finance to education, research, social good, payments, institutional services, and Web3 features. Binance is devoted to building an ",
+    "technologies": [
+      "Java",
+      "API",
+      "SQL",
+      "iOS"
+    ],
+    "publishedAt": null,
+    "lastChecked": "2026-08-08T16:07:35.523Z",
+    "source": "Lever · official ATS",
+    "url": "https://jobs.lever.co/binance/2603f3c0-75cb-4d49-b8de-cb4ade0e8b39",
+    "status": "active",
+    "matchScore": 83,
+    "country": "Hong Kong / Taiwan"
+  },
+  {
+    "id": "lever-7366f0dd-5f08-4fc5-a677-53fd69ec7239",
+    "title": "Binance Accelerator Program - QA",
+    "company": "Binance",
+    "industry": "Fintech",
+    "region": "Asia-Pacific",
+    "location": "Asia / Hong Kong / Taiwan, Taipei",
+    "format": "Remote",
+    "level": "Middle",
+    "description": "Binance is a leading global blockchain ecosystem behind the world’s largest cryptocurrency exchange by trading volume and registered users. Binance is trusted by more than 320 million people in 100+ countries for its industry-leading security, transparency, tr",
+    "requirements": "Binance is a leading global blockchain ecosystem behind the world’s largest cryptocurrency exchange by trading volume and registered users. Binance is trusted by more than 320 million people in 100+ countries for its industry-leading security, transparency, trading engine speed, protections for investors, and unmatched portfolio of digital asset products and offerings from trading and finance to education, research, social good, payments, institutional services, and Web3 features. Binance is devoted to building an ",
+    "technologies": [
+      "Java",
+      "API",
+      "SQL",
+      "iOS"
+    ],
+    "publishedAt": null,
+    "lastChecked": "2026-08-08T16:07:35.523Z",
+    "source": "Lever · official ATS",
+    "url": "https://jobs.lever.co/binance/7366f0dd-5f08-4fc5-a677-53fd69ec7239",
+    "status": "active",
+    "matchScore": 83,
+    "country": "Hong Kong / Taiwan"
   },
   {
     "id": "lever-c92271de-8ff8-450c-bf1b-b7741a641bb6",
@@ -941,11 +1049,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.187Z",
+    "lastChecked": "2026-08-08T16:07:35.523Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/c92271de-8ff8-450c-bf1b-b7741a641bb6",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Hong Kong / Taiwan"
   },
   {
     "id": "lever-6867adf0-87e2-49a1-bb1e-304336c44fe1",
@@ -965,11 +1074,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.187Z",
+    "lastChecked": "2026-08-08T16:07:35.523Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/6867adf0-87e2-49a1-bb1e-304336c44fe1",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Hong Kong / Taiwan"
   },
   {
     "id": "lever-46adeae7-75cc-42bb-b73c-ba547463e4d8",
@@ -989,11 +1099,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.187Z",
+    "lastChecked": "2026-08-08T16:07:35.523Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/46adeae7-75cc-42bb-b73c-ba547463e4d8",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Hong Kong / Taiwan"
   },
   {
     "id": "lever-da981b97-477a-4cd6-af88-797c6a7c0ea3",
@@ -1020,11 +1131,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.205Z",
+    "lastChecked": "2026-08-08T16:07:35.552Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/da981b97-477a-4cd6-af88-797c6a7c0ea3",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Hong Kong / Taiwan"
   },
   {
     "id": "gh-4683455006",
@@ -1048,11 +1160,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-31T07:43:33-04:00",
-    "lastChecked": "2026-08-08T15:44:53.968Z",
+    "lastChecked": "2026-08-08T16:07:31.488Z",
     "source": "Greenhouse · official ATS",
     "url": "https://www.orioninc.com/careers/job/?gh_jid=4683455006",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Serbia"
   },
   {
     "id": "gh-4726031101",
@@ -1081,11 +1194,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-27T05:41:35-04:00",
-    "lastChecked": "2026-08-08T15:44:54.350Z",
+    "lastChecked": "2026-08-08T16:07:31.791Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/sportygroup/jobs/4726031101",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Worldwide"
   },
   {
     "id": "gh-4871167101",
@@ -1115,11 +1229,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-27T05:41:35-04:00",
-    "lastChecked": "2026-08-08T15:44:54.351Z",
+    "lastChecked": "2026-08-08T16:07:31.791Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/sportygroup/jobs/4871167101",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Worldwide"
   },
   {
     "id": "gh-4905122101",
@@ -1147,11 +1262,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-06-26T01:02:36-04:00",
-    "lastChecked": "2026-08-08T15:44:54.771Z",
+    "lastChecked": "2026-08-08T16:07:32.055Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/justmarkets/jobs/4905122101",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Worldwide"
   },
   {
     "id": "gh-6116518004",
@@ -1173,11 +1289,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-24T05:38:19-04:00",
-    "lastChecked": "2026-08-08T15:44:55.193Z",
+    "lastChecked": "2026-08-08T16:07:32.215Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/xebiacee/jobs/6116518004",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Poland / Bulgaria"
   },
   {
     "id": "gh-5836999004",
@@ -1201,11 +1318,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-24T05:38:19-04:00",
-    "lastChecked": "2026-08-08T15:44:55.198Z",
+    "lastChecked": "2026-08-08T16:07:32.219Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/xebiacee/jobs/5836999004",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Poland / Romania / Bulgaria"
   },
   {
     "id": "gh-6112337004",
@@ -1231,11 +1349,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-24T05:38:19-04:00",
-    "lastChecked": "2026-08-08T15:44:55.199Z",
+    "lastChecked": "2026-08-08T16:07:32.219Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/xebiacee/jobs/6112337004",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Poland"
   },
   {
     "id": "gh-6122337004",
@@ -1259,11 +1378,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-24T05:38:19-04:00",
-    "lastChecked": "2026-08-08T15:44:55.199Z",
+    "lastChecked": "2026-08-08T16:07:32.219Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/xebiacee/jobs/6122337004",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Bulgaria"
   },
   {
     "id": "ashby-82186db7-ff2c-4436-9d47-7d0f70b0c76a",
@@ -1289,11 +1409,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": "2026-07-17T16:03:37.202+00:00",
-    "lastChecked": "2026-08-08T15:44:55.207Z",
+    "lastChecked": "2026-08-08T16:07:32.449Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/Lendable/82186db7-ff2c-4436-9d47-7d0f70b0c76a",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Worldwide"
   },
   {
     "id": "ashby-8d2549d0-af64-4c1d-8ee0-d399941994ab",
@@ -1316,11 +1437,32 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": "2026-07-03T13:56:29.004+00:00",
-    "lastChecked": "2026-08-08T15:44:55.263Z",
+    "lastChecked": "2026-08-08T16:07:32.539Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/WA.Technology/8d2549d0-af64-4c1d-8ee0-d399941994ab",
     "status": "active",
-    "matchScore": 83
+    "matchScore": 83,
+    "country": "Romania"
+  },
+  {
+    "id": "bamboohr-fxpro-866",
+    "title": "Senior QA Engineer",
+    "company": "FxPro",
+    "industry": "Fintech",
+    "region": "Cyprus",
+    "location": "Cyprus, Ypsonas",
+    "format": "On-site",
+    "level": "Senior",
+    "description": "IT Backend Development / Payments Full-Time",
+    "requirements": "IT Backend Development / Payments Full-Time",
+    "technologies": [],
+    "publishedAt": null,
+    "lastChecked": "2026-08-08T16:07:34.279Z",
+    "source": "BambooHR · official ATS",
+    "url": "https://fxpro.bamboohr.com/careers/866",
+    "status": "active",
+    "matchScore": 82,
+    "country": "Cyprus"
   },
   {
     "id": "direct-isx-financial-0",
@@ -1338,11 +1480,12 @@ export const jobs = [
       "SQL"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.289Z",
+    "lastChecked": "2026-08-08T16:07:35.976Z",
     "source": "Official career page",
     "url": "https://isx.financial/hubfs/Jobs/Junior%20QA%20Engineer_ISX.pdf?hsLang=en",
     "status": "active",
-    "matchScore": 82
+    "matchScore": 82,
+    "country": "Cyprus"
   },
   {
     "id": "gh-4686618006",
@@ -1362,11 +1505,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-17T15:13:51-04:00",
-    "lastChecked": "2026-08-08T15:44:53.966Z",
+    "lastChecked": "2026-08-08T16:07:31.486Z",
     "source": "Greenhouse · official ATS",
     "url": "https://www.orioninc.com/careers/job/?gh_jid=4686618006",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Mexico"
   },
   {
     "id": "gh-5654027004",
@@ -1386,11 +1530,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-03-27T09:46:40-04:00",
-    "lastChecked": "2026-08-08T15:44:54.413Z",
+    "lastChecked": "2026-08-08T16:07:31.759Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/clickhouse/jobs/5654027004",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "United States"
   },
   {
     "id": "gh-5654026004",
@@ -1410,11 +1555,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-03-27T09:46:40-04:00",
-    "lastChecked": "2026-08-08T15:44:54.413Z",
+    "lastChecked": "2026-08-08T16:07:31.759Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/clickhouse/jobs/5654026004",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Spain"
   },
   {
     "id": "gh-5670526004",
@@ -1434,11 +1580,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-03-27T09:46:40-04:00",
-    "lastChecked": "2026-08-08T15:44:54.413Z",
+    "lastChecked": "2026-08-08T16:07:31.759Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/clickhouse/jobs/5670526004",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "India"
   },
   {
     "id": "gh-5654025004",
@@ -1458,11 +1605,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-03-27T09:46:40-04:00",
-    "lastChecked": "2026-08-08T15:44:54.413Z",
+    "lastChecked": "2026-08-08T16:07:31.759Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/clickhouse/jobs/5654025004",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "United Kingdom"
   },
   {
     "id": "gh-5654024004",
@@ -1482,11 +1630,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-03-27T09:46:40-04:00",
-    "lastChecked": "2026-08-08T15:44:54.413Z",
+    "lastChecked": "2026-08-08T16:07:31.759Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/clickhouse/jobs/5654024004",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Netherlands"
   },
   {
     "id": "gh-5654023004",
@@ -1506,11 +1655,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-03-27T09:46:40-04:00",
-    "lastChecked": "2026-08-08T15:44:54.413Z",
+    "lastChecked": "2026-08-08T16:07:31.759Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/clickhouse/jobs/5654023004",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Germany"
   },
   {
     "id": "gh-4804163101",
@@ -1532,11 +1682,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-06T03:47:23-04:00",
-    "lastChecked": "2026-08-08T15:44:54.636Z",
+    "lastChecked": "2026-08-08T16:07:31.915Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/idnow/jobs/4804163101",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "France"
   },
   {
     "id": "gh-8046867",
@@ -1559,11 +1710,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-30T01:39:59-04:00",
-    "lastChecked": "2026-08-08T15:44:54.842Z",
+    "lastChecked": "2026-08-08T16:07:32.205Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/dept/jobs/8046867",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Canada"
   },
   {
     "id": "gh-6128522004",
@@ -1583,11 +1735,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-28T07:46:33-04:00",
-    "lastChecked": "2026-08-08T15:44:55.199Z",
+    "lastChecked": "2026-08-08T16:07:32.219Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/xebiacee/jobs/6128522004",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Bulgaria"
   },
   {
     "id": "ashby-7d35594f-d99a-45d0-97af-85589473b973",
@@ -1607,11 +1760,12 @@ export const jobs = [
       "Kubernetes"
     ],
     "publishedAt": "2026-06-26T13:59:55.876+00:00",
-    "lastChecked": "2026-08-08T15:44:55.237Z",
+    "lastChecked": "2026-08-08T16:07:32.506Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/infiterra/7d35594f-d99a-45d0-97af-85589473b973",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Greece"
   },
   {
     "id": "ashby-0584e373-6185-4efe-8311-5ab6b62d9228",
@@ -1635,11 +1789,12 @@ export const jobs = [
       "TypeScript"
     ],
     "publishedAt": "2026-05-13T06:27:09.665+00:00",
-    "lastChecked": "2026-08-08T15:44:55.262Z",
+    "lastChecked": "2026-08-08T16:07:32.587Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/lndmrk/0584e373-6185-4efe-8311-5ab6b62d9228",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "United Arab Emirates"
   },
   {
     "id": "ashby-5c28d417-ea14-40b5-a615-5d51c4f0d3a3",
@@ -1657,11 +1812,12 @@ export const jobs = [
       "CI/CD"
     ],
     "publishedAt": "2025-02-19T15:44:10.394+00:00",
-    "lastChecked": "2026-08-08T15:44:55.349Z",
+    "lastChecked": "2026-08-08T16:07:32.955Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/blockstream/5c28d417-ea14-40b5-a615-5d51c4f0d3a3",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Worldwide"
   },
   {
     "id": "ashby-e01609d4-4668-4a1b-b4e4-a040ffcbd02f",
@@ -1679,11 +1835,12 @@ export const jobs = [
       "CI/CD"
     ],
     "publishedAt": "2026-01-23T20:53:42.209+00:00",
-    "lastChecked": "2026-08-08T15:44:55.349Z",
+    "lastChecked": "2026-08-08T16:07:32.956Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/blockstream/e01609d4-4668-4a1b-b4e4-a040ffcbd02f",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Worldwide"
   },
   {
     "id": "workday-worldpay-job-bucharest-romania-qa-automation-engineer-ii-mid-level-java-selenium-jr0609989-1",
@@ -1701,11 +1858,12 @@ export const jobs = [
       "Selenium"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:59.440Z",
+    "lastChecked": "2026-08-08T16:07:38.825Z",
     "source": "Workday · official ATS",
     "url": "https://worldpay.wd5.myworkdayjobs.com/job/BUCHAREST--ROMANIA/QA-Automation-Engineer-II--Mid-Level----Java--Selenium_JR0609989-1",
     "status": "active",
-    "matchScore": 81
+    "matchScore": 81,
+    "country": "Romania"
   },
   {
     "id": "gh-5201258008",
@@ -1727,11 +1885,12 @@ export const jobs = [
     ],
     "specialization": "QA",
     "publishedAt": "2026-08-04T11:01:49-04:00",
-    "lastChecked": "2026-08-08T15:44:54.788Z",
+    "lastChecked": "2026-08-08T16:07:32.038Z",
     "source": "Greenhouse · official ATS",
     "url": "https://plata.careers/vacancy/details?id=5201258008&gh_jid=5201258008",
     "status": "active",
-    "matchScore": 80
+    "matchScore": 80,
+    "country": "Worldwide"
   },
   {
     "id": "gh-7975990",
@@ -1751,11 +1910,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-08-05T18:23:33-04:00",
-    "lastChecked": "2026-08-08T15:44:55.691Z",
+    "lastChecked": "2026-08-08T16:07:33.383Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/canonical/jobs/7975990",
     "status": "active",
-    "matchScore": 80
+    "matchScore": 80,
+    "country": "Taiwan"
   },
   {
     "id": "lever-1046727e-f855-44ef-a18d-37c2bfb9d6d6",
@@ -1774,11 +1934,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.187Z",
+    "lastChecked": "2026-08-08T16:07:35.523Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/1046727e-f855-44ef-a18d-37c2bfb9d6d6",
     "status": "active",
-    "matchScore": 77
+    "matchScore": 77,
+    "country": "Taiwan"
   },
   {
     "id": "gh-4702616006",
@@ -1799,11 +1960,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-08-07T05:50:17-04:00",
-    "lastChecked": "2026-08-08T15:44:53.966Z",
+    "lastChecked": "2026-08-08T16:07:31.485Z",
     "source": "Greenhouse · official ATS",
     "url": "https://www.orioninc.com/careers/job/?gh_jid=4702616006",
     "status": "active",
-    "matchScore": 77
+    "matchScore": 77,
+    "country": "India"
   },
   {
     "id": "gh-8534554002",
@@ -1823,11 +1985,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-05-04T11:13:07-04:00",
-    "lastChecked": "2026-08-08T15:44:54.956Z",
+    "lastChecked": "2026-08-08T16:07:32.229Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8534554002",
     "status": "active",
-    "matchScore": 77
+    "matchScore": 77,
+    "country": "United States"
   },
   {
     "id": "ashby-9e0d0368-7621-4968-bb65-44e95abd6c68",
@@ -1848,11 +2011,12 @@ export const jobs = [
       "Mobile"
     ],
     "publishedAt": "2026-06-23T14:51:36.318+00:00",
-    "lastChecked": "2026-08-08T15:44:55.213Z",
+    "lastChecked": "2026-08-08T16:07:32.420Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/PaveBank/9e0d0368-7621-4968-bb65-44e95abd6c68",
     "status": "active",
-    "matchScore": 77
+    "matchScore": 77,
+    "country": "Georgia"
   },
   {
     "id": "ashby-a65899a1-75ac-4fcf-97ee-a7c2dbe18e32",
@@ -1873,11 +2037,12 @@ export const jobs = [
       "Mobile"
     ],
     "publishedAt": "2026-08-04T04:45:34.562+00:00",
-    "lastChecked": "2026-08-08T15:44:55.214Z",
+    "lastChecked": "2026-08-08T16:07:32.421Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/PaveBank/a65899a1-75ac-4fcf-97ee-a7c2dbe18e32",
     "status": "active",
-    "matchScore": 77
+    "matchScore": 77,
+    "country": "Malaysia"
   },
   {
     "id": "lever-2eba8b7b-eec6-4934-900c-328b66626bbb",
@@ -1899,11 +2064,12 @@ export const jobs = [
       "Python"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:55.913Z",
+    "lastChecked": "2026-08-08T16:07:35.034Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.eu.lever.co/xm/2eba8b7b-eec6-4934-900c-328b66626bbb",
     "status": "active",
-    "matchScore": 77
+    "matchScore": 77,
+    "country": "Cyprus / Greece"
   },
   {
     "id": "lever-b83dfb6a-eaa7-45b0-8d00-3eb57eded62c",
@@ -1925,11 +2091,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:55.800Z",
+    "lastChecked": "2026-08-08T16:07:36.708Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/contentsquare/b83dfb6a-eaa7-45b0-8d00-3eb57eded62c",
     "status": "active",
-    "matchScore": 77
+    "matchScore": 77,
+    "country": "France"
   },
   {
     "id": "ashby-ff71b282-7aab-415f-870f-8e3bdfbad1fe",
@@ -1950,11 +2117,12 @@ export const jobs = [
       "Android"
     ],
     "publishedAt": "2026-05-06T12:35:50.085+00:00",
-    "lastChecked": "2026-08-08T15:44:55.246Z",
+    "lastChecked": "2026-08-08T16:07:32.573Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/gen-digital/ff71b282-7aab-415f-870f-8e3bdfbad1fe",
     "status": "active",
-    "matchScore": 76
+    "matchScore": 76,
+    "country": "Ireland / Czech Republic / India"
   },
   {
     "id": "lever-95d5f25b-583c-4f36-b4a3-4d5ac249b269",
@@ -1975,11 +2143,12 @@ export const jobs = [
       "CI/CD"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.187Z",
+    "lastChecked": "2026-08-08T16:07:35.523Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/95d5f25b-583c-4f36-b4a3-4d5ac249b269",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Taiwan"
   },
   {
     "id": "gh-6105352004",
@@ -2001,11 +2170,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-06T15:43:49-04:00",
-    "lastChecked": "2026-08-08T15:44:54.418Z",
+    "lastChecked": "2026-08-08T16:07:31.763Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/clickhouse/jobs/6105352004",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "United States"
   },
   {
     "id": "gh-6105350004",
@@ -2027,11 +2197,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-02T11:30:37-04:00",
-    "lastChecked": "2026-08-08T15:44:54.418Z",
+    "lastChecked": "2026-08-08T16:07:31.763Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/clickhouse/jobs/6105350004",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Netherlands"
   },
   {
     "id": "lever-88091211-8f89-499c-8f59-4639d24ad676",
@@ -2057,11 +2228,12 @@ export const jobs = [
       "Python"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:45:05.000Z",
+    "lastChecked": "2026-08-08T16:07:35.387Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/actian/88091211-8f89-499c-8f59-4639d24ad676",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Europe · multiple countries"
   },
   {
     "id": "gh-4903347101",
@@ -2088,11 +2260,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-06-26T01:02:36-04:00",
-    "lastChecked": "2026-08-08T15:44:54.771Z",
+    "lastChecked": "2026-08-08T16:07:32.055Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.eu.greenhouse.io/justmarkets/jobs/4903347101",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Worldwide"
   },
   {
     "id": "gh-7251324",
@@ -2117,11 +2290,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-30T01:39:59-04:00",
-    "lastChecked": "2026-08-08T15:44:54.831Z",
+    "lastChecked": "2026-08-08T16:07:32.194Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/dept/jobs/7251324",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Argentina"
   },
   {
     "id": "gh-6127459004",
@@ -2144,11 +2318,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-30T05:11:11-04:00",
-    "lastChecked": "2026-08-08T15:44:55.194Z",
+    "lastChecked": "2026-08-08T16:07:32.216Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/xebiacee/jobs/6127459004",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Poland / Czech Republic / Romania / Bulgaria / Hungary"
   },
   {
     "id": "gh-8342423002",
@@ -2168,11 +2343,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2025-12-16T15:18:22-05:00",
-    "lastChecked": "2026-08-08T15:44:54.955Z",
+    "lastChecked": "2026-08-08T16:07:32.228Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8342423002",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Canada"
   },
   {
     "id": "gh-8493984002",
@@ -2194,11 +2370,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-04-03T15:47:42-04:00",
-    "lastChecked": "2026-08-08T15:44:54.956Z",
+    "lastChecked": "2026-08-08T16:07:32.229Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8493984002",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "United Kingdom"
   },
   {
     "id": "ashby-07762b8a-d97d-4468-b336-206513775aec",
@@ -2220,11 +2397,12 @@ export const jobs = [
       "JavaScript"
     ],
     "publishedAt": "2026-06-18T11:48:14.016+00:00",
-    "lastChecked": "2026-08-08T15:44:55.262Z",
+    "lastChecked": "2026-08-08T16:07:32.539Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/WA.Technology/07762b8a-d97d-4468-b336-206513775aec",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Romania"
   },
   {
     "id": "ashby-54481f0d-1613-428a-a47b-0b9e34648965",
@@ -2249,11 +2427,12 @@ export const jobs = [
       "TypeScript"
     ],
     "publishedAt": "2026-06-30T10:17:22.606+00:00",
-    "lastChecked": "2026-08-08T15:44:55.283Z",
+    "lastChecked": "2026-08-08T16:07:32.689Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/hostinger/54481f0d-1613-428a-a47b-0b9e34648965",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Lithuania"
   },
   {
     "id": "ashby-aa156425-ec0d-4617-a684-521501ebc8cd",
@@ -2275,11 +2454,12 @@ export const jobs = [
       "TypeScript"
     ],
     "publishedAt": "2026-07-29T16:13:47.451+00:00",
-    "lastChecked": "2026-08-08T15:44:55.310Z",
+    "lastChecked": "2026-08-08T16:07:32.660Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/optro/aa156425-ec0d-4617-a684-521501ebc8cd",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Canada"
   },
   {
     "id": "gh-7334725",
@@ -2301,11 +2481,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-08-05T18:23:33-04:00",
-    "lastChecked": "2026-08-08T15:44:55.672Z",
+    "lastChecked": "2026-08-08T16:07:33.357Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/canonical/jobs/7334725",
     "status": "active",
-    "matchScore": 75
+    "matchScore": 75,
+    "country": "Europe · multiple countries"
   },
   {
     "id": "lever-eee16b8f-9b9d-473d-8d0f-cde36cdf83cd",
@@ -2322,11 +2503,12 @@ export const jobs = [
       "Python"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.194Z",
+    "lastChecked": "2026-08-08T16:07:35.536Z",
     "source": "Lever · official ATS",
     "url": "https://jobs.lever.co/binance/eee16b8f-9b9d-473d-8d0f-cde36cdf83cd",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "Hong Kong / Taiwan / Australia / New Zealand"
   },
   {
     "id": "smartrecruiters-744000142170681",
@@ -2341,11 +2523,12 @@ export const jobs = [
     "requirements": "Quality Information Technology Full-time",
     "technologies": [],
     "publishedAt": "2026-08-07T15:38:25.092Z",
-    "lastChecked": "2026-08-08T15:44:56.066Z",
+    "lastChecked": "2026-08-08T16:07:35.074Z",
     "source": "SmartRecruiters · official ATS",
     "url": "https://jobs.smartrecruiters.com/Playtech/744000142170681-qa-engineer",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "Bulgaria"
   },
   {
     "id": "smartrecruiters-744000141456877",
@@ -2360,11 +2543,12 @@ export const jobs = [
     "requirements": "Quality Information Technology Full-time",
     "technologies": [],
     "publishedAt": "2026-08-04T10:09:01.018Z",
-    "lastChecked": "2026-08-08T15:44:56.066Z",
+    "lastChecked": "2026-08-08T16:07:35.074Z",
     "source": "SmartRecruiters · official ATS",
     "url": "https://jobs.smartrecruiters.com/Playtech/744000141456877-junior-qa-engineer",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "Cyprus"
   },
   {
     "id": "smartrecruiters-744000140690629",
@@ -2379,11 +2563,12 @@ export const jobs = [
     "requirements": "Quality Information Technology Full-time",
     "technologies": [],
     "publishedAt": "2026-07-30T13:21:13.934Z",
-    "lastChecked": "2026-08-08T15:44:56.066Z",
+    "lastChecked": "2026-08-08T16:07:35.074Z",
     "source": "SmartRecruiters · official ATS",
     "url": "https://jobs.smartrecruiters.com/Playtech/744000140690629-qa-engineer-intern",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "Ukraine"
   },
   {
     "id": "smartrecruiters-744000140690069",
@@ -2398,11 +2583,12 @@ export const jobs = [
     "requirements": "Quality Information Technology Full-time",
     "technologies": [],
     "publishedAt": "2026-07-30T13:19:59.831Z",
-    "lastChecked": "2026-08-08T15:44:56.066Z",
+    "lastChecked": "2026-08-08T16:07:35.074Z",
     "source": "SmartRecruiters · official ATS",
     "url": "https://jobs.smartrecruiters.com/Playtech/744000140690069-junior-qa-engineer",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "Bulgaria"
   },
   {
     "id": "smartrecruiters-744000140307099",
@@ -2417,11 +2603,12 @@ export const jobs = [
     "requirements": "Quality Information Technology Full-time",
     "technologies": [],
     "publishedAt": "2026-07-28T17:19:59.536Z",
-    "lastChecked": "2026-08-08T15:44:56.066Z",
+    "lastChecked": "2026-08-08T16:07:35.074Z",
     "source": "SmartRecruiters · official ATS",
     "url": "https://jobs.smartrecruiters.com/Playtech/744000140307099-qa-engineer",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "Brazil"
   },
   {
     "id": "smartrecruiters-744000139982729",
@@ -2436,11 +2623,12 @@ export const jobs = [
     "requirements": "Quality Information Technology Full-time",
     "technologies": [],
     "publishedAt": "2026-07-27T11:37:08.085Z",
-    "lastChecked": "2026-08-08T15:44:56.066Z",
+    "lastChecked": "2026-08-08T16:07:35.074Z",
     "source": "SmartRecruiters · official ATS",
     "url": "https://jobs.smartrecruiters.com/Playtech/744000139982729-qa-engineer",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "Ukraine"
   },
   {
     "id": "workday-tsys-job-xian-shaanxi-china-software-qa-engineer-iii-r0073127",
@@ -2455,11 +2643,12 @@ export const jobs = [
     "requirements": "R0073127 Full time",
     "technologies": [],
     "publishedAt": "Posted 3 Days Ago",
-    "lastChecked": "2026-08-08T15:44:58.872Z",
+    "lastChecked": "2026-08-08T16:07:38.894Z",
     "source": "Workday · official ATS",
     "url": "https://tsys.wd1.myworkdayjobs.com/job/XIAN-SHAANXI-CHINA/Software-QA-Engineer-III_R0073127",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "China"
   },
   {
     "id": "direct-voyage-priv-0",
@@ -2478,11 +2667,32 @@ export const jobs = [
       "CI/CD"
     ],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:56.604Z",
+    "lastChecked": "2026-08-08T16:07:36.203Z",
     "source": "Official career page",
     "url": "https://jobs.smartrecruiters.com/VoyagePriv/744000097543255-qa-engineer-full-remote-or-hybrid-m-f-d-",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "France"
+  },
+  {
+    "id": "career-https-bolt-eu-en-careers-positions-69bc787e-9fdb-4c76-98f2-13f97ea2ef96-tab-apply",
+    "title": "Senior QA Engineer",
+    "company": "Bolt",
+    "industry": "Mobility",
+    "region": "Europe",
+    "location": "Hybrid, Europe",
+    "format": "Hybrid",
+    "level": "Senior",
+    "description": "Senior QA Engineer | Bolt Careers Senior QA Engineer DEPARTMENT Engineering LOCATIONS Tallinn, Estonia Tartu, Estonia WORKPLACE Hybrid TYPE Full time View all roles Products Rides Scooters E-Bikes Bolt Drive Bolt Food Bolt Market Bolt for Business Bolt Plus Bo",
+    "requirements": "Senior QA Engineer | Bolt Careers Senior QA Engineer DEPARTMENT Engineering LOCATIONS Tallinn, Estonia Tartu, Estonia WORKPLACE Hybrid TYPE Full time View all roles Products Rides Scooters E-Bikes Bolt Drive Bolt Food Bolt Market Bolt for Business Bolt Plus Bolt Send Earn Company Support Safety Locations City solutions Get Bolt Get Bolt Food Suppliers Terms and Conditions Privacy Insurance Cookies Security Community Guidelines © 2026 Bolt Technology OÜ",
+    "technologies": [],
+    "publishedAt": null,
+    "lastChecked": "2026-08-08T16:07:40.594Z",
+    "source": "Official career page · verified job",
+    "url": "https://bolt.eu/en/careers/positions/69bc787e-9fdb-4c76-98f2-13f97ea2ef96/?tab=apply",
+    "status": "active",
+    "matchScore": 74,
+    "country": "Europe · multiple countries"
   },
   {
     "id": "career-https-bolt-eu-en-careers-positions-69bc787e-9fdb-4c76-98f2-13f97ea2ef96-",
@@ -2497,11 +2707,12 @@ export const jobs = [
     "requirements": "Senior QA Engineer | Bolt Careers Senior QA Engineer DEPARTMENT Engineering LOCATIONS Tallinn, Estonia Tartu, Estonia WORKPLACE Hybrid TYPE Full time View all roles Products Rides Scooters E-Bikes Bolt Drive Bolt Food Bolt Market Bolt for Business Bolt Plus Bolt Send Earn Company Support Safety Locations City solutions Get Bolt Get Bolt Food Suppliers Terms and Conditions Privacy Insurance Cookies Security Community Guidelines © 2026 Bolt Technology OÜ",
     "technologies": [],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:45:02.015Z",
+    "lastChecked": "2026-08-08T16:07:40.632Z",
     "source": "Official career page · verified job",
     "url": "https://bolt.eu/en/careers/positions/69bc787e-9fdb-4c76-98f2-13f97ea2ef96/",
     "status": "active",
-    "matchScore": 74
+    "matchScore": 74,
+    "country": "Europe · multiple countries"
   },
   {
     "id": "gh-8437718002",
@@ -2519,11 +2730,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-02-25T11:04:44-05:00",
-    "lastChecked": "2026-08-08T15:44:54.954Z",
+    "lastChecked": "2026-08-08T16:07:32.227Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8437718002",
     "status": "active",
-    "matchScore": 70
+    "matchScore": 70,
+    "country": "United Kingdom"
   },
   {
     "id": "gh-8437779002",
@@ -2541,11 +2753,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-02-25T11:25:46-05:00",
-    "lastChecked": "2026-08-08T15:44:54.954Z",
+    "lastChecked": "2026-08-08T16:07:32.228Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8437779002",
     "status": "active",
-    "matchScore": 70
+    "matchScore": 70,
+    "country": "United Kingdom"
   },
   {
     "id": "ashby-8fa95f75-5885-4f39-b1e7-62815d20e32a",
@@ -2565,11 +2778,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": "2025-12-26T10:13:21.738+00:00",
-    "lastChecked": "2026-08-08T15:44:55.071Z",
+    "lastChecked": "2026-08-08T16:07:32.287Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/crackenagi/8fa95f75-5885-4f39-b1e7-62815d20e32a",
     "status": "active",
-    "matchScore": 70
+    "matchScore": 70,
+    "country": "Europe · multiple countries"
   },
   {
     "id": "ashby-8f2e636c-3bd6-4206-bef4-41541f5e764d",
@@ -2587,11 +2801,12 @@ export const jobs = [
       "iOS"
     ],
     "publishedAt": "2026-07-07T12:45:06.222+00:00",
-    "lastChecked": "2026-08-08T15:44:55.314Z",
+    "lastChecked": "2026-08-08T16:07:32.649Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/voodoo/8f2e636c-3bd6-4206-bef4-41541f5e764d",
     "status": "active",
-    "matchScore": 70
+    "matchScore": 70,
+    "country": "United Kingdom / Germany / Spain / Netherlands / Poland / Estonia / Ukraine / Georgia"
   },
   {
     "id": "gh-6956219",
@@ -2614,11 +2829,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-30T01:39:59-04:00",
-    "lastChecked": "2026-08-08T15:44:54.842Z",
+    "lastChecked": "2026-08-08T16:07:32.205Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/dept/jobs/6956219",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "Argentina"
   },
   {
     "id": "gh-8519229002",
@@ -2634,11 +2850,12 @@ export const jobs = [
     "technologies": [],
     "specialization": null,
     "publishedAt": "2026-04-22T12:21:12-04:00",
-    "lastChecked": "2026-08-08T15:44:54.954Z",
+    "lastChecked": "2026-08-08T16:07:32.228Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8519229002",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "United States"
   },
   {
     "id": "gh-5190221008",
@@ -2656,11 +2873,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-22T20:28:25-04:00",
-    "lastChecked": "2026-08-08T15:44:55.121Z",
+    "lastChecked": "2026-08-08T16:07:32.236Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/divergent/jobs/5190221008",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "United States"
   },
   {
     "id": "gh-5373490008",
@@ -2678,11 +2896,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-28T18:58:43-04:00",
-    "lastChecked": "2026-08-08T15:44:55.134Z",
+    "lastChecked": "2026-08-08T16:07:32.247Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/divergent/jobs/5373490008",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "United States"
   },
   {
     "id": "ashby-10178808-a3e2-428c-92b2-88cc001223f2",
@@ -2704,11 +2923,12 @@ export const jobs = [
       "TypeScript"
     ],
     "publishedAt": "2026-08-08T08:38:56.909+00:00",
-    "lastChecked": "2026-08-08T15:44:55.204Z",
+    "lastChecked": "2026-08-08T16:07:32.445Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/Lendable/10178808-a3e2-428c-92b2-88cc001223f2",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "United Kingdom"
   },
   {
     "id": "ashby-8cbe2dc4-e746-4565-9c4e-2eda086057da",
@@ -2730,11 +2950,12 @@ export const jobs = [
       "TypeScript"
     ],
     "publishedAt": "2026-08-08T08:39:28.596+00:00",
-    "lastChecked": "2026-08-08T15:44:55.204Z",
+    "lastChecked": "2026-08-08T16:07:32.445Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/Lendable/8cbe2dc4-e746-4565-9c4e-2eda086057da",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "United Kingdom"
   },
   {
     "id": "ashby-b5e45f00-7765-462b-ad4b-2ff0cadb2a61",
@@ -2751,11 +2972,12 @@ export const jobs = [
       "API"
     ],
     "publishedAt": "2026-08-06T11:27:26.144+00:00",
-    "lastChecked": "2026-08-08T15:44:55.208Z",
+    "lastChecked": "2026-08-08T16:07:32.451Z",
     "source": "Ashby · official ATS",
     "url": "https://jobs.ashbyhq.com/Lendable/b5e45f00-7765-462b-ad4b-2ff0cadb2a61",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "United Kingdom"
   },
   {
     "id": "career-https-jobs-zalando-com-en-jobs-2725082-sap-test-automation-expert-ea-26a-infrastructure-2fe",
@@ -2770,11 +2992,12 @@ export const jobs = [
     "requirements": "SAP Test Automation Expert - EA&A Infrastructure/EAA Test Management Team(all genders) Menu All Jobs Careers Home Our Culture Toggle accordion Perks & Benefits Diversity & Inclusion Sustainability What We Do Toggle accordion Job Categories Early Careers Where We Work How We Hire Blog EN DE All Jobs SAP Test Automation Expert - EA&A Infrastructure/EAA Test Management Team(all genders) Location Romania - Bucharest Contract Full time Job Category IT Consulting & Operations Apply Back to job description Application For",
     "technologies": [],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:45:02.702Z",
+    "lastChecked": "2026-08-08T16:07:40.991Z",
     "source": "Official career page · verified job",
     "url": "https://jobs.zalando.com/en/jobs/2725082-SAP-Test-Automation-Expert---EA%26A-Infrastructure%2FE",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "Europe · multiple countries"
   },
   {
     "id": "career-https-jobs-zalando-com-en-jobs-2725078-sap-test-automation-expert-all-genders-",
@@ -2789,11 +3012,12 @@ export const jobs = [
     "requirements": "SAP Test Automation Expert (all genders) Menu All Jobs Careers Home Our Culture Toggle accordion Perks & Benefits Diversity & Inclusion Sustainability What We Do Toggle accordion Job Categories Early Careers Where We Work How We Hire Blog EN DE All Jobs SAP Test Automation Expert (all genders) Location Romania - Bucharest Contract Full time Job Category IT Consulting & Operations Apply Back to job description Application Form First Name * Last Name * Email * Country Code * Germany (+49) --- Afghanistan (+93) Åland ",
     "technologies": [],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:45:02.894Z",
+    "lastChecked": "2026-08-08T16:07:41.195Z",
     "source": "Official career page · verified job",
     "url": "https://jobs.zalando.com/en/jobs/2725078-SAP-Test-Automation-Expert-(all-genders)",
     "status": "active",
-    "matchScore": 69
+    "matchScore": 69,
+    "country": "Europe · multiple countries"
   },
   {
     "id": "gh-7437284002",
@@ -2811,11 +3035,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-05-20T12:53:55-04:00",
-    "lastChecked": "2026-08-08T15:44:54.953Z",
+    "lastChecked": "2026-08-08T16:07:32.227Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/7437284002",
     "status": "active",
-    "matchScore": 68
+    "matchScore": 68,
+    "country": "United States"
   },
   {
     "id": "gh-8618413002",
@@ -2834,11 +3059,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-07T11:31:34-04:00",
-    "lastChecked": "2026-08-08T15:44:54.954Z",
+    "lastChecked": "2026-08-08T16:07:32.228Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8618413002",
     "status": "active",
-    "matchScore": 68
+    "matchScore": 68,
+    "country": "Canada"
   },
   {
     "id": "gh-8621074002",
@@ -2857,11 +3083,12 @@ export const jobs = [
     ],
     "specialization": null,
     "publishedAt": "2026-07-07T11:31:09-04:00",
-    "lastChecked": "2026-08-08T15:44:54.954Z",
+    "lastChecked": "2026-08-08T16:07:32.228Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8621074002",
     "status": "active",
-    "matchScore": 68
+    "matchScore": 68,
+    "country": "Costa Rica"
   },
   {
     "id": "gh-8171989002",
@@ -2877,11 +3104,12 @@ export const jobs = [
     "technologies": [],
     "specialization": null,
     "publishedAt": "2025-09-16T14:58:36-04:00",
-    "lastChecked": "2026-08-08T15:44:54.955Z",
+    "lastChecked": "2026-08-08T16:07:32.229Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8171989002",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "United States"
   },
   {
     "id": "gh-8602548002",
@@ -2897,11 +3125,12 @@ export const jobs = [
     "technologies": [],
     "specialization": null,
     "publishedAt": "2026-06-22T10:36:52-04:00",
-    "lastChecked": "2026-08-08T15:44:54.957Z",
+    "lastChecked": "2026-08-08T16:07:32.230Z",
     "source": "Greenhouse · official ATS",
     "url": "https://job-boards.greenhouse.io/ttcglobal/jobs/8602548002",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "United States"
   },
   {
     "id": "smartrecruiters-744000140501526",
@@ -2916,11 +3145,12 @@ export const jobs = [
     "requirements": "Quality Information Technology Full-time",
     "technologies": [],
     "publishedAt": "2026-07-29T15:46:37.238Z",
-    "lastChecked": "2026-08-08T15:44:56.066Z",
+    "lastChecked": "2026-08-08T16:07:35.074Z",
     "source": "SmartRecruiters · official ATS",
     "url": "https://jobs.smartrecruiters.com/Playtech/744000140501526-junior-production-qa",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "Bulgaria"
   },
   {
     "id": "workday-visa-job-in-bengaluru-india-sr-sw-engineer-sdet-automation-genai-tooling-api-testing-ref080993w",
@@ -2937,11 +3167,12 @@ export const jobs = [
       "API"
     ],
     "publishedAt": "Posted 4 Days Ago",
-    "lastChecked": "2026-08-08T15:45:01.345Z",
+    "lastChecked": "2026-08-08T16:07:40.562Z",
     "source": "Workday · official ATS",
     "url": "https://visa.wd5.myworkdayjobs.com/job/IN---Bengaluru-India/Sr-SW-Engineer---SDET---Automation--GenAI-tooling--API-Testing_REF080993W",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "India"
   },
   {
     "id": "workday-visa-job-us-austin-tx-software-test-engineer-ref077610w",
@@ -2956,11 +3187,12 @@ export const jobs = [
     "requirements": "REF077610W",
     "technologies": [],
     "publishedAt": "Posted 22 Days Ago",
-    "lastChecked": "2026-08-08T15:44:56.998Z",
+    "lastChecked": "2026-08-08T16:07:36.213Z",
     "source": "Workday · official ATS",
     "url": "https://visa.wd5.myworkdayjobs.com/job/US---Austin-TX/Software-Test-Engineer_REF077610W",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "United States"
   },
   {
     "id": "workday-worldpay-job-karnataka-india-senior-automation-tester-c-sdet-specflow-7-10-yrs-pune-jr0610198",
@@ -2975,11 +3207,12 @@ export const jobs = [
     "requirements": "KARNATAKA, , INDIA JR0610198",
     "technologies": [],
     "publishedAt": null,
-    "lastChecked": "2026-08-08T15:44:59.440Z",
+    "lastChecked": "2026-08-08T16:07:38.825Z",
     "source": "Workday · official ATS",
     "url": "https://worldpay.wd5.myworkdayjobs.com/job/KARNATAKA--INDIA/Senior-Automation-Tester--C---SDET--Specflow--7-10-Yrs----Pune_JR0610198",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "India"
   },
   {
     "id": "workday-tsys-job-tempe-arizona-sdet-specialist-r0071674-1",
@@ -2994,11 +3227,12 @@ export const jobs = [
     "requirements": "R0071674 Full time",
     "technologies": [],
     "publishedAt": "Posted 2 Days Ago",
-    "lastChecked": "2026-08-08T15:44:58.871Z",
+    "lastChecked": "2026-08-08T16:07:38.894Z",
     "source": "Workday · official ATS",
     "url": "https://tsys.wd1.myworkdayjobs.com/job/TEMPE-ARIZONA/SDET-Specialist_R0071674-1",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "United States"
   },
   {
     "id": "workday-tsys-job-columbia-south-carolina-sdet-analyst-i-r0071930",
@@ -3013,11 +3247,12 @@ export const jobs = [
     "requirements": "R0071930 Full time",
     "technologies": [],
     "publishedAt": "Posted 3 Days Ago",
-    "lastChecked": "2026-08-08T15:44:58.872Z",
+    "lastChecked": "2026-08-08T16:07:38.894Z",
     "source": "Workday · official ATS",
     "url": "https://tsys.wd1.myworkdayjobs.com/job/COLUMBIA-SOUTH-CAROLINA/SDET-Analyst-I_R0071930",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "United States"
   },
   {
     "id": "workday-tsys-job-pune-india-senior-sdet-analyst-r0071955-2",
@@ -3032,11 +3267,12 @@ export const jobs = [
     "requirements": "R0071955 Full time",
     "technologies": [],
     "publishedAt": "Posted 2 Days Ago",
-    "lastChecked": "2026-08-08T15:44:58.871Z",
+    "lastChecked": "2026-08-08T16:07:38.894Z",
     "source": "Workday · official ATS",
     "url": "https://tsys.wd1.myworkdayjobs.com/job/PUNE--INDIA/Senior-SDET-Analyst_R0071955-2",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "India"
   },
   {
     "id": "workday-zendesk-job-mexico-city-mexico-it-principal-enterprise-delivery-lead-r34946-1",
@@ -3051,16 +3287,17 @@ export const jobs = [
     "requirements": "R34946",
     "technologies": [],
     "publishedAt": "Posted 5 Days Ago",
-    "lastChecked": "2026-08-08T15:44:59.627Z",
+    "lastChecked": "2026-08-08T16:07:39.051Z",
     "source": "Workday · official ATS",
     "url": "https://zendesk.wd1.myworkdayjobs.com/job/Mexico-City-Mexico/IT-Principal-Enterprise-Delivery-Lead_R34946-1",
     "status": "active",
-    "matchScore": 62
+    "matchScore": 62,
+    "country": "Mexico"
   }
 ];
 export const linkedinJobs = [];
 export const jobMeta = {
-  "generatedAt": "2026-08-08T15:44:53.203Z",
+  "generatedAt": "2026-08-08T16:07:30.784Z",
   "linkedinConnected": false,
   "coveredCompanies": [
     "Binance",
@@ -3144,6 +3381,7 @@ export const jobMeta = {
     "payabl.",
     "TheSoul Publishing",
     "Playtech",
+    "FxPro",
     "BrowserStack",
     "NCR Atleos",
     "Mastercard",
@@ -3202,5 +3440,5 @@ export const jobMeta = {
     "Trust Insurance Cyprus",
     "paytech"
   ],
-  "message": "Проверены официальные ATS и career-страницы: 138/146. Career URL: 145/145. Vacancy URL: 125/125. Ошибки не остановили остальные источники."
+  "message": "Проверены официальные ATS и career-страницы: 139/146. Career URL: 145/145. Vacancy URL: 130/130. Ошибки не остановили остальные источники."
 };

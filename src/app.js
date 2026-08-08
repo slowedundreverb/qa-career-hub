@@ -55,6 +55,7 @@ const cleanJobText = (value='') => {
   return text.replace(/\s+/g,' ').trim();
 };
 const initials = name => name.split(/\s+/).map(x => x[0]).join('').slice(0,2).toUpperCase();
+const jobCountry = job => job.country || (/cyprus|limassol|nicosia|paphos/i.test(job.location||'') ? 'Cyprus' : /remote|global|worldwide|anywhere/i.test(job.location||'') ? 'Worldwide' : 'Country not specified');
 const watchedCompanies = () => [...customCompanies, ...companies];
 const companyKey = name => String(name).replace(/\.US$/,'').replace(/\s*\/\s*Gen Digital$/,'').trim().toLowerCase();
 const saveCustomCompanies = () => localStorage.setItem('qa-hub-custom-companies', JSON.stringify(customCompanies));
@@ -144,121 +145,9 @@ let mobileNavigationCleanup;
 
 function bindMobileNavigation() {
   mobileNavigationCleanup?.();
-  const banner=document.querySelector('.sidebar, .learn-sidebar');
-  if(!banner) return;
-
-  const topbar=document.querySelector('.topbar');
-  const spacer=document.createElement('div');
-  spacer.className='mobile-navigation-spacer';
-  banner.after(spacer);
-
-  let compact=false;
-  let triggerY=0;
-  let frame=0;
-  let collapseTimer=0;
-  let revealTimer=0;
-  let expandTimer=0;
-  let fullHeight=0;
-  let hasScrolledAfterCollapse=false;
-  let lastScrollY=window.scrollY;
-
-  const compactHeight=()=>window.matchMedia('(max-width: 620px)').matches?84:88;
-
-  const reset=()=>{
-    compact=false;
-    hasScrolledAfterCollapse=false;
-    clearTimeout(collapseTimer);
-    clearTimeout(revealTimer);
-    clearTimeout(expandTimer);
-    banner.classList.remove('is-collapsing','is-condensed','is-fixed');
-    spacer.classList.remove('active');
-    spacer.style.height='';
-  };
-
-  const measure=()=>{
-    if(compact||!window.matchMedia('(max-width: 900px)').matches) return;
-    const topbarHeight=topbar?.getBoundingClientRect().height||0;
-    triggerY=window.scrollY+banner.getBoundingClientRect().top-topbarHeight+14;
-  };
-
-  const setCompact=next=>{
-    if(next===compact) return;
-    compact=next;
-    clearTimeout(collapseTimer);
-    clearTimeout(revealTimer);
-    clearTimeout(expandTimer);
-    if(next){
-      hasScrolledAfterCollapse=false;
-      fullHeight=banner.getBoundingClientRect().height;
-      spacer.style.height=`${fullHeight}px`;
-      banner.classList.add('is-fixed');
-      spacer.classList.add('active');
-      requestAnimationFrame(()=>{
-        banner.classList.add('is-collapsing');
-        collapseTimer=window.setTimeout(()=>{
-          if(!compact) return;
-          banner.classList.add('is-condensed');
-          spacer.style.height=`${compactHeight()}px`;
-        },220);
-      });
-      return;
-    }
-    spacer.style.height=`${fullHeight}px`;
-    banner.classList.remove('is-condensed');
-    revealTimer=window.setTimeout(()=>{
-      if(compact) return;
-      banner.classList.remove('is-collapsing');
-    },260);
-    expandTimer=window.setTimeout(()=>{
-      if(compact) return;
-      banner.classList.remove('is-fixed');
-      spacer.classList.remove('active');
-      spacer.style.height='';
-      measure();
-    },460);
-  };
-
-  const update=()=>{
-    frame=0;
-    const mobile=window.matchMedia('(max-width: 900px)').matches;
-    if(!mobile){
-      reset();
-      return;
-    }
-    const currentScrollY=window.scrollY;
-    if(!compact){
-      if(currentScrollY>triggerY) setCompact(true);
-    }else{
-      if(currentScrollY>triggerY+8) hasScrolledAfterCollapse=true;
-      const movingUp=currentScrollY<lastScrollY-1;
-      if(hasScrolledAfterCollapse&&movingUp&&currentScrollY<=triggerY) setCompact(false);
-    }
-    lastScrollY=currentScrollY;
-  };
-
-  const scheduleUpdate=()=>{
-    if(frame) return;
-    frame=requestAnimationFrame(update);
-  };
-
-  const resize=()=>{
-    if(!compact) measure();
-    scheduleUpdate();
-  };
-
-  measure();
-  update();
-  window.addEventListener('scroll',scheduleUpdate,{passive:true});
-  window.addEventListener('resize',resize,{passive:true});
-  mobileNavigationCleanup=()=>{
-    cancelAnimationFrame(frame);
-    clearTimeout(collapseTimer);
-    clearTimeout(revealTimer);
-    clearTimeout(expandTimer);
-    window.removeEventListener('scroll',scheduleUpdate);
-    window.removeEventListener('resize',resize);
-    spacer.remove();
-  };
+  document.querySelectorAll('.mobile-navigation-spacer').forEach(spacer=>spacer.remove());
+  document.querySelectorAll('.sidebar, .learn-sidebar').forEach(banner=>banner.classList.remove('is-collapsing','is-condensed','is-fixed'));
+  mobileNavigationCleanup=undefined;
 }
 
 function bindGlobal() {
@@ -413,12 +302,12 @@ function linkedinBlock() {
 function jobCard(j) {
   const fav = state.favorites.has(j.id);
   return `<article class="job-card">
-    <div class="company-logo" style="--h:${(j.company.length*31)%360}">${esc(initials(j.company))}</div>
-    <div class="job-content"><div class="job-title-row"><div><span class="fit ${j.matchScore>=85?'great':''}">${j.matchScore||70}% совпадение</span><h3>${esc(j.title)}</h3></div><button class="save ${fav?'saved':''}" data-favorite="${esc(j.id)}" aria-label="Сохранить">${fav?'♥':'♡'}</button></div>
-      <div class="job-company"><b>${esc(j.company)}</b><span>·</span><span>${esc(j.location)}</span></div>
+    <header class="job-card-header"><div class="company-logo" style="--h:${(j.company.length*31)%360}">${esc(initials(j.company))}</div><div class="job-card-employer"><b>${esc(j.company)}</b><span>${esc(jobCountry(j))}</span></div><button class="save ${fav?'saved':''}" data-favorite="${esc(j.id)}" aria-label="${fav?'Убрать из сохранённых':'Сохранить вакансию'}">${fav?'♥':'♡'}</button></header>
+    <div class="job-content"><div class="job-title-row"><div><span class="fit ${j.matchScore>=85?'great':''}">${j.matchScore||70}% совпадение</span><h3>${esc(j.title)}</h3></div></div>
+      <div class="job-company"><span>${esc(j.location)}</span></div>
       <p>${esc(cleanJobText(j.description) || 'Описание и требования доступны на официальной странице работодателя.')}</p>
-      <div class="tag-cloud job-tags">${(j.technologies||[]).slice(0,6).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
-      <div class="job-meta"><span>${esc(j.industry||'Technology')}</span><span>${esc(j.region||'Global')}</span><span>${j.format||'Не указан'}</span><span>${j.level||'Уровень не указан'}</span><span>проверено ${date(j.lastChecked)}</span><span class="status-dot">${j.status==='active'?'активна':'перепроверить'}</span></div>
+      <div class="tag-cloud job-tags">${(j.technologies||[]).slice(0,4).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+      <div class="job-meta"><span>${esc(j.industry||'Technology')}</span><span>${esc(jobCountry(j))}</span><span>${j.format||'Не указан'}</span><span>${j.level||'Уровень не указан'}</span><span>проверено ${date(j.lastChecked)}</span><span class="status-dot">${j.status==='active'?'активна':'перепроверить'}</span></div>
     </div>
     <a class="apply" href="${esc(j.url)}" target="_blank" rel="noreferrer">Официальная вакансия <span>↗</span></a>
   </article>`;
@@ -554,7 +443,8 @@ async function refreshJobs(){
   if(!panel||!button||!status) return;
   panel.classList.add('refreshing'); button.disabled=true; status.textContent='Проверяем официальные источники…';
   try{
-    const response=await fetch('/api/refresh-jobs',{method:'POST'});
+    const previousCount=jobs.length;
+    const response=await fetch(`/api/refresh-jobs?refresh=${Date.now()}`,{method:'POST',cache:'no-store',headers:{'cache-control':'no-cache'}});
     const result=await response.json().catch(()=>({}));
     if(!response.ok) throw new Error(result.error||'Refresh unavailable');
     if(!Array.isArray(result.jobs)) throw new Error('Invalid refresh response');
@@ -564,7 +454,9 @@ async function refreshJobs(){
     sessionStorage.setItem('qa-hub-jobs',JSON.stringify({jobs:result.jobs,linkedinJobs:result.linkedinJobs||[],meta:jobMeta}));
     state.settingsOpen=false;
     render();
-    toast(`Готово: ${result.count} активных вакансий${result.warnings?` · ${sourceWarning(result.warnings)}`:''}`);
+    const fxProCount=result.jobs.filter(job=>companyKey(job.company)==='fxpro').length;
+    const delta=result.count-previousCount;
+    toast(`Обновлено: ${result.count} вакансий${delta?` (${delta>0?'+':''}${delta})`:''} · FxPro: ${fxProCount}${result.warnings?` · ${sourceWarning(result.warnings)}`:''}`);
   }catch(error){
     console.error('Job refresh failed',error);
     panel.classList.remove('refreshing'); button.disabled=false; status.textContent='Не удалось проверить данные';

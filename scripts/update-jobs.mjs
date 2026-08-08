@@ -95,6 +95,7 @@ const sources = [
   { type:'workable', token:'payabl', company:'payabl.', industry:'Payments' },
   { type:'workable', token:'thesoul-publishing-1', company:'TheSoul Publishing', industry:'MediaTech' },
   { type:'smartrecruiters', token:'Playtech', company:'Playtech', industry:'iGaming' },
+  { type:'bamboohr', token:'fxpro', company:'FxPro', industry:'Fintech' },
   { type:'workday', host:'browserstack.wd3.myworkdayjobs.com', tenant:'browserstack', site:'External', company:'BrowserStack', industry:'Testing' },
   { type:'workday', host:'ncratleos.wd1.myworkdayjobs.com', tenant:'ncratleos', site:'ext_non_usalteos', company:'NCR Atleos', industry:'Fintech' },
   { type:'workday', host:'mastercard.wd1.myworkdayjobs.com', tenant:'mastercard', site:'CorporateCareers', company:'Mastercard', industry:'Payments' },
@@ -128,6 +129,70 @@ const regions = {
   Global: /remote|global|worldwide|anywhere/i
 };
 const regionOf = location => Object.entries(regions).find(([,pattern])=>pattern.test(location))?.[0] || 'Other';
+const countryPatterns = [
+  ['Cyprus', /\b(?:cyprus|limassol|nicosia|paphos|ypsonas|latsia|lefkosia|cy)\b/i],
+  ['United Arab Emirates', /\b(?:united arab emirates|uae|dubai|abu dhabi)\b/i],
+  ['United States', /\b(?:united states|usa|u\.s\.|new york|california|san francisco|seattle|boston|austin|chicago|denver|miami|atlanta|arizona|south carolina|tempe)\b/i],
+  ['United Kingdom', /\b(?:united kingdom|uk|london|manchester|edinburgh|belfast)\b/i],
+  ['Canada', /\b(?:canada|toronto|vancouver|montreal|ottawa|calgary)\b/i],
+  ['Germany', /\b(?:germany|berlin|munich|hamburg|frankfurt|cologne)\b/i],
+  ['Spain', /\b(?:spain|madrid|barcelona|valencia|malaga)\b/i],
+  ['Netherlands', /\b(?:netherlands|amsterdam|rotterdam|utrecht)\b/i],
+  ['Italy', /\b(?:italy|milan|rome|turin)\b/i],
+  ['France', /\b(?:france|paris|rennes|lyon|marseille)\b/i],
+  ['Ireland', /\b(?:ireland|dublin|cork|\birl\b)\b/i],
+  ['Poland', /\b(?:poland|warsaw|krakow|kraków|wroclaw|wrocław|gdansk|gdańsk)\b/i],
+  ['Portugal', /\b(?:portugal|lisbon|porto)\b/i],
+  ['Serbia', /\b(?:serbia|belgrade|novi sad)\b/i],
+  ['Armenia', /\b(?:armenia|yerevan)\b/i],
+  ['Estonia', /\b(?:estonia|tallinn|tartu)\b/i],
+  ['Czech Republic', /\b(?:czech(?: republic|ia)?|prague|\bcze\b)\b/i],
+  ['Romania', /\b(?:romania|bucharest|cluj)\b/i],
+  ['Bulgaria', /\b(?:bulgaria|sofia)\b/i],
+  ['Greece', /\b(?:greece|athens|thessaloniki)\b/i],
+  ['Malta', /\b(?:malta|valletta)\b/i],
+  ['Ukraine', /\b(?:ukraine|kyiv|kiev|lviv)\b/i],
+  ['Georgia', /\b(?:georgia|tbilisi|batumi)\b/i],
+  ['Sweden', /\b(?:sweden|stockholm)\b/i],
+  ['Denmark', /\b(?:denmark|copenhagen)\b/i],
+  ['Norway', /\b(?:norway|oslo)\b/i],
+  ['Finland', /\b(?:finland|helsinki)\b/i],
+  ['Switzerland', /\b(?:switzerland|zurich|geneva)\b/i],
+  ['Austria', /\b(?:austria|vienna)\b/i],
+  ['Belgium', /\b(?:belgium|brussels)\b/i],
+  ['Hungary', /\b(?:hungary|budapest)\b/i],
+  ['Lithuania', /\b(?:lithuania|vilnius|kaunas)\b/i],
+  ['Latvia', /\b(?:latvia|riga)\b/i],
+  ['Slovenia', /\b(?:slovenia|ljubljana)\b/i],
+  ['Croatia', /\b(?:croatia|zagreb)\b/i],
+  ['Slovakia', /\b(?:slovakia|bratislava)\b/i],
+  ['Israel', /\b(?:israel|tel aviv|jerusalem)\b/i],
+  ['India', /\b(?:india|bengaluru|bangalore|chennai|hyderabad|mumbai|pune|\bind\b)\b/i],
+  ['Singapore', /\b(?:singapore)\b/i],
+  ['Malaysia', /\b(?:malaysia|kuala lumpur|\bmys\b)\b/i],
+  ['Hong Kong', /\b(?:hong kong)\b/i],
+  ['Japan', /\b(?:japan|tokyo|osaka)\b/i],
+  ['Taiwan', /\b(?:taiwan|taipei)\b/i],
+  ['Thailand', /\b(?:thailand|bangkok)\b/i],
+  ['Australia', /\b(?:australia|sydney|melbourne|brisbane)\b/i],
+  ['New Zealand', /\b(?:new zealand|auckland|wellington)\b/i],
+  ['Brazil', /\b(?:brazil|sao paulo|são paulo)\b/i],
+  ['Mexico', /\b(?:mexico|mexico city)\b/i],
+  ['Costa Rica', /\b(?:costa rica|san jos[eé])\b/i],
+  ['Argentina', /\b(?:argentina|buenos aires)\b/i],
+  ['Colombia', /\b(?:colombia|bogota|bogotá)\b/i],
+  ['China', /\b(?:china|beijing|shanghai|shenzhen|xian|xi'an|shaanxi)\b/i],
+  ['South Africa', /\b(?:south africa|cape town|johannesburg)\b/i]
+];
+const countryOf = location => {
+  const value=String(location||'');
+  const matches=countryPatterns.filter(([,pattern])=>pattern.test(value)).map(([country])=>country);
+  if(matches.length) return [...new Set(matches)].join(' / ');
+  if(/\b(?:europe|emea|european union|eu only)\b/i.test(value)) return 'Europe · multiple countries';
+  if(/\b(?:remote|global|worldwide|anywhere)\b/i.test(value)) return 'Worldwide';
+  if(/\b(?:asia|apac|latin america|latam|middle east|africa)\b/i.test(value)) return `${strip(value).slice(0,80)} · multiple countries`;
+  return 'Country not specified';
+};
 const strip = html => String(html||'')
   .replace(/<(script|style|noscript)\b[^>]*>[\s\S]*?<\/\1>/gi,' ')
   .replace(/&amp;/gi,'&')
@@ -419,6 +484,14 @@ async function fetchSource(source) {
     }
     return [...new Map(rows.map(row=>[row.id,row])).values()];
   }
+  if(source.type==='bamboohr') {
+    const data=await fetchJSON(`https://${source.token}.bamboohr.com/careers/list`);
+    return (data.result||[]).map(j=>{
+      const location=[j.location?.city,j.location?.state,j.atsLocation?.city,j.atsLocation?.state,j.atsLocation?.country,j.isRemote?'Remote':null].filter(Boolean).join(', ')||'Not specified';
+      const description=strip(`${j.departmentLabel||''} ${j.employmentStatusLabel||''} ${j.employmentType||''}`);
+      return toJob(source,{id:`bamboohr-${source.token}-${j.id}`,title:j.jobOpeningName,description,location,url:`https://${source.token}.bamboohr.com/careers/${j.id}`,sourceLabel:'BambooHR · official ATS'});
+    });
+  }
   if(source.type==='workday') {
     const rows=[];
     for(const query of ['qa','quality','test']){
@@ -507,7 +580,9 @@ export async function collectJobs({checkCompanies=false}={}) {
     catch(error){report.errors.push(`LinkedIn adapter: ${error.message}`);}
   }
 
-  let jobs=[...new Map(all.map(j=>[`${j.company}|${j.title}|${j.location}`.toLowerCase(),j])).values()].sort((a,b)=>(b.matchScore||0)-(a.matchScore||0));
+  let jobs=[...new Map(all.map(j=>[`${j.company}|${j.url||`${j.title}|${j.location}`}`.toLowerCase(),j])).values()]
+    .map(job=>({...job,country:countryOf(`${job.location} ${job.url}`)}))
+    .sort((a,b)=>(b.matchScore||0)-(a.matchScore||0));
   const coveredCompanies=report.sources.filter(x=>['ok','cached'].includes(x.status)).map(x=>x.company);
 
   if(checkCompanies){
