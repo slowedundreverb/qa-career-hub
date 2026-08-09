@@ -6,6 +6,8 @@ import { questions } from './data/questions.js';
 
 const app = document.querySelector('#app');
 const saved = JSON.parse(localStorage.getItem('qa-hub-state') || '{}');
+const learningContentVersion = 'interview-theory-2026-08-09';
+const savedLearningIsCurrent = saved.learningContentVersion === learningContentVersion;
 let versionHistory = { repository: '', commits: [], loading: true };
 const cachedJobs = JSON.parse(sessionStorage.getItem('qa-hub-jobs') || 'null');
 if (cachedJobs?.jobs?.length && new Date(cachedJobs.meta?.generatedAt || 0) > new Date(jobMeta.generatedAt || 0)) {
@@ -20,11 +22,11 @@ const state = {
   jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit', jobFiltersOpen: false,
   companySearch: '', companySearchDraft: '', companyOpenFirst: true,
   favoritesOnly: false,
-  track: 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: saved.quizCategory || 'Все',
-  completed: new Set(saved.completed || []),
+  track: 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: savedLearningIsCurrent ? saved.quizCategory || 'Все' : 'Все',
+  completed: new Set(savedLearningIsCurrent ? saved.completed || [] : []),
   favorites: new Set(saved.favorites || []),
-  quiz: saved.quiz?.set?.length === 10 ? saved.quiz : null,
-  quizStats: saved.quizStats || { answered: 0, correct: 0 },
+  quiz: savedLearningIsCurrent && saved.quiz?.set?.length === 10 ? saved.quiz : null,
+  quizStats: savedLearningIsCurrent ? saved.quizStats || { answered: 0, correct: 0 } : { answered: 0, correct: 0 },
   settingsOpen: false
 };
 
@@ -64,7 +66,8 @@ const companyLogo = (name, small=false) => {
 const date = value => value ? new Intl.DateTimeFormat('ru', { day:'2-digit', month:'short' }).format(new Date(value)) : '—';
 const save = () => localStorage.setItem('qa-hub-state', JSON.stringify({
   completed:[...state.completed], favorites:[...state.favorites], quizStats: state.quizStats,
-  quiz: state.quiz, quizCategory: state.quizCategory, learnView: state.learnView
+  quiz: state.quiz, quizCategory: state.quizCategory, learnView: state.learnView,
+  learningContentVersion
 }));
 const shuffle = arr => [...arr].sort(() => Math.random() - .5);
 const sourceWarning = count => count % 10 === 1 && count % 100 !== 11
@@ -486,31 +489,20 @@ function renderLearn() {
 
 function theoryView(roadmap=false) {
   const filtered = curriculum.filter(t => (state.track==='Все'||t.track===state.track) && `${t.title} ${t.summary} ${t.theory}`.toLowerCase().includes(state.theorySearch.toLowerCase()));
-  return `<div class="learn-head"><div><span class="eyebrow">${roadmap?'ПЛАН ПОДГОТОВКИ':'БАЗА ЗНАНИЙ'}</span><h2>${roadmap?'QA-интервью: от основ к практике':'Коротко. По делу. Для интервью.'}</h2><p>${roadmap?'Повторяйте ключевые темы, закрепляйте знания и выбирайте собственную траекторию.':'Ищите по теме, фильтруйте трек и отмечайте пройденное.'}</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
+  return `<div class="learn-head"><div><span class="eyebrow">${roadmap?'ПЛАН ПОДГОТОВКИ':'БАЗА ЗНАНИЙ'}</span><h2>${roadmap?'Теория для QA-собеседования':'Коротко. По делу. Для интервью.'}</h2><p>${roadmap?'10 тем из нового конспекта: тестирование, REST API, SQL, Web и Android.':'Ищите по теме, фильтруйте трек и отмечайте пройденное.'}</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
   <div class="theory-tools"><form class="search learn-search-form"><input id="theory-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти определение или тему" aria-label="Поиск по плану подготовки" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="track-tabs">${tracks.map(t=>`<button data-track="${t}" class="${state.track===t?'active':''}">${t}</button>`).join('')}</div></div>
   <div class="topic-grid">${filtered.map((t,i)=>topicCard(t,i,roadmap)).join('')}</div>${!filtered.length?'<div class="empty-state"><h3>Темы не найдены</h3><p>Измените запрос или выберите другой трек.</p></div>':''}
   ${state.selectedTopic?topicModal(curriculum.find(t=>t.id===state.selectedTopic)):''}`;
 }
 
 function knowledgeView() {
-  const baseQuestions=questions.slice(0,Math.floor(questions.length/2));
+  const baseQuestions=questions;
   const categories=['Все',...new Set(baseQuestions.map(q=>q.category))];
   const query=state.theorySearch.toLowerCase();
   const filtered=baseQuestions.filter(q=>(state.knowledgeCategory==='Все'||q.category===state.knowledgeCategory)&&`${q.prompt} ${q.answer} ${q.explanation}`.toLowerCase().includes(query));
-  const resources=[
-    ['QA Core','ISTQB Foundation Level','Силлабус, glossary и sample exams','https://www.istqb.org/certifications/certified-tester-foundation-level-ctfl-v4-0/'],
-    ['Web','MDN: HTTP','Методы, статусы, заголовки и кеширование','https://developer.mozilla.org/en-US/docs/Web/HTTP'],
-    ['Security','OWASP Testing Guide','Практическая методология web security testing','https://owasp.org/www-project-web-security-testing-guide/'],
-    ['API','Postman Docs','Скрипты проверок и автоматизация коллекций','https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/'],
-    ['Java','Oracle: BigDecimal','Точность, scale и правила округления','https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html'],
-    ['Automation','Selenium Docs','WebDriver, ожидания и тестовые практики','https://www.selenium.dev/documentation/'],
-    ['Integration','Testcontainers for Java','Реальные зависимости в integration tests','https://java.testcontainers.org/'],
-    ['Data','PostgreSQL Tutorial','SQL, joins, transactions и aggregates','https://www.postgresql.org/docs/current/tutorial-sql.html']
-  ];
   return `<div class="learn-head knowledge-head"><div><span class="eyebrow">БАЗА ЗНАНИЙ</span><h2>Вопрос. Ответ. Почему.</h2><p>${baseQuestions.length} коротких разборов для повторения перед интервью.</p></div></div>
     <div class="knowledge-tools"><form class="search learn-search-form"><input id="knowledge-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти вопрос, термин или ответ" aria-label="Поиск по базе знаний" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="knowledge-tabs">${categories.map(c=>`<button data-knowledge-category="${c}" class="${state.knowledgeCategory===c?'active':''}">${c}</button>`).join('')}</div></div>
-    <div class="knowledge-layout"><section class="knowledge-list">${filtered.map((q,i)=>`<details class="knowledge-card" ${i===0?'open':''}><summary><span>${String(i+1).padStart(2,'0')}</span><div><small>${q.category}</small><h3>${q.prompt}</h3></div><b>+</b></summary><div class="knowledge-answer"><section><span>Короткий ответ</span><p>${q.answer}</p></section><section><span>Почему так</span><p>${q.explanation}</p></section></div></details>`).join('')||'<div class="empty-state"><h3>Ничего не найдено</h3><p>Измените запрос или категорию.</p></div>'}</section>
-    <aside class="resource-panel"><span class="kicker">ПОЛЕЗНО ПОЧИТАТЬ</span><h3>Официальные источники</h3><div class="resource-list">${resources.map(([tag,title,description,url])=>`<a href="${url}" target="_blank" rel="noreferrer"><small>${tag}</small><b>${title}</b><span>${description}</span><i>↗</i></a>`).join('')}</div></aside></div>`;
+    <div class="knowledge-layout knowledge-only"><section class="knowledge-list">${filtered.map((q,i)=>`<details class="knowledge-card" ${i===0?'open':''}><summary><span>${String(i+1).padStart(2,'0')}</span><div><small>${q.category}</small><h3>${q.prompt}</h3></div><b>+</b></summary><div class="knowledge-answer"><section><span>Короткий ответ</span><p>${q.answer}</p></section><section><span>Почему так</span><p>${q.explanation}</p></section></div></details>`).join('')||'<div class="empty-state"><h3>Ничего не найдено</h3><p>Измените запрос или категорию.</p></div>'}</section></div>`;
 }
 
 function topicCard(t,i,roadmap) {
@@ -521,14 +513,15 @@ function topicCard(t,i,roadmap) {
 function topicModal(t) {
   if(!t) return '';
   const complete=state.completed.has(t.id);
-  return `<div class="topic-overlay" id="topic-overlay"><section class="topic-modal" role="dialog" aria-modal="true" aria-labelledby="topic-title"><button id="close-topic" aria-label="Закрыть конспект">×</button><span class="track">${t.track} · ${t.duration} минут</span><h2 id="topic-title">${t.title}</h2><div class="key-callout"><span>!</span><div><b>Формулировка для интервью</b><p>${t.key}</p></div></div><section><h3>Короткий ответ</h3><p>${t.summary}</p></section><section><h3>Разбор</h3><p>${t.theory}</p></section><div class="modal-columns"><section><h3>Вопрос на интервью</h3><p>${t.interview}</p></section><section><h3>Практика</h3><p>${t.exercise}</p></section></div><button class="complete-btn ${complete?'complete':''}" data-complete="${t.id}"><span class="complete-icon" aria-hidden="true">${complete?'✓':''}</span><span>${complete?'Тема пройдена':'Отметить как пройденную'}</span></button></section></div>`;
+  const sections=(t.sections||[]).map(section=>`<section class="topic-section"><h3>${esc(section.title)}</h3>${section.flow?`<div class="topic-flow">${section.flow.map((step,index)=>`<span>${esc(step)}${index<section.flow.length-1?'<i>→</i>':''}</span>`).join('')}</div>`:''}${section.points?`<div class="topic-points">${section.points.map(([term,description])=>`<div><b>${esc(term)}</b><p>${esc(description)}</p></div>`).join('')}</div>`:''}${section.note?`<p class="topic-note">${esc(section.note)}</p>`:''}</section>`).join('');
+  return `<div class="topic-overlay" id="topic-overlay"><section class="topic-modal" role="dialog" aria-modal="true" aria-labelledby="topic-title"><button id="close-topic" aria-label="Закрыть конспект">×</button><span class="track">${t.track} · ${t.duration} минут</span><h2 id="topic-title">${t.title}</h2><div class="key-callout"><span>!</span><div><b>Формулировка для интервью</b><p>${t.key}</p></div></div><section><h3>Короткий ответ</h3><p>${t.summary}</p></section><div class="topic-sections">${sections}</div><div class="modal-columns"><section><h3>Вопрос на интервью</h3><p>${t.interview}</p></section><section><h3>Практика</h3><p>${t.exercise}</p></section></div><button class="complete-btn ${complete?'complete':''}" data-complete="${t.id}"><span class="complete-icon" aria-hidden="true">${complete?'✓':''}</span><span>${complete?'Тема пройдена':'Отметить как пройденную'}</span></button></section></div>`;
 }
 
 function quizView() {
   if (!state.quiz) startQuiz(false);
   const q=state.quiz.question;
   const accuracy=state.quizStats.answered?Math.round(state.quizStats.correct/state.quizStats.answered*100):0;
-  const quizCategories=['Все','QA Core','Web & API','Java AQA','Domain'];
+  const quizCategories=['Все',...new Set(questions.map(question=>question.category))];
   return `<div class="quiz-head"><div><span class="eyebrow">ИНТЕРВЬЮ-ТРЕНАЖЁР</span><h2>Сессия из 10 вопросов</h2><p>Сначала ответьте вслух. Затем выберите вариант и разберите объяснение.</p></div><button class="new-session-btn" id="new-quiz">Новая сессия ↻</button></div>
     <div class="quiz-workspace">
       <section class="quiz-card quiz-exam">

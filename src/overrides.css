@@ -637,6 +637,15 @@
   gap: 8px;
 }
 
+.knowledge-layout.knowledge-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.knowledge-only .knowledge-list {
+  width: 100%;
+  max-width: 980px;
+}
+
 .knowledge-card {
   overflow: hidden;
   border: 1px solid var(--line);
@@ -748,6 +757,94 @@ body:has(.topic-overlay) {
   top: 0;
   float: right;
   z-index: 2;
+}
+
+.topic-sections {
+  display: grid;
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.topic-section {
+  margin: 0 !important;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #faf9f5;
+}
+
+.topic-section > h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+.topic-points {
+  display: grid;
+}
+
+.topic-points > div {
+  display: grid;
+  grid-template-columns: minmax(130px, .4fr) minmax(0, 1fr);
+  gap: 14px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+}
+
+.topic-points > div:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.topic-points > div:last-child {
+  padding-bottom: 0;
+}
+
+.topic-points b {
+  color: var(--navy);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.topic-points p {
+  margin: 0 !important;
+  color: #56615c;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.topic-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.topic-flow span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: #edf5f0;
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.topic-flow i {
+  color: #91a39b;
+  font-style: normal;
+}
+
+.topic-note {
+  margin: 12px 0 0 !important;
+  padding: 12px 14px;
+  border-left: 3px solid var(--green);
+  border-radius: 8px;
+  background: #edf5f0;
+  color: #42504a;
+  font-size: 10px;
+  line-height: 1.6;
 }
 
 .topic-modal > .complete-btn {
@@ -1879,6 +1976,20 @@ body:has(.topic-overlay) {
   }
 
   .topic-modal h2 { font-size: 25px; }
+
+  .topic-points > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .topic-flow {
+    align-items: stretch;
+  }
+
+  .topic-flow span {
+    flex: 1 1 140px;
+    justify-content: space-between;
+  }
 
   #companies-dialog {
     width: calc(100vw - 16px);
