@@ -3328,8 +3328,9 @@ body:has(.topic-overlay) {
 .plan-topic-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
   gap: 10px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .plan-topic-grid .topic-card,
@@ -3389,8 +3390,9 @@ body:has(.topic-overlay) {
 
 .question-pick-card.in-plan {
   background: #fbfaf6;
-  min-height: 112px;
-  align-self: start;
+  min-height: 190px;
+  height: 100%;
+  align-self: stretch;
 }
 
 .quiz-overview-head {
@@ -3609,7 +3611,7 @@ body:has(.topic-overlay) {
   .plan-topic-grid .topic-card,
   .question-pick-card,
   .quiz-question-grid .question-pick-card { min-height: 142px; }
-  .question-pick-card.in-plan { min-height: 96px; }
+  .question-pick-card.in-plan { min-height: 142px; }
   .quiz-overview-head h2 { font-size: 29px; }
   .quiz-session-launch { grid-template-columns: 1fr; padding: 20px; }
   .quiz-session-actions { align-items: stretch; }

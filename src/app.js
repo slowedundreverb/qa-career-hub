@@ -31,6 +31,8 @@ const state = {
   settingsOpen: false
 };
 
+const planTheoryCoveredQuestions=new Set([26,28,30,31,37,47]);
+
 const esc = (s='') => String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const navIcon = name => {
   const paths = {
@@ -504,7 +506,7 @@ function theoryView() {
 }
 
 function planTopicSection(topic,index) {
-  const questions=interviewQuestions.filter(question=>question.planTopicId===topic.id);
+  const questions=interviewQuestions.filter(question=>question.planTopicId===topic.id&&!planTheoryCoveredQuestions.has(question.number));
   return `<section class="plan-topic-section" aria-labelledby="plan-topic-${topic.id}">
     <div class="plan-topic-heading"><div><small>${esc(topic.track)}</small><h3 id="plan-topic-${topic.id}">${esc(topic.title)}</h3></div><b>${questions.length ? `${questions.length} ${questions.length===1?'вопрос':'вопросов'}` : 'только теория'}</b></div>
     <div class="plan-topic-grid">${topicCard(topic,index)}${questions.map(question=>questionPickCard(question,'plan')).join('')}</div>
