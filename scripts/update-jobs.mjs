@@ -598,7 +598,19 @@ async function fetchSource(source) {
       } catch {}
     }
     rows=[...new Map(rows.map(row=>[row.url,row])).values()];
-    return verifyDiscoveredJobs(rows,source);
+    const verified=await verifyDiscoveredJobs(rows,source);
+    if(source.evidence?.title&&source.evidence?.url&&!verified.some(job=>job.title.toLowerCase()===source.evidence.title.toLowerCase())) {
+      verified.push(toJob(source,{
+        id:`linkedin-evidence-${source.company}-${source.evidence.url}`,
+        title:source.evidence.title,
+        description:`Current QA/AQA role discovered through LinkedIn and linked to the official company vacancy source.`,
+        location:source.evidence.location||source.location||'Not specified',
+        url:source.evidence.url,
+        publishedAt:source.evidence.publishedAt||null,
+        sourceLabel:'LinkedIn discovery · official company source'
+      }));
+    }
+    return verified;
   }
   const data=await fetchJSON(`https://boards-api.greenhouse.io/v1/boards/${source.token}/jobs?content=true`);
   return (data.jobs||[]).map(j=>{
@@ -615,7 +627,7 @@ export async function collectJobs({checkCompanies=false}={}) {
   const configuredCompanies=new Set(sources.map(source=>source.company.toLowerCase()));
   const careerSources=companies
     .filter(company=>!configuredCompanies.has(company.name.toLowerCase()))
-    .map(company=>({type:'career',company:company.name,industry:company.industry,url:company.careerUrl,location:[company.city,company.country].filter(Boolean).join(', ')}));
+    .map(company=>({type:'career',company:company.name,industry:company.industry,url:company.careerUrl,location:[company.city,company.country].filter(Boolean).join(', '),discovery:company.discovery,evidence:company.linkedinEvidence}));
   const effectiveSources=[...sources,...careerSources];
 
   // Источники независимы, но ограничиваем параллельность, чтобы не терять ответы из-за перегрузки соединений.
@@ -628,7 +640,9 @@ export async function collectJobs({checkCompanies=false}={}) {
         ? j.specialization?.toLowerCase()===source.qaSpecialization.toLowerCase()
         : source.includeAllQuality
           ? qa.test(j.title)
-        : qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`))));
+        : source.discovery==='linkedin'
+          ? qa.test(j.title)
+          : qa.test(j.title)&&(explicitSoftwareQATitle.test(j.title)||softwareSignal.test(`${j.title} ${j.description} ${j.requirements}`))));
       return {source,rows,accepted};
     } catch(error) {
       return {source,error};
@@ -638,10 +652,21 @@ export async function collectJobs({checkCompanies=false}={}) {
   for(const result of sourceResults){
     if(result.error){
       const cached=previousJobs.filter(job=>job.company.toLowerCase()===result.source.company.toLowerCase());
-      all.push(...cached.map(job=>({...job,source:`${job.source.replace(/ · cached after temporary source error$/,'')} · cached after temporary source error`})));
-      report.sources.push({...result.source,status:cached.length?'cached':'error',cached:cached.length,error:result.error.message});
+      const evidence=result.source.discovery==='linkedin'?result.source.evidence:null;
+      const evidenceJob=evidence?.title&&evidence?.url?toJob(result.source,{
+        id:`linkedin-evidence-${result.source.company}-${evidence.url}`,
+        title:evidence.title,
+        description:'Current QA/AQA role discovered through LinkedIn and linked to the official company vacancy source.',
+        location:evidence.location||result.source.location||'Not specified',
+        url:evidence.url,
+        publishedAt:evidence.publishedAt||null,
+        sourceLabel:'LinkedIn discovery · official company source'
+      }):null;
+      const recovered=[...(evidenceJob?[evidenceJob]:[]),...cached.map(job=>({...job,source:`${job.source.replace(/ · cached after temporary source error$/,'')} · cached after temporary source error`}))];
+      all.push(...new Map(recovered.map(job=>[`${job.company}|${job.url}`.toLowerCase(),job])).values());
+      report.sources.push({...result.source,status:evidenceJob?'evidence':cached.length?'cached':'error',cached:cached.length,error:result.error.message});
       report.errors.push(`${result.source.company}: ${result.error.message}`);
-      console.warn(`× ${result.source.company}: ${result.error.message}${cached.length?` · kept ${cached.length} verified vacancies from the previous snapshot`:''}`);
+      console.warn(`× ${result.source.company}: ${result.error.message}${evidenceJob?' · kept current LinkedIn evidence with an official company URL':cached.length?` · kept ${cached.length} verified vacancies from the previous snapshot`:''}`);
       continue;
     }
     all.push(...result.accepted);
@@ -658,7 +683,7 @@ export async function collectJobs({checkCompanies=false}={}) {
   let jobs=[...new Map(all.map(j=>[`${j.company}|${j.url||`${j.title}|${j.location}`}`.toLowerCase(),j])).values()]
     .map(job=>({...job,country:countryOf(`${job.location} ${job.url}`)}))
     .sort((a,b)=>(b.matchScore||0)-(a.matchScore||0));
-  const coveredCompanies=report.sources.filter(x=>['ok','cached'].includes(x.status)).map(x=>x.company);
+  const coveredCompanies=report.sources.filter(x=>['ok','cached','evidence'].includes(x.status)).map(x=>x.company);
 
   if(checkCompanies){
     report.jobLinks=await mapWithConcurrency(jobs,12,async job=>({

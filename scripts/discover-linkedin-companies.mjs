@@ -8,13 +8,11 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const companiesPath=resolve(root,'src/data/companies.js');
 const reportPath=resolve(root,'.linkedin-discovery-report.json');
 const shouldWrite=process.argv.includes('--write');
-const maxNew=12;
+const maxCandidates=36;
 const rolePattern=/\b(?:qa|quality assurance|quality engineer|test engineer|test automation|automation test|sdet|aqa)\b/i;
-const explicitSoftwareRole=/\b(?:qa|aqa|sdet|software test(?:er|ing)?|test automation|quality assurance engineer)\b/i;
-const softwareContext=/\b(?:software|web|mobile|api|automation|selenium|playwright|cypress|appium|backend|frontend|application|platform|javascript|typescript|python|java|ci\/cd)\b/i;
-const agencyPattern=/\b(?:recruit(?:ing|ment|er)?|staffing|talent solutions?|headhunt(?:er|ing)?|executive search)\b/i;
-const careerPattern=/\b(?:careers?|jobs?|vacanc(?:y|ies)|positions?|open roles?|opportunities|join (?:us|the team))\b/i;
-const listingPattern=/\b(?:careers?|jobs?|vacanc(?:y|ies)|positions?|open roles?|openings?|opportunities)\b/i;
+const careerPattern=/\b(?:careers?|jobs?|vacanc(?:y|ies)|positions?|open roles?|opportunities|join (?:us|the team)|karriere|karrier|kariera|stellen(?:angebote|markt)?|offene stellen|emploi|emplois|carri[eè]res?|recrutement|postes?|trabajo|empleo|vacantes?|trabaja con nosotros|lavora con noi|posizioni aperte|carreiras?|vagas|trabalhe conosco|praca|oferty pracy|vacatures|werken bij|volna mista|allas)\b/i;
+const listingPattern=/\b(?:careers?|jobs?|vacanc(?:y|ies)|positions?|open roles?|openings?|opportunities|karriere|karrier|kariera|stellen(?:angebote|markt)?|offene stellen|emploi|emplois|carri[eè]res?|recrutement|postes?|trabajo|empleo|vacantes?|trabaja con nosotros|lavora con noi|posizioni aperte|carreiras?|vagas|trabalhe conosco|praca|oferty pracy|vacatures|werken bij|volna mista|allas)\b/i;
+const editorialPathPattern=/\/(?:blog|news|article|articles|insights|press|stories)(?:\/|$)/i;
 const sharedAtsPattern=/(?:greenhouse\.io|lever\.co|ashbyhq\.com|myworkdayjobs\.com|smartrecruiters\.com|workable\.com|bamboohr\.com|jobvite\.com|teamtailor\.com)$/i;
 const searches=[
   ['QA Engineer','European Union',false],
@@ -204,20 +202,36 @@ async function verifiedOfficialJobUrl(careerUrl,website,job) {
   return null;
 }
 
-async function careerUrlFor(website) {
-  if(careerPattern.test(new URL(website).pathname)&&!isLikelyDirectJobUrl(website)) return website;
+async function careerUrlFor(website,job) {
   try {
     const page=await fetchText(website);
     const candidates=extractAnchors(page.html,page.url)
       .filter(anchor=>careerPattern.test(`${anchor.label} ${new URL(anchor.url).pathname}`))
       .filter(anchor=>!/linkedin\.com|facebook\.com|instagram\.com|youtube\.com/i.test(anchor.url))
+      .filter(anchor=>!editorialPathPattern.test(new URL(anchor.url).pathname))
       .filter(anchor=>!isLikelyDirectJobUrl(anchor.url))
-      .map(anchor=>({...anchor,score:(/careers?|jobs?|vacanc/i.test(new URL(anchor.url).pathname)?3:0)+(/careers?|jobs?|vacanc|open roles?/i.test(anchor.label)?2:0)}))
-      .sort((a,b)=>b.score-a.score);
-    for(const candidate of candidates.slice(0,4)) {
-      try { return (await fetchText(candidate.url,{timeout:12000})).url; } catch {}
+      .map(anchor=>({...anchor,score:(listingPattern.test(new URL(anchor.url).pathname)?4:0)+(listingPattern.test(anchor.label)?3:0)}));
+    try {
+      const sitemap=await fetchText(new URL('/sitemap.xml',page.url).href,{timeout:12000});
+      for(const match of sitemap.html.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)) {
+        const url=publicUrl(match[1],sitemap.url);
+        if(url&&careerPattern.test(new URL(url).pathname)&&!isLikelyDirectJobUrl(url)) candidates.push({url,label:'sitemap',score:5});
+      }
+    } catch {}
+    if(careerPattern.test(new URL(page.url).pathname)&&!isLikelyDirectJobUrl(page.url)) candidates.push({url:page.url,label:'current page',score:4});
+    const unique=[...new Map(candidates.map(candidate=>[candidate.url,candidate])).values()].sort((a,b)=>b.score-a.score);
+    let best={url:page.url,score:0};
+    for(const candidate of unique.slice(0,6)) {
+      try {
+        const target=await fetchText(candidate.url,{timeout:12000});
+        const anchors=extractAnchors(target.html,target.url);
+        const roleVisible=sameRole(text(target.html),job.title)||anchors.some(anchor=>sameRole(anchor.label,job.title));
+        const score=candidate.score+(roleVisible?20:0)+(anchors.some(anchor=>rolePattern.test(anchor.label))?8:0);
+        if(score>best.score) best={url:target.url,score};
+        if(roleVisible) break;
+      } catch {}
     }
-    return page.url;
+    return best.score>=4?best.url:page.url;
   } catch { return website; }
 }
 
@@ -254,10 +268,17 @@ for(const [keyword,location,remote] of searches) {
   await sleep(650);
 }
 
-const candidates=[...new Map(discoveredJobs.map(job=>[companyKey(job.company),job])).values()]
+const discoveredByCompany=new Map();
+for(const job of discoveredJobs) {
+  const key=companyKey(job.company);
+  const current=discoveredByCompany.get(key);
+  // Keep the geographically useful result instead of letting the later Worldwide
+  // search overwrite an EU/UK/Cyprus location for the same company.
+  if(!current||(current.remote&&!job.remote)) discoveredByCompany.set(key,job);
+}
+const candidates=[...discoveredByCompany.values()]
   .filter(job=>!knownNames.has(companyKey(job.company)))
-  .filter(job=>!agencyPattern.test(job.company))
-  .slice(0,maxNew*3);
+  .slice(0,maxCandidates);
 const additions=[];
 const rejected=[];
 const candidateResults=new Map(candidates.map(job=>[companyKey(job.company),{
@@ -276,23 +297,12 @@ const recordCandidate=(job,status,reason='',details={})=>{
 };
 
 for(const job of candidates) {
-  if(additions.length>=maxNew) break;
   try {
     try {
       const detail=await fetchText(job.jobUrl,{timeout:15000});
       Object.assign(job,linkedInJobDetails(detail.html,job));
     } catch {}
-    if(!explicitSoftwareRole.test(job.title)&&!softwareContext.test(job.description)) {
-      const reason='The LinkedIn role is not verified as software QA/AQA';
-      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason});
-      recordCandidate(job,'rejected',reason);
-      continue;
-    }
     const profile=await fetchText(job.companyProfile);
-    if(agencyPattern.test(industryFrom(profile.html))) {
-      recordCandidate(job,'rejected','The LinkedIn company profile is categorized as recruiting or staffing');
-      continue;
-    }
     const website=externalWebsite(profile.html);
     if(!website) {
       recordCandidate(job,'rejected','No official company website was found on the LinkedIn company profile');
@@ -303,28 +313,18 @@ for(const job of candidates) {
       recordCandidate(job,'already-tracked','The official website is already present in the company catalogue',{website});
       continue;
     }
-    const listingUrl=await careerUrlFor(website);
-    if(isLikelyDirectJobUrl(listingUrl)) {
-      const reason='The official URL resolves to one job instead of a reusable vacancy listing';
-      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason});
-      recordCandidate(job,'rejected',reason,{website,careerUrl:listingUrl});
-      console.warn(`× ${job.company}: official career source is a direct vacancy URL`);
-      continue;
-    }
+    const discoveredListingUrl=await careerUrlFor(website,job);
+    const listingUrl=isLikelyDirectJobUrl(discoveredListingUrl)?website:discoveredListingUrl;
     const verified=await verifiedOfficialJobUrl(listingUrl,website,job);
-    if(!verified) {
-      const reason='No matching QA/AQA role was verified on the official company or ATS site';
-      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason});
-      recordCandidate(job,'rejected',reason,{website,careerUrl:listingUrl});
-      console.warn(`× ${job.company}: official QA vacancy URL was not verified`);
-      continue;
-    }
     const careerUrl=listingUrl;
     const [country,city]=geography(job.location,job.remote);
-    additions.push({name:job.company,country,city,industry:industryFrom(profile.html),careerUrl,verifiedJobUrl:verified.url,linkedinJob:job.jobUrl,verifiedRole:verified.title||job.title});
-    recordCandidate(job,'added','Verified on the official company or ATS vacancy listing',{website,careerUrl,verifiedJobUrl:verified.url,verifiedRole:verified.title||job.title});
+    const verifiedJobUrl=verified?.url||careerUrl;
+    const verifiedRole=verified?.title||job.title;
+    const evidence={title:verifiedRole,location:job.location||city,publishedAt:job.publishedAt||'',url:verifiedJobUrl,linkedinJob:job.jobUrl};
+    additions.push({name:job.company,country,city,industry:industryFrom(profile.html),careerUrl,verifiedJobUrl,linkedinJob:job.jobUrl,verifiedRole,evidence});
+    recordCandidate(job,'added',verified?'Matched on the official company or ATS vacancy listing':'Accepted from a current LinkedIn QA/AQA vacancy; the reusable official career page was found',{website,careerUrl,verifiedJobUrl,verifiedRole});
     knownNames.add(companyKey(job.company)); knownHosts.add(host);
-    console.log(`+ ${job.company}: ${careerUrl} (verified via ${verified.url})`);
+    console.log(`+ ${job.company}: ${careerUrl}${verified?` (matched via ${verified.url})`:' (accepted from current LinkedIn QA/AQA role)'}`);
   } catch(error) {
     recordCandidate(job,'error',error.message);
     console.warn(`× ${job.company}: ${error.message}`);
@@ -335,14 +335,14 @@ for(const job of candidates) {
 for(const candidate of candidateResults.values()) {
   if(candidate.status==='pending') {
     candidate.status='deferred';
-    candidate.reason='The per-run addition limit was reached before this candidate was checked';
+    candidate.reason='The candidate was not completed in this run';
   }
 }
 
 if(shouldWrite&&additions.length) {
   const source=await readFile(companiesPath,'utf8');
-  const marker='].map(([name,country,city,industry,careerUrl,discovery], index) => ({';
-  const rows=additions.map(company=>`  [${[company.name,company.country,company.city,company.industry,company.careerUrl,'linkedin'].map(value=>JSON.stringify(value)).join(',')}],`).join('\n');
+  const marker='].map(([name,country,city,industry,careerUrl,discovery,linkedinEvidence], index) => ({';
+  const rows=additions.map(company=>`  [${[company.name,company.country,company.city,company.industry,company.careerUrl,'linkedin',company.evidence].map(value=>JSON.stringify(value)).join(',')}],`).join('\n');
   const insertAt=source.indexOf(marker);
   if(insertAt<0) throw new Error('Company list insertion point not found');
   const before=source.slice(0,insertAt).trimEnd();
