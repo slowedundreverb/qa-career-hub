@@ -763,8 +763,7 @@ body:has(.topic-overlay) {
   margin: 22px 0;
 }
 
-.question-explanation,
-.question-topic-context {
+.question-explanation {
   margin: 0 0 14px;
   padding: 18px;
   border: 1px solid var(--line);
@@ -772,28 +771,16 @@ body:has(.topic-overlay) {
   background: #faf9f5;
 }
 
-.question-explanation h3,
-.question-topic-context h3 {
+.question-explanation h3 {
   margin: 0 0 9px;
   font-size: 16px;
 }
 
-.question-explanation p,
-.question-topic-context p {
+.question-explanation p {
   margin: 0;
   color: #56615c;
   font-size: 11px;
   line-height: 1.75;
-}
-
-.question-topic-context {
-  border-color: #c8ded4;
-  background: #f1f7f3;
-}
-
-.question-topic-context .kicker {
-  display: block;
-  margin-bottom: 8px;
 }
 
 .topic-sections {
