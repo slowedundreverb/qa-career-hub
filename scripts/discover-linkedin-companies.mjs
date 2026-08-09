@@ -260,6 +260,20 @@ const candidates=[...new Map(discoveredJobs.map(job=>[companyKey(job.company),jo
   .slice(0,maxNew*3);
 const additions=[];
 const rejected=[];
+const candidateResults=new Map(candidates.map(job=>[companyKey(job.company),{
+  name:job.company,
+  title:job.title,
+  location:job.location,
+  publishedAt:job.publishedAt||'',
+  linkedinJob:job.jobUrl,
+  linkedinCompany:job.companyProfile,
+  status:'pending',
+  reason:''
+}]));
+const recordCandidate=(job,status,reason='',details={})=>{
+  const key=companyKey(job.company);
+  candidateResults.set(key,{...(candidateResults.get(key)||{name:job.company}),status,reason,...details});
+};
 
 for(const job of candidates) {
   if(additions.length>=maxNew) break;
@@ -269,36 +283,60 @@ for(const job of candidates) {
       Object.assign(job,linkedInJobDetails(detail.html,job));
     } catch {}
     if(!explicitSoftwareRole.test(job.title)&&!softwareContext.test(job.description)) {
-      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason:'The LinkedIn role is not verified as software QA/AQA'});
+      const reason='The LinkedIn role is not verified as software QA/AQA';
+      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason});
+      recordCandidate(job,'rejected',reason);
       continue;
     }
     const profile=await fetchText(job.companyProfile);
-    if(agencyPattern.test(industryFrom(profile.html))) continue;
+    if(agencyPattern.test(industryFrom(profile.html))) {
+      recordCandidate(job,'rejected','The LinkedIn company profile is categorized as recruiting or staffing');
+      continue;
+    }
     const website=externalWebsite(profile.html);
-    if(!website) continue;
+    if(!website) {
+      recordCandidate(job,'rejected','No official company website was found on the LinkedIn company profile');
+      continue;
+    }
     const host=new URL(website).hostname.replace(/^www\./,'');
-    if(knownHosts.has(host)) continue;
+    if(knownHosts.has(host)) {
+      recordCandidate(job,'already-tracked','The official website is already present in the company catalogue',{website});
+      continue;
+    }
     const listingUrl=await careerUrlFor(website);
     if(isLikelyDirectJobUrl(listingUrl)) {
-      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason:'The official URL resolves to one job instead of a reusable vacancy listing'});
+      const reason='The official URL resolves to one job instead of a reusable vacancy listing';
+      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason});
+      recordCandidate(job,'rejected',reason,{website,careerUrl:listingUrl});
       console.warn(`× ${job.company}: official career source is a direct vacancy URL`);
       continue;
     }
     const verified=await verifiedOfficialJobUrl(listingUrl,website,job);
     if(!verified) {
-      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason:'No matching QA/AQA role was verified on the official company or ATS site'});
+      const reason='No matching QA/AQA role was verified on the official company or ATS site';
+      rejected.push({name:job.company,linkedinJob:job.jobUrl,reason});
+      recordCandidate(job,'rejected',reason,{website,careerUrl:listingUrl});
       console.warn(`× ${job.company}: official QA vacancy URL was not verified`);
       continue;
     }
     const careerUrl=listingUrl;
     const [country,city]=geography(job.location,job.remote);
     additions.push({name:job.company,country,city,industry:industryFrom(profile.html),careerUrl,verifiedJobUrl:verified.url,linkedinJob:job.jobUrl,verifiedRole:verified.title||job.title});
+    recordCandidate(job,'added','Verified on the official company or ATS vacancy listing',{website,careerUrl,verifiedJobUrl:verified.url,verifiedRole:verified.title||job.title});
     knownNames.add(companyKey(job.company)); knownHosts.add(host);
     console.log(`+ ${job.company}: ${careerUrl} (verified via ${verified.url})`);
   } catch(error) {
+    recordCandidate(job,'error',error.message);
     console.warn(`× ${job.company}: ${error.message}`);
   }
   await sleep(500);
+}
+
+for(const candidate of candidateResults.values()) {
+  if(candidate.status==='pending') {
+    candidate.status='deferred';
+    candidate.reason='The per-run addition limit was reached before this candidate was checked';
+  }
 }
 
 if(shouldWrite&&additions.length) {
@@ -312,6 +350,6 @@ if(shouldWrite&&additions.length) {
   await writeFile(companiesPath,`${before}${separator}${rows}\n${source.slice(insertAt)}`);
 }
 
-const report={generatedAt:new Date().toISOString(),searched:searches.length,linkedinJobs:discoveredJobs.length,candidates:candidates.length,added:additions.length,rejected:rejected.length,write:shouldWrite,companies:additions,rejections:rejected};
-if(shouldWrite) await writeFile(reportPath,JSON.stringify(report,null,2));
+const report={generatedAt:new Date().toISOString(),searched:searches.length,linkedinJobs:discoveredJobs.length,candidates:candidates.length,added:additions.length,rejected:rejected.length,write:shouldWrite,companies:additions,candidateCompanies:[...candidateResults.values()],rejections:rejected};
+await writeFile(reportPath,JSON.stringify(report,null,2));
 console.log(JSON.stringify(report,null,2));
