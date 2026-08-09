@@ -2,11 +2,11 @@ import { companies } from './data/companies.js';
 import { companyLogos } from './data/company-logos.js';
 import { jobs, linkedinJobs, jobMeta } from './data/jobs.js';
 import { curriculum, tracks } from './data/curriculum.js';
-import { interviewQuestions, interviewCategories } from './data/interview-questions.js';
+import { questions } from './data/questions.js';
 
 const app = document.querySelector('#app');
 const saved = JSON.parse(localStorage.getItem('qa-hub-state') || '{}');
-const learningContentVersion = 'interview-quiz-2026-08-09';
+const learningContentVersion = 'interview-theory-2026-08-09';
 const savedLearningIsCurrent = saved.learningContentVersion === learningContentVersion;
 let versionHistory = { repository: '', commits: [], loading: true };
 const cachedJobs = JSON.parse(sessionStorage.getItem('qa-hub-jobs') || 'null');
@@ -18,20 +18,17 @@ if (cachedJobs?.jobs?.length && new Date(cachedJobs.meta?.generatedAt || 0) > ne
 const modeFromHash = () => location.hash.includes('versions') ? 'versions' : location.hash.includes('learn') ? 'learn' : 'jobs';
 const state = {
   mode: modeFromHash(),
-  learnView: saved.learnView === 'quiz' ? 'quiz' : 'roadmap',
+  learnView: saved.learnView || 'roadmap',
   jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit', jobFiltersOpen: false,
   companySearch: '', companySearchDraft: '', companyOpenFirst: true,
   favoritesOnly: false,
-  track: 'Все', theorySearch: '', theorySearchDraft: '', selectedTopic: null, selectedPlanQuestion: null,
+  track: 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: savedLearningIsCurrent ? saved.quizCategory || 'Все' : 'Все',
   completed: new Set(savedLearningIsCurrent ? saved.completed || [] : []),
   favorites: new Set(saved.favorites || []),
-  quizCategory: savedLearningIsCurrent && interviewCategories.includes(saved.quizCategory) ? saved.quizCategory : 'Все',
-  quiz: savedLearningIsCurrent && saved.quiz?.set?.length ? saved.quiz : null,
+  quiz: savedLearningIsCurrent && saved.quiz?.set?.length === 10 ? saved.quiz : null,
   quizStats: savedLearningIsCurrent ? saved.quizStats || { answered: 0, correct: 0 } : { answered: 0, correct: 0 },
   settingsOpen: false
 };
-
-const planTheoryCoveredQuestions=new Set([26,28,30,31,37,47]);
 
 const esc = (s='') => String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const navIcon = name => {
@@ -68,11 +65,11 @@ const companyLogo = (name, small=false) => {
 };
 const date = value => value ? new Intl.DateTimeFormat('ru', { day:'2-digit', month:'short' }).format(new Date(value)) : '—';
 const save = () => localStorage.setItem('qa-hub-state', JSON.stringify({
-  completed:[...state.completed], favorites:[...state.favorites], learnView: state.learnView,
-  quizCategory: state.quizCategory, quiz: state.quiz, quizStats: state.quizStats,
+  completed:[...state.completed], favorites:[...state.favorites], quizStats: state.quizStats,
+  quiz: state.quiz, quizCategory: state.quizCategory, learnView: state.learnView,
   learningContentVersion
 }));
-const shuffle = array => [...array].sort(() => Math.random() - .5);
+const shuffle = arr => [...arr].sort(() => Math.random() - .5);
 const sourceWarning = count => count % 10 === 1 && count % 100 !== 11
   ? `${count} источник требует перепроверки`
   : count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 12 || count % 100 > 14)
@@ -162,7 +159,6 @@ function bindGlobal() {
     window.setTimeout(()=>{
       state.mode=targetMode;
       state.selectedTopic=null;
-      state.selectedPlanQuestion=null;
       location.hash=targetMode;
     },animated&&!reduceMotion?300:0);
   }));
@@ -187,14 +183,12 @@ document.addEventListener('click',e=>{
 });
 
 function resetTrainingProgress(){
-  if(!confirm('Сбросить пройденные темы и прогресс интервью-тренажёра?')) return;
+  if(!confirm('Сбросить пройденные темы, текущую сессию и статистику тренажёра?')) return;
   state.completed.clear();
+  state.quizStats={answered:0,correct:0};
   state.quiz=null;
   state.quizCategory='Все';
-  state.quizStats={answered:0,correct:0};
   state.learnView='roadmap';
-  state.selectedTopic=null;
-  state.selectedPlanQuestion=null;
   state.settingsOpen=false;
   save();
   render();
@@ -483,37 +477,35 @@ function renderLearn() {
       <div class="eyebrow">INTERVIEW LAB</div><h1><span>Готовьтесь.</span><em>Практикуйтесь.</em><span>Отвечайте.</span></h1>
       <div class="progress-ring" style="--p:${pct}"><div><strong>${pct}%</strong><span>курса</span></div></div>
       <nav class="learn-nav">
-        <button data-learn="roadmap" class="${state.learnView==='roadmap'?'active':''}"><span>${navIcon('roadmap')}</span><div><b>План подготовки</b><small>${curriculum.length} тем + ${interviewQuestions.length} вопросов</small></div></button>
-        <button data-learn="quiz" class="${state.learnView==='quiz'?'active':''}"><span>${navIcon('quiz')}</span><div><b>Интервью-тренажёр</b><small>${interviewQuestions.length} реальных вопросов</small></div></button>
+        <button data-learn="roadmap" class="${state.learnView==='roadmap'?'active':''}"><span>${navIcon('roadmap')}</span><div><b>План подготовки</b><small>${curriculum.length} тем</small></div></button>
+        <button data-learn="theory" class="${state.learnView==='theory'?'active':''}"><span>${navIcon('knowledge')}</span><div><b>База знаний</b><small>теория и практика</small></div></button>
+        <button data-learn="quiz" class="${state.learnView==='quiz'?'active':''}"><span>${navIcon('quiz')}</span><div><b>Тренажёр</b><small>${questions.length} вопросов</small></div></button>
       </nav>
     </aside>
-    <section class="learn-main">${state.learnView==='quiz'?interviewTrainerView():theoryView()}</section>
+    <section class="learn-main">${state.learnView==='quiz'?quizView():state.learnView==='theory'?knowledgeView():theoryView(true)}</section>
   </main>`);
   bindLearn();
 }
 
-function theoryView() {
-  const query=state.theorySearch.toLowerCase();
-  const filtered = curriculum.filter(t => {
-    const related=interviewQuestions.filter(question=>question.planTopicId===t.id);
-    return (state.track==='Все'||t.track===state.track) && `${t.title} ${t.summary} ${t.theory} ${related.map(question=>question.prompt).join(' ')}`.toLowerCase().includes(query);
-  });
-  return `<div class="learn-head"><div><span class="eyebrow">ПЛАН ПОДГОТОВКИ</span><h2>Теория и готовые ответы</h2><p>Читайте конспекты, раскрывайте вопросы и сверяйтесь с короткими ответами и объяснениями — без перехода в тренажёр.</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
+function theoryView(roadmap=false) {
+  const filtered = curriculum.filter(t => (state.track==='Все'||t.track===state.track) && `${t.title} ${t.summary} ${t.theory}`.toLowerCase().includes(state.theorySearch.toLowerCase()));
+  return `<div class="learn-head"><div><span class="eyebrow">${roadmap?'ПЛАН ПОДГОТОВКИ':'БАЗА ЗНАНИЙ'}</span><h2>${roadmap?'Теория для QA-собеседования':'Коротко. По делу. Для интервью.'}</h2><p>${roadmap?'10 тем из нового конспекта: тестирование, REST API, SQL, Web и Android.':'Ищите по теме, фильтруйте трек и отмечайте пройденное.'}</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
   <div class="theory-tools"><form class="search learn-search-form"><input id="theory-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти определение или тему" aria-label="Поиск по плану подготовки" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="track-tabs">${tracks.map(t=>`<button data-track="${t}" class="${state.track===t?'active':''}">${t}</button>`).join('')}</div></div>
-  <div class="plan-topic-list">${filtered.map((t,i)=>planTopicSection(t,curriculum.indexOf(t))).join('')}</div>${!filtered.length?'<div class="empty-state"><h3>Темы не найдены</h3><p>Измените запрос или выберите другой трек.</p></div>':''}
-  ${state.selectedTopic?topicModal(curriculum.find(t=>t.id===state.selectedTopic)):''}
-  ${state.selectedPlanQuestion?planQuestionModal(interviewQuestions.find(question=>question.id===state.selectedPlanQuestion)):''}`;
+  <div class="topic-grid">${filtered.map((t,i)=>topicCard(t,i,roadmap)).join('')}</div>${!filtered.length?'<div class="empty-state"><h3>Темы не найдены</h3><p>Измените запрос или выберите другой трек.</p></div>':''}
+  ${state.selectedTopic?topicModal(curriculum.find(t=>t.id===state.selectedTopic)):''}`;
 }
 
-function planTopicSection(topic,index) {
-  const questions=interviewQuestions.filter(question=>question.planTopicId===topic.id&&!planTheoryCoveredQuestions.has(question.number));
-  return `<section class="plan-topic-section" aria-labelledby="plan-topic-${topic.id}">
-    <div class="plan-topic-heading"><div><small>${esc(topic.track)}</small><h3 id="plan-topic-${topic.id}">${esc(topic.title)}</h3></div><b>${questions.length ? `${questions.length} ${questions.length===1?'вопрос':'вопросов'}` : 'только теория'}</b></div>
-    <div class="plan-topic-grid">${topicCard(topic,index)}${questions.map(question=>questionPickCard(question,'plan')).join('')}</div>
-  </section>`;
+function knowledgeView() {
+  const baseQuestions=questions;
+  const categories=['Все',...new Set(baseQuestions.map(q=>q.category))];
+  const query=state.theorySearch.toLowerCase();
+  const filtered=baseQuestions.filter(q=>(state.knowledgeCategory==='Все'||q.category===state.knowledgeCategory)&&`${q.prompt} ${q.answer} ${q.explanation}`.toLowerCase().includes(query));
+  return `<div class="learn-head knowledge-head"><div><span class="eyebrow">БАЗА ЗНАНИЙ</span><h2>Вопрос. Ответ. Почему.</h2><p>${baseQuestions.length} коротких разборов для повторения перед интервью.</p></div></div>
+    <div class="knowledge-tools"><form class="search learn-search-form"><input id="knowledge-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти вопрос, термин или ответ" aria-label="Поиск по базе знаний" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="knowledge-tabs">${categories.map(c=>`<button data-knowledge-category="${c}" class="${state.knowledgeCategory===c?'active':''}">${c}</button>`).join('')}</div></div>
+    <div class="knowledge-layout knowledge-only"><section class="knowledge-list">${filtered.map((q,i)=>`<details class="knowledge-card" ${i===0?'open':''}><summary><span>${String(i+1).padStart(2,'0')}</span><div><small>${q.category}</small><h3>${q.prompt}</h3></div><b>+</b></summary><div class="knowledge-answer"><section><span>Короткий ответ</span><p>${q.answer}</p></section><section><span>Почему так</span><p>${q.explanation}</p></section></div></details>`).join('')||'<div class="empty-state"><h3>Ничего не найдено</h3><p>Измените запрос или категорию.</p></div>'}</section></div>`;
 }
 
-function topicCard(t,i) {
+function topicCard(t,i,roadmap) {
   const done=state.completed.has(t.id);
   return `<article class="topic-card ${done?'done':''}" data-topic="${t.id}"><div class="topic-num">${String(i+1).padStart(2,'0')}</div><div class="topic-body"><div class="topic-top"><span class="track">${t.track}</span><span>${t.duration} мин</span></div><h3>${t.title}</h3><p>${t.summary}</p><div class="topic-footer"><span>${done?'✓ Пройдено':'Открыть конспект'}</span><b>→</b></div></div></article>`;
 }
@@ -525,181 +517,61 @@ function topicModal(t) {
   return `<div class="topic-overlay" id="topic-overlay"><section class="topic-modal" role="dialog" aria-modal="true" aria-labelledby="topic-title"><button id="close-topic" aria-label="Закрыть конспект">×</button><span class="track">${t.track} · ${t.duration} минут</span><h2 id="topic-title">${t.title}</h2><div class="key-callout"><span>!</span><div><b>Формулировка для интервью</b><p>${t.key}</p></div></div><section><h3>Короткий ответ</h3><p>${t.summary}</p></section><div class="topic-sections">${sections}</div><div class="modal-columns"><section><h3>Вопрос на интервью</h3><p>${t.interview}</p></section><section><h3>Практика</h3><p>${t.exercise}</p></section></div><button class="complete-btn ${complete?'complete':''}" data-complete="${t.id}"><span class="complete-icon" aria-hidden="true">${complete?'✓':''}</span><span>${complete?'Тема пройдена':'Отметить как пройденную'}</span></button></section></div>`;
 }
 
-function planQuestionModal(question) {
-  if(!question) return '';
-  const topic=curriculum.find(entry=>entry.id===question.planTopicId);
-  const sections=(topic?.sections||[]).map(section=>`<section class="topic-section"><h3>${esc(section.title)}</h3>${section.flow?`<div class="topic-flow">${section.flow.map((step,index)=>`<span>${esc(step)}${index<section.flow.length-1?'<i>→</i>':''}</span>`).join('')}</div>`:''}${section.points?`<div class="topic-points">${section.points.map(([term,description])=>`<div><b>${esc(term)}</b><p>${esc(description)}</p></div>`).join('')}</div>`:''}${section.note?`<p class="topic-note">${esc(section.note)}</p>`:''}</section>`).join('');
-  return `<div class="topic-overlay" id="question-overlay"><section class="topic-modal question-modal" role="dialog" aria-modal="true" aria-labelledby="question-title"><button id="close-plan-question" aria-label="Закрыть вопрос">×</button><span class="track">ВОПРОС ${String(question.number).padStart(2,'0')} · ${esc(question.category)}</span><h2 id="question-title">${esc(question.prompt)}</h2><div class="key-callout"><span>!</span><div><b>Короткий ответ</b><p>${esc(question.answer)}</p></div></div><section class="question-explanation"><h3>Почему так</h3><p>${esc(question.explanation)}</p></section>${topic?`<div class="topic-sections">${sections}</div>`:''}</section></div>`;
-}
-
-function interviewTrainerView() {
-  if(state.quiz?.finished) return quizCompleteView();
-  if(state.quiz?.set?.length) return quizQuestionView();
-  return quizOverviewView();
-}
-
-function questionPickCard(question,context='trainer') {
-  if(context==='plan'){
-    return `<button class="question-pick-card in-plan" data-plan-question-id="${question.id}"><span>${String(question.number).padStart(2,'0')}</span><div><small>${esc(question.category)}</small><b>${esc(question.prompt)}</b></div><i>→</i></button>`;
-  }
-  return `<button class="question-pick-card" data-question-id="${question.id}"><span>${String(question.number).padStart(2,'0')}</span><div><small>${esc(question.category)}</small><b>${esc(question.prompt)}</b></div><i>→</i></button>`;
-}
-
-function quizOverviewView() {
-  const groups=interviewCategories.filter(category=>category!=='Все');
-  return `<div class="quiz-overview-head"><span class="eyebrow">ИНТЕРВЬЮ-ТРЕНАЖЁР</span><h2>Выберите тему или начните сессию</h2><p>${interviewQuestions.length} вопросов с вариантами ответов и объяснениями. Можно открыть любой вопрос или пройти случайный раунд.</p></div>
-    <section class="quiz-session-launch">
-      <div><span class="kicker">РЕЖИМ СЕССИИ</span><h3>10 случайных вопросов</h3><p>Выберите фокус. Если в теме меньше десяти вопросов, раунд дополнится вопросами из других тем.</p></div>
-      <div class="quiz-session-actions"><div class="quiz-focus-picker">${interviewCategories.map(category=>`<button data-quiz-category="${esc(category)}" class="${state.quizCategory===category?'active':''}">${esc(category)}</button>`).join('')}</div><button id="start-random-session">Начать сессию →</button></div>
-    </section>
-    <div class="quiz-groups">${groups.map(category=>{
-      const questions=interviewQuestions.filter(question=>question.category===category);
-      return `<section class="quiz-group"><div class="quiz-group-head"><div><span>${String(questions.length).padStart(2,'0')}</span><h3>${esc(category)}</h3></div><p>${questions.length} вопросов</p></div><div class="quiz-question-grid">${questions.map(question=>questionPickCard(question)).join('')}</div></section>`;
-    }).join('')}</div>`;
-}
-
-function activeQuizQuestion() {
-  const item=state.quiz?.set?.[state.quiz.index];
-  const question=interviewQuestions.find(entry=>entry.id===item?.id);
-  return question ? {...question,displayOptions:item.displayOptions} : null;
-}
-
-function quizQuestionView() {
-  const question=activeQuizQuestion();
-  if(!question){ state.quiz=null; return quizOverviewView(); }
-  const total=state.quiz.set.length;
-  const accuracy=state.quiz.index ? Math.round(state.quiz.score/state.quiz.index*100) : 0;
-  return `<div class="quiz-head"><div><span class="eyebrow">ИНТЕРВЬЮ-ТРЕНАЖЁР</span><h2>${state.quiz.mode==='session'?'Сессия из 10 вопросов':question.category}</h2><p>Выберите наиболее точный ответ, затем разберите объяснение.</p></div><button class="new-session-btn" id="back-to-quiz-list">Все вопросы</button></div>
-    <div class="quiz-workspace ${state.quiz.mode==='session'?'session':'single'}">
+function quizView() {
+  if (!state.quiz) startQuiz(false);
+  const q=state.quiz.question;
+  const accuracy=state.quizStats.answered?Math.round(state.quizStats.correct/state.quizStats.answered*100):0;
+  const quizCategories=['Все',...new Set(questions.map(question=>question.category))];
+  return `<div class="quiz-head"><div><span class="eyebrow">ИНТЕРВЬЮ-ТРЕНАЖЁР</span><h2>Сессия из 10 вопросов</h2><p>Сначала ответьте вслух. Затем выберите вариант и разберите объяснение.</p></div><button class="new-session-btn" id="new-quiz">Новая сессия ↻</button></div>
+    <div class="quiz-workspace">
       <section class="quiz-card quiz-exam">
-        <div class="quiz-category"><span>ВОПРОС ${String(question.number).padStart(2,'0')} · ${esc(question.category)}</span><b>${state.quiz.index+1} / ${total}</b></div>
-        <div class="quiz-progress"><i style="width:${((state.quiz.index+1)/total)*100}%"></i></div>
-        <div class="quiz-prompt"><small>Выберите ответ</small><h3>${esc(question.prompt)}</h3><p>Один вариант точнее остальных.</p></div>
-        <div class="answers">${question.displayOptions.map((option,index)=>`<button data-answer="${esc(option)}" class="${state.quiz.answered?(option===question.answer?'answer-correct':option===state.quiz.selected?'answer-wrong':'answer-muted'):''}" ${state.quiz.answered?'disabled':''}><span>${String.fromCharCode(65+index)}</span><b>${esc(option)}</b></button>`).join('')}</div>
-        <div class="quiz-feedback ${state.quiz.correct?'correct':'wrong'} ${state.quiz.answered?'show':''}">${state.quiz.answered?`<span>${state.quiz.correct?'✓':'×'}</span><div><b>${state.quiz.correct?'Верно':'Правильный ответ: '+esc(question.answer)}</b><p>${esc(question.explanation)}</p></div><button id="next-quiz-question">${state.quiz.mode==='session'?(state.quiz.index===total-1?'Завершить сессию':'Следующий вопрос →'):'Следующий в теме →'}</button>`:''}</div>
+        <div class="quiz-category"><span>ВОПРОС ${String(state.quiz.index+1).padStart(2,'0')} · ${q.category}</span><b>${state.quiz.index+1} / 10</b></div>
+        <div class="quiz-progress"><i style="width:${(state.quiz.index+1)*10}%"></i></div>
+        <div class="quiz-prompt"><small>Ваш ответ</small><h3>${q.prompt}</h3><p>Выберите наиболее точную формулировку.</p></div>
+        <div class="answers">${q.displayOptions.map((o,i)=>`<button data-answer="${esc(o)}" class="${state.quiz.answered?(o===q.answer?'answer-correct':'answer-muted'):''}" ${state.quiz.answered?'disabled':''}><span>${String.fromCharCode(65+i)}</span><b>${esc(o)}</b></button>`).join('')}</div>
+        <div class="quiz-feedback ${state.quiz.correct?'correct':'wrong'} ${state.quiz.answered?'show':''}">${state.quiz.answered?`<span>${state.quiz.correct?'✓':'×'}</span><div><b>${state.quiz.correct?'Верно':'Правильный ответ: '+esc(q.answer)}</b><p>${esc(q.explanation)}</p></div><button id="next-question">${state.quiz.index===9?'Завершить сессию':'Следующий вопрос →'}</button>`:''}</div>
       </section>
-      ${state.quiz.mode==='session'?`<aside class="quiz-side-panel">
+      <aside class="quiz-side-panel">
         <span class="kicker">РЕЖИМ СЕССИИ</span><h3>${state.quizCategory==='Все'?'Смешанный раунд':state.quizCategory}</h3>
-        <div class="quiz-score"><div><strong>${state.quiz.score}</strong><span>верных ответов</span></div><div><strong>${state.quiz.index+(state.quiz.answered?1:0)}</strong><span>ответов дано</span></div></div>
-        <div class="quiz-session-dots">${Array.from({length:total},(_,index)=>`<i class="${index<state.quiz.index?'passed':index===state.quiz.index?'current':''}"></i>`).join('')}</div>
-        <div class="quiz-tip"><span>${accuracy}%</span><p>точность до текущего вопроса</p></div>
-      </aside>`:''}
+        <div class="quiz-score"><div><strong>${accuracy}%</strong><span>общая точность</span></div><div><strong>${state.quizStats.answered}</strong><span>ответов дано</span></div></div>
+        <div class="quiz-session-dots">${Array.from({length:10},(_,i)=>`<i class="${i<state.quiz.index?'passed':i===state.quiz.index?'current':''}"></i>`).join('')}</div>
+        <p class="quiz-side-label">Темы вопросов</p><div class="quiz-topic-picker">${quizCategories.map(c=>`<button data-quiz-category="${c}" class="${state.quizCategory===c?'active':''}">${c}</button>`).join('')}</div>
+        <div class="quiz-tip"><span>60 сек</span><p>Сформулируйте короткий ответ и подкрепите его примером из собственного опыта.</p></div>
+      </aside>
     </div>`;
 }
 
-function quizCompleteView() {
-  const total=state.quiz.set.length;
-  return `<section class="quiz-complete" aria-labelledby="quiz-complete-title"><div class="fireworks" aria-hidden="true">${Array.from({length:28},(_,index)=>`<i style="--i:${index}"></i>`).join('')}</div><div class="quiz-complete-mark">✓</div><span class="eyebrow">СЕССИЯ ЗАВЕРШЕНА</span><h2 id="quiz-complete-title">Отличная работа!</h2><p>Верных ответов: <strong>${state.quiz.score} из ${total}</strong>. Через несколько секунд вопросы сбросятся, и можно будет начать новый раунд.</p><button id="finish-celebration">К списку вопросов</button></section>`;
-}
-
-function quizSetItem(question) {
-  return {id:question.id,displayOptions:shuffle(question.options)};
-}
-
-function startSingleQuestion(id) {
-  const question=interviewQuestions.find(entry=>entry.id===id);
-  if(!question) return;
-  enterQuizHistory();
-  state.quiz={mode:'single',set:[quizSetItem(question)],index:0,score:0,answered:false,correct:false,selected:'',finished:false};
-  state.learnView='quiz';
-  save(); renderLearn(); window.scrollTo(0,0);
-}
-
-function startRandomSession() {
-  const primary=state.quizCategory==='Все'?interviewQuestions:interviewQuestions.filter(question=>question.category===state.quizCategory);
-  const rest=state.quizCategory==='Все'?[]:interviewQuestions.filter(question=>question.category!==state.quizCategory);
-  const set=shuffle(primary).concat(shuffle(rest)).slice(0,10).map(quizSetItem);
-  enterQuizHistory();
-  state.quiz={mode:'session',set,index:0,score:0,answered:false,correct:false,selected:'',finished:false};
-  save(); renderLearn(); window.scrollTo(0,0);
-}
-
-function enterQuizHistory() {
-  if(history.state?.qaHubQuiz) return;
-  history.pushState({...history.state,qaHubQuiz:true},'',location.href);
-}
-
-function resetQuizToOverview(fromHistory=false) {
-  if(!fromHistory&&history.state?.qaHubQuiz){
-    history.back();
-    return;
-  }
-  state.quiz=null;
-  save(); renderLearn(); window.scrollTo(0,0);
+function startQuiz(renderNow=true) {
+  const pool=state.quizCategory==='Все'?questions:questions.filter(q=>q.category===state.quizCategory);
+  const set=shuffle(pool).slice(0,10).map(q=>({...q,displayOptions:shuffle(q.options)}));
+  state.quiz={set,index:0,question:set[0],answered:false,correct:false}; save(); if(renderNow) renderLearn();
 }
 
 function bindLearn() {
-  document.querySelectorAll('[data-learn]').forEach(b=>b.addEventListener('click',()=>{state.learnView=b.dataset.learn;state.selectedTopic=null;state.selectedPlanQuestion=null;if(state.learnView!=='quiz')state.quiz=null;save();renderLearn();window.scrollTo(0,0);}));
-  document.querySelectorAll('[data-track]').forEach(b=>b.addEventListener('click',()=>{state.track=b.dataset.track;state.selectedTopic=null;state.selectedPlanQuestion=null;renderLearn();}));
-  document.querySelectorAll('#theory-search').forEach(input=>input.addEventListener('input',e=>{state.theorySearchDraft=e.target.value;}));
+  document.querySelectorAll('[data-learn]').forEach(b=>b.addEventListener('click',()=>{state.learnView=b.dataset.learn;state.selectedTopic=null;save();renderLearn();window.scrollTo(0,0);}));
+  document.querySelectorAll('[data-track]').forEach(b=>b.addEventListener('click',()=>{state.track=b.dataset.track;state.selectedTopic=null;renderLearn();}));
+  document.querySelectorAll('#theory-search,#knowledge-search').forEach(input=>input.addEventListener('input',e=>{state.theorySearchDraft=e.target.value;}));
   document.querySelectorAll('.learn-search-form').forEach(form=>form.addEventListener('submit',e=>{
     e.preventDefault();
     state.theorySearchDraft=form.querySelector('input').value;
     state.theorySearch=state.theorySearchDraft;
     state.selectedTopic=null;
-    state.selectedPlanQuestion=null;
     renderLearn();
   }));
-  document.querySelectorAll('[data-topic]').forEach(c=>c.addEventListener('click',()=>{state.selectedPlanQuestion=null;state.selectedTopic=c.dataset.topic;renderLearn();}));
-  document.querySelectorAll('[data-plan-question-id]').forEach(card=>card.addEventListener('click',()=>{state.selectedTopic=null;state.selectedPlanQuestion=card.dataset.planQuestionId;renderLearn();}));
+  document.querySelectorAll('[data-knowledge-category]').forEach(b=>b.addEventListener('click',()=>{state.knowledgeCategory=b.dataset.knowledgeCategory;renderLearn();}));
+  document.querySelectorAll('[data-topic]').forEach(c=>c.addEventListener('click',()=>{state.selectedTopic=c.dataset.topic;renderLearn();}));
   document.querySelector('#close-topic')?.addEventListener('click',()=>{state.selectedTopic=null;renderLearn();});
   document.querySelector('#topic-overlay')?.addEventListener('click',e=>{if(e.target.id==='topic-overlay'){state.selectedTopic=null;renderLearn();}});
-  document.querySelector('#close-plan-question')?.addEventListener('click',()=>{state.selectedPlanQuestion=null;renderLearn();});
-  document.querySelector('#question-overlay')?.addEventListener('click',e=>{if(e.target.id==='question-overlay'){state.selectedPlanQuestion=null;renderLearn();}});
   document.querySelector('[data-complete]')?.addEventListener('click',e=>{e.stopPropagation();const id=e.currentTarget.dataset.complete;state.completed.has(id)?state.completed.delete(id):state.completed.add(id);save();renderLearn();});
-  document.querySelectorAll('[data-question-id]').forEach(button=>button.addEventListener('click',()=>startSingleQuestion(button.dataset.questionId)));
-  document.querySelectorAll('[data-quiz-category]').forEach(button=>button.addEventListener('click',()=>{state.quizCategory=button.dataset.quizCategory;save();renderLearn();}));
-  document.querySelector('#start-random-session')?.addEventListener('click',startRandomSession);
-  document.querySelector('#back-to-quiz-list')?.addEventListener('click',resetQuizToOverview);
-  document.querySelectorAll('[data-answer]').forEach(button=>button.addEventListener('click',()=>{
-    if(state.quiz?.answered) return;
-    const question=activeQuizQuestion();
-    state.quiz.answered=true;
-    state.quiz.selected=button.dataset.answer;
-    state.quiz.correct=button.dataset.answer===question.answer;
-    if(state.quiz.correct) state.quiz.score++;
-    state.quizStats.answered++;
-    if(state.quiz.correct) state.quizStats.correct++;
-    save(); renderLearn();
-  }));
-  document.querySelector('#next-quiz-question')?.addEventListener('click',()=>{
-    if(state.quiz.mode==='single'){
-      const current=activeQuizQuestion();
-      const inCategory=interviewQuestions.filter(question=>question.category===current.category);
-      const next=inCategory[(inCategory.findIndex(question=>question.id===current.id)+1)%inCategory.length];
-      startSingleQuestion(next.id);
-      return;
-    }
-    if(state.quiz.index===state.quiz.set.length-1){
-      state.quiz.finished=true;
-      save(); renderLearn();
-      window.setTimeout(()=>{if(state.quiz?.finished) resetQuizToOverview();},5200);
-      return;
-    }
-    state.quiz.index++;
-    state.quiz.answered=false;
-    state.quiz.correct=false;
-    state.quiz.selected='';
-    save(); renderLearn(); window.scrollTo(0,0);
-  });
-  document.querySelector('#finish-celebration')?.addEventListener('click',resetQuizToOverview);
+  document.querySelector('#new-quiz')?.addEventListener('click',()=>startQuiz());
+  document.querySelectorAll('[data-quiz-category]').forEach(b=>b.addEventListener('click',()=>{state.quizCategory=b.dataset.quizCategory;startQuiz();}));
+  document.querySelectorAll('[data-answer]').forEach(b=>b.addEventListener('click',()=>{ if(state.quiz.answered)return; state.quiz.answered=true;state.quiz.correct=b.dataset.answer===state.quiz.question.answer;state.quizStats.answered++;if(state.quiz.correct)state.quizStats.correct++;save();renderLearn(); }));
+  document.querySelector('#next-question')?.addEventListener('click',()=>{ if(state.quiz.index===9){toast(`Сессия завершена. Общая точность: ${Math.round(state.quizStats.correct/state.quizStats.answered*100)}%`);startQuiz();}else{state.quiz.index++;state.quiz.question=state.quiz.set[state.quiz.index];state.quiz.answered=false;state.quiz.correct=false;save();renderLearn();} });
 }
 
 function toast(message){const t=document.querySelector('#toast');if(!t)return;t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
 function render(){ state.mode==='versions'?renderVersions():state.mode==='jobs'?renderJobs():renderLearn(); window.scrollTo(0,0); }
 window.addEventListener('hashchange',()=>{state.mode=modeFromHash();render();});
-window.addEventListener('popstate',event=>{
-  if(state.mode==='learn'&&state.learnView==='quiz'&&state.quiz&&!event.state?.qaHubQuiz){
-    resetQuizToOverview(true);
-    return;
-  }
-  state.mode=modeFromHash();
-  render();
-});
-window.addEventListener('keydown',e=>{
-  if(e.key!=='Escape') return;
-  if(state.selectedPlanQuestion){state.selectedPlanQuestion=null;renderLearn();return;}
-  if(state.selectedTopic){state.selectedTopic=null;renderLearn();}
-});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.selectedTopic){state.selectedTopic=null;renderLearn();}});
 loadVersionHistory();
 render();
