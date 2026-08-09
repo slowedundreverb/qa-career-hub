@@ -493,7 +493,7 @@ function theoryView() {
     const related=interviewQuestions.filter(question=>question.planTopicId===t.id);
     return (state.track==='Все'||t.track===state.track) && `${t.title} ${t.summary} ${t.theory} ${related.map(question=>question.prompt).join(' ')}`.toLowerCase().includes(query);
   });
-  return `<div class="learn-head"><div><span class="eyebrow">ПЛАН ПОДГОТОВКИ</span><h2>Теория сразу с практикой</h2><p>Каждая тема объединяет конспект и относящиеся к ней вопросы. Откройте теорию или сразу проверьте себя.</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
+  return `<div class="learn-head"><div><span class="eyebrow">ПЛАН ПОДГОТОВКИ</span><h2>Теория и готовые ответы</h2><p>Читайте конспекты, раскрывайте вопросы и сверяйтесь с короткими ответами и объяснениями — без перехода в тренажёр.</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
   <div class="theory-tools"><form class="search learn-search-form"><input id="theory-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти определение или тему" aria-label="Поиск по плану подготовки" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="track-tabs">${tracks.map(t=>`<button data-track="${t}" class="${state.track===t?'active':''}">${t}</button>`).join('')}</div></div>
   <div class="plan-topic-list">${filtered.map((t,i)=>planTopicSection(t,curriculum.indexOf(t))).join('')}</div>${!filtered.length?'<div class="empty-state"><h3>Темы не найдены</h3><p>Измените запрос или выберите другой трек.</p></div>':''}
   ${state.selectedTopic?topicModal(curriculum.find(t=>t.id===state.selectedTopic)):''}`;
@@ -526,7 +526,10 @@ function interviewTrainerView() {
 }
 
 function questionPickCard(question,context='trainer') {
-  return `<button class="question-pick-card ${context==='plan'?'in-plan':''}" data-question-id="${question.id}"><span>${String(question.number).padStart(2,'0')}</span><div><small>${esc(question.category)}</small><b>${esc(question.prompt)}</b></div><i>→</i></button>`;
+  if(context==='plan'){
+    return `<details class="plan-question-card"><summary><span>${String(question.number).padStart(2,'0')}</span><div><small>${esc(question.category)}</small><b>${esc(question.prompt)}</b></div><i>+</i></summary><div class="plan-question-answer"><section><small>Короткий ответ</small><p>${esc(question.answer)}</p></section><section><small>Почему так</small><p>${esc(question.explanation)}</p></section></div></details>`;
+  }
+  return `<button class="question-pick-card" data-question-id="${question.id}"><span>${String(question.number).padStart(2,'0')}</span><div><small>${esc(question.category)}</small><b>${esc(question.prompt)}</b></div><i>→</i></button>`;
 }
 
 function quizOverviewView() {
@@ -554,7 +557,7 @@ function quizQuestionView() {
   const total=state.quiz.set.length;
   const accuracy=state.quiz.index ? Math.round(state.quiz.score/state.quiz.index*100) : 0;
   return `<div class="quiz-head"><div><span class="eyebrow">ИНТЕРВЬЮ-ТРЕНАЖЁР</span><h2>${state.quiz.mode==='session'?'Сессия из 10 вопросов':question.category}</h2><p>Выберите наиболее точный ответ, затем разберите объяснение.</p></div><button class="new-session-btn" id="back-to-quiz-list">Все вопросы</button></div>
-    <div class="quiz-workspace">
+    <div class="quiz-workspace ${state.quiz.mode==='session'?'session':'single'}">
       <section class="quiz-card quiz-exam">
         <div class="quiz-category"><span>ВОПРОС ${String(question.number).padStart(2,'0')} · ${esc(question.category)}</span><b>${state.quiz.index+1} / ${total}</b></div>
         <div class="quiz-progress"><i style="width:${((state.quiz.index+1)/total)*100}%"></i></div>
@@ -562,12 +565,12 @@ function quizQuestionView() {
         <div class="answers">${question.displayOptions.map((option,index)=>`<button data-answer="${esc(option)}" class="${state.quiz.answered?(option===question.answer?'answer-correct':option===state.quiz.selected?'answer-wrong':'answer-muted'):''}" ${state.quiz.answered?'disabled':''}><span>${String.fromCharCode(65+index)}</span><b>${esc(option)}</b></button>`).join('')}</div>
         <div class="quiz-feedback ${state.quiz.correct?'correct':'wrong'} ${state.quiz.answered?'show':''}">${state.quiz.answered?`<span>${state.quiz.correct?'✓':'×'}</span><div><b>${state.quiz.correct?'Верно':'Правильный ответ: '+esc(question.answer)}</b><p>${esc(question.explanation)}</p></div><button id="next-quiz-question">${state.quiz.mode==='session'?(state.quiz.index===total-1?'Завершить сессию':'Следующий вопрос →'):'Следующий в теме →'}</button>`:''}</div>
       </section>
-      <aside class="quiz-side-panel">
-        <span class="kicker">${state.quiz.mode==='session'?'РЕЖИМ СЕССИИ':'ВЫБРАННЫЙ ВОПРОС'}</span><h3>${state.quiz.mode==='session'?(state.quizCategory==='Все'?'Смешанный раунд':state.quizCategory):question.category}</h3>
+      ${state.quiz.mode==='session'?`<aside class="quiz-side-panel">
+        <span class="kicker">РЕЖИМ СЕССИИ</span><h3>${state.quizCategory==='Все'?'Смешанный раунд':state.quizCategory}</h3>
         <div class="quiz-score"><div><strong>${state.quiz.score}</strong><span>верных ответов</span></div><div><strong>${state.quiz.index+(state.quiz.answered?1:0)}</strong><span>ответов дано</span></div></div>
         <div class="quiz-session-dots">${Array.from({length:total},(_,index)=>`<i class="${index<state.quiz.index?'passed':index===state.quiz.index?'current':''}"></i>`).join('')}</div>
         <div class="quiz-tip"><span>${accuracy}%</span><p>точность до текущего вопроса</p></div>
-      </aside>
+      </aside>`:''}
     </div>`;
 }
 
