@@ -35,7 +35,7 @@ jobs:
         run: npm run update:jobs
       - name: Cache logos for newly discovered companies
         run: npm run update:logos
-      - name: Verify LinkedIn discoveries against official roles
+      - name: Audit LinkedIn discoveries against official roles
         run: npm run verify:linkedin-discoveries
       - name: Checkout private discovery archive
         uses: actions/checkout@v4

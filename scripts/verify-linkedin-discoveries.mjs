@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { jobs } from '../src/data/jobs.js';
@@ -7,6 +7,7 @@ import { isLikelyDirectJobUrl } from './lib/career-urls.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const reportPath=resolve(root,'.linkedin-discovery-report.json');
+const strict=process.argv.includes('--strict')||process.env.LINKEDIN_DISCOVERY_STRICT==='1';
 const companyKey=value=>String(value||'').replace(/\.US$/,'').replace(/\s*\/\s*Gen Digital$/,'').trim().toLowerCase();
 
 let report={companies:[]};
@@ -29,8 +30,39 @@ for(const job of jobs) {
 
 const unresolved=discoveries.filter(company=>(activeCounts.get(companyKey(company.name))||0)===0);
 if(unresolved.length) {
-  const details=unresolved.map(company=>`- ${company.name}: ${company.careerUrl} (LinkedIn evidence: ${company.linkedinJob})`).join('\n');
-  throw new Error(`LinkedIn discovery verification failed. These companies were discovered through active QA/AQA roles, but no role was extracted from the official career source:\n${details}`);
+  const issues=unresolved.map(company=>({
+    name:company.name,
+    careerUrl:company.careerUrl||'',
+    linkedinJob:company.linkedinEvidence?.linkedinJob||company.linkedinJob||''
+  }));
+  const details=issues.map(company=>`- ${company.name}: ${company.careerUrl}${company.linkedinJob?` (LinkedIn evidence: ${company.linkedinJob})`:''}`).join('\n');
+  const message=`LinkedIn discoveries need manual review. An active role was seen on LinkedIn, but this run could not extract a QA/AQA role from the official career source:\n${details}`;
+  report.verification={
+    generatedAt:new Date().toISOString(),
+    status:'needs-review',
+    unresolved:issues
+  };
+  if(!process.env.LINKEDIN_DISCOVERY_REPORT) {
+    await writeFile(reportPath,`${JSON.stringify(report,null,2)}\n`);
+  }
+  console.warn(message);
+  for(const company of issues) {
+    console.log(`::warning title=Career source needs review::${company.name}: no QA/AQA role was extracted from ${company.careerUrl}`);
+  }
+  if(process.env.GITHUB_STEP_SUMMARY) {
+    const rows=issues.map(company=>`| ${company.name} | ${company.careerUrl||'—'} | ${company.linkedinJob||'—'} |`).join('\n');
+    await appendFile(process.env.GITHUB_STEP_SUMMARY,`## Career sources needing review\n\nThe daily update continued so verified vacancies and the private archive were not lost.\n\n| Company | Official source | LinkedIn evidence |\n| --- | --- | --- |\n${rows}\n\n`);
+  }
+  if(strict) throw new Error(message);
+} else {
+  report.verification={
+    generatedAt:new Date().toISOString(),
+    status:'verified',
+    unresolved:[]
+  };
+  if(!process.env.LINKEDIN_DISCOVERY_REPORT) {
+    await writeFile(reportPath,`${JSON.stringify(report,null,2)}\n`);
+  }
 }
 
 const directListingUrls=companies.filter(company=>isLikelyDirectJobUrl(company.careerUrl));
@@ -45,4 +77,8 @@ if(linkedinJobLinks.length) {
   throw new Error(`LinkedIn discovery verification failed. Published roles must link to an official company or ATS page, not back to LinkedIn:\n${details}`);
 }
 
-console.log(`Verified ${discoveries.length} LinkedIn-discovered companies; every tracked company has an official reusable career listing, at least one active QA/AQA role, and no vacancy links back to LinkedIn.`);
+if(unresolved.length) {
+  console.log(`Audited ${discoveries.length} LinkedIn-discovered companies; ${unresolved.length} career source(s) were queued for manual review and the remaining verified data can be published.`);
+} else {
+  console.log(`Verified ${discoveries.length} LinkedIn-discovered companies; every tracked company has an official reusable career listing, at least one active QA/AQA role, and no vacancy links back to LinkedIn.`);
+}
