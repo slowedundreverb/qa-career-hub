@@ -2644,6 +2644,49 @@ body:has(.topic-overlay) {
   }
 }
 
+/* Persistent RU/EN interface switch. */
+.language-switch {
+  height: 42px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.language-switch button {
+  min-width: 34px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  transition: background .18s ease, color .18s ease;
+}
+
+.language-switch button.active {
+  background: var(--navy);
+  color: white;
+}
+
+.language-switch button:hover:not(.active) {
+  color: var(--green);
+  background: #eef3ef;
+}
+
+@media (max-width: 620px) {
+  .language-switch { height: 38px; }
+  .language-switch button { min-width: 30px; padding-inline: 6px; }
+}
+
+@media (max-width: 420px) {
+  .language-switch button { min-width: 27px; padding-inline: 4px; }
+}
+
 /* Preparation progress: full moon-style indicator on desktop, no indicator in the mobile banner. */
 @media (min-width: 901px) {
   .learn-sidebar .progress-ring {

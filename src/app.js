@@ -1,8 +1,10 @@
 import { companies } from './data/companies.js';
 import { companyLogos } from './data/company-logos.js';
 import { jobs, linkedinJobs, jobMeta } from './data/jobs.js';
-import { curriculum, tracks } from './data/curriculum.js';
-import { questions } from './data/questions.js';
+import { curriculum as curriculumRu, tracks as tracksRu } from './data/curriculum.js';
+import { questions as questionsRu } from './data/questions.js';
+import { curriculumEn, tracksEn, questionsEn } from './data/english-content.js';
+import { localizeDocument, translateUiText } from './i18n.js';
 
 const app = document.querySelector('#app');
 const saved = JSON.parse(localStorage.getItem('qa-hub-state') || '{}');
@@ -18,11 +20,12 @@ if (cachedJobs?.jobs?.length && new Date(cachedJobs.meta?.generatedAt || 0) > ne
 const modeFromHash = () => location.hash.includes('versions') ? 'versions' : location.hash.includes('learn') ? 'learn' : 'jobs';
 const state = {
   mode: modeFromHash(),
+  locale: saved.locale === 'en' ? 'en' : 'ru',
   learnView: saved.learnView || 'roadmap',
   jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit', jobFiltersOpen: false,
   companySearch: '', companySearchDraft: '', companyOpenFirst: true,
   favoritesOnly: false,
-  track: 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: 'Все', selectedTopic: null, quizCategory: savedLearningIsCurrent ? saved.quizCategory || 'Все' : 'Все',
+  track: saved.locale === 'en' ? 'All' : 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: saved.locale === 'en' ? 'All' : 'Все', selectedTopic: null, quizCategory: savedLearningIsCurrent ? saved.quizCategory || (saved.locale === 'en' ? 'All' : 'Все') : (saved.locale === 'en' ? 'All' : 'Все'),
   completed: new Set(savedLearningIsCurrent ? saved.completed || [] : []),
   favorites: new Set(saved.favorites || []),
   quiz: savedLearningIsCurrent && saved.quiz?.set?.length === 10 ? saved.quiz : null,
@@ -30,7 +33,18 @@ const state = {
   settingsOpen: false
 };
 
+let curriculum = state.locale === 'en' ? curriculumEn : curriculumRu;
+let tracks = state.locale === 'en' ? tracksEn : tracksRu;
+let questions = state.locale === 'en' ? questionsEn : questionsRu;
+const allLabel = () => state.locale === 'en' ? 'All' : 'Все';
+const setLocaleContent = () => {
+  curriculum = state.locale === 'en' ? curriculumEn : curriculumRu;
+  tracks = state.locale === 'en' ? tracksEn : tracksRu;
+  questions = state.locale === 'en' ? questionsEn : questionsRu;
+};
+
 const esc = (s='') => String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const tr = (value) => translateUiText(value, state.locale);
 const navIcon = name => {
   const paths = {
     jobs: '<path d="M4 8h16v11H4z"/><path d="M9 8V5h6v3M4 12h16"/>',
@@ -63,11 +77,11 @@ const companyLogo = (name, small=false) => {
   const logo=companyLogos[companyKey(name)];
   return `<span class="company-logo${small?' small':''}" style="--h:${(name.length*31)%360}"><span>${esc(initials(name))}</span>${logo?`<img src="${esc(logo)}" alt="" loading="lazy" onerror="this.remove()">`:''}</span>`;
 };
-const date = value => value ? new Intl.DateTimeFormat('ru', { day:'2-digit', month:'short' }).format(new Date(value)) : '—';
+const date = value => value ? new Intl.DateTimeFormat(state.locale === 'en' ? 'en-GB' : 'ru', { day:'2-digit', month:'short' }).format(new Date(value)) : '—';
 const save = () => localStorage.setItem('qa-hub-state', JSON.stringify({
   completed:[...state.completed], favorites:[...state.favorites], quizStats: state.quizStats,
   quiz: state.quiz, quizCategory: state.quizCategory, learnView: state.learnView,
-  learningContentVersion
+  locale: state.locale, learningContentVersion
 }));
 const shuffle = arr => [...arr].sort(() => Math.random() - .5);
 const sourceWarning = count => count % 10 === 1 && count % 100 !== 11
@@ -88,7 +102,7 @@ async function loadVersionHistory() {
   const currentVersion=versionHistory.commits?.[0]?.version;
   if(versionButton&&currentVersion){
     versionButton.textContent=`v${currentVersion}`;
-    versionButton.setAttribute('aria-label',`История версий, текущая версия v${currentVersion}`);
+    versionButton.setAttribute('aria-label',tr(`История версий, текущая версия v${currentVersion}`));
   }
   if(state.mode==='versions') renderVersions();
 }
@@ -106,6 +120,10 @@ function shell(content) {
         <button class="mode-btn ${state.mode === 'learn' ? 'active' : ''}" data-mode="learn"><span>02</span> Подготовка</button>
       </nav>
       <div class="settings-wrap">
+        <div class="language-switch" role="group" aria-label="Язык интерфейса">
+          <button type="button" data-locale="ru" class="${state.locale==='ru'?'active':''}" aria-pressed="${state.locale==='ru'}">RU</button>
+          <button type="button" data-locale="en" class="${state.locale==='en'?'active':''}" aria-pressed="${state.locale==='en'}">EN</button>
+        </div>
         <a class="versions-button ${state.mode==='versions'?'active':''}" href="#versions" aria-label="История версий${versionHistory.commits?.[0]?.version?`, текущая версия v${versionHistory.commits[0].version}`:''}">${versionHistory.commits?.[0]?.version?`v${versionHistory.commits[0].version}`:'v…'}</a>
         <button class="settings-button" id="settings-button" aria-label="Настройки" aria-expanded="false" aria-controls="settings-menu">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.63 15 1.7 1.7 0 0 0 3.08 14H3v-4h.08A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63 1.7 1.7 0 0 0 10 3.08V3h4v.08A1.7 1.7 0 0 0 15 4.63a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9 1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>
@@ -130,6 +148,7 @@ function shell(content) {
     </header>
     ${content}
     <div id="toast" class="toast" role="status"></div>`;
+  localizeDocument(app, state.locale);
   bindGlobal();
   bindMobileNavigation();
 }
@@ -144,6 +163,19 @@ function bindMobileNavigation() {
 }
 
 function bindGlobal() {
+  document.querySelectorAll('[data-locale]').forEach(button => button.addEventListener('click', () => {
+    const locale=button.dataset.locale;
+    if(locale===state.locale) return;
+    state.locale=locale;
+    setLocaleContent();
+    state.track=allLabel();
+    state.knowledgeCategory=allLabel();
+    state.quizCategory=allLabel();
+    state.quiz=null;
+    state.selectedTopic=null;
+    save();
+    render();
+  }));
   document.querySelectorAll('[data-mode]').forEach(el => el.addEventListener('click', e => {
     e.preventDefault();
     const targetMode=el.dataset.mode;
@@ -183,16 +215,16 @@ document.addEventListener('click',e=>{
 });
 
 function resetTrainingProgress(){
-  if(!confirm('Сбросить пройденные темы, текущую сессию и статистику тренажёра?')) return;
+  if(!confirm(state.locale === 'en' ? 'Reset completed topics, the current session, and trainer statistics?' : 'Сбросить пройденные темы, текущую сессию и статистику тренажёра?')) return;
   state.completed.clear();
   state.quizStats={answered:0,correct:0};
   state.quiz=null;
-  state.quizCategory='Все';
+  state.quizCategory=allLabel();
   state.learnView='roadmap';
   state.settingsOpen=false;
   save();
   render();
-  toast('Учебный прогресс сброшен');
+  toast(state.locale === 'en' ? 'Learning progress has been reset' : 'Учебный прогресс сброшен');
 }
 
 function jobType(j) {
@@ -255,7 +287,7 @@ function renderJobs() {
     </aside>
     <section class="jobs-main">
       <div class="jobs-hero">
-        <div><div class="eyebrow">${new Date().toLocaleDateString('ru',{weekday:'long',day:'numeric',month:'long'})}</div><h2>Подходящие вакансии</h2><p>${active ? `Есть ${active} активных позиций, ${cyprus} — с фокусом на Кипр.` : 'Запустите обновление, чтобы наполнить агрегатор официальными вакансиями.'}</p></div>
+        <div><div class="eyebrow">${new Date().toLocaleDateString(state.locale === 'en' ? 'en-GB' : 'ru',{weekday:'long',day:'numeric',month:'long'})}</div><h2>Подходящие вакансии</h2><p>${active ? `Есть ${active} активных позиций, ${cyprus} — с фокусом на Кипр.` : 'Запустите обновление, чтобы наполнить агрегатор официальными вакансиями.'}</p></div>
         <div class="hero-stats"><div><strong>${active}</strong><span>активных</span></div><div><strong>${watchlist.length}</strong><span>компаний</span></div><div><strong>${state.favorites.size}</strong><span>сохранено</span></div></div>
       </div>
       ${linkedinBlock()}
@@ -398,7 +430,7 @@ async function refreshJobs(){
   const button=document.querySelector('#settings-refresh-jobs');
   const status=document.querySelector('#settings-update-status');
   if(!panel||!button||!status) return;
-  panel.classList.add('refreshing'); button.disabled=true; status.textContent='Проверяем официальные источники…';
+  panel.classList.add('refreshing'); button.disabled=true; status.textContent=state.locale === 'en' ? 'Checking official sources…' : 'Проверяем официальные источники…';
   try{
     const previousCount=jobs.length;
     const response=await fetch(`/api/refresh-jobs?refresh=${Date.now()}`,{method:'POST',cache:'no-store',headers:{'cache-control':'no-cache'}});
@@ -413,11 +445,13 @@ async function refreshJobs(){
     render();
     const fxProCount=result.jobs.filter(job=>companyKey(job.company)==='fxpro').length;
     const delta=result.count-previousCount;
-    toast(`Обновлено: ${result.count} вакансий${delta?` (${delta>0?'+':''}${delta})`:''} · FxPro: ${fxProCount}${result.warnings?` · ${sourceWarning(result.warnings)}`:''}`);
+    toast(state.locale === 'en'
+      ? `Updated: ${result.count} jobs${delta?` (${delta>0?'+':''}${delta})`:''} · FxPro: ${fxProCount}${result.warnings?` · ${result.warnings} sources require review`:''}`
+      : `Обновлено: ${result.count} вакансий${delta?` (${delta>0?'+':''}${delta})`:''} · FxPro: ${fxProCount}${result.warnings?` · ${sourceWarning(result.warnings)}`:''}`);
   }catch(error){
     console.error('Job refresh failed',error);
-    panel.classList.remove('refreshing'); button.disabled=false; status.textContent='Не удалось проверить данные';
-    toast('Не удалось обновить вакансии. Попробуйте ещё раз позже');
+    panel.classList.remove('refreshing'); button.disabled=false; status.textContent=state.locale === 'en' ? 'Unable to check the data' : 'Не удалось проверить данные';
+    toast(state.locale === 'en' ? 'Unable to update jobs. Please try again later' : 'Не удалось обновить вакансии. Попробуйте ещё раз позже');
   }
 }
 
@@ -445,7 +479,7 @@ function renderVersions() {
   const cards=commits.map((commit,index)=>{
     const note=versionNotes[commit.shortSha]||commit.message;
     const title=versionTitles[commit.shortSha]||commit.message;
-    const formattedDate=new Intl.DateTimeFormat('ru',{day:'numeric',month:'long',year:'numeric'}).format(new Date(commit.date));
+    const formattedDate=new Intl.DateTimeFormat(state.locale === 'en' ? 'en-GB' : 'ru',{day:'numeric',month:'long',year:'numeric'}).format(new Date(commit.date));
     return `<article class="version-card ${index===0?'current':''}">
       <div class="version-rail"><span></span><i></i></div>
       <div class="version-content">
@@ -488,7 +522,7 @@ function renderLearn() {
 }
 
 function theoryView(roadmap=false) {
-  const filtered = curriculum.filter(t => (state.track==='Все'||t.track===state.track) && `${t.title} ${t.summary} ${t.theory}`.toLowerCase().includes(state.theorySearch.toLowerCase()));
+  const filtered = curriculum.filter(t => (state.track===allLabel()||t.track===state.track) && `${t.title} ${t.summary} ${t.theory}`.toLowerCase().includes(state.theorySearch.toLowerCase()));
   return `<div class="learn-head"><div><span class="eyebrow">${roadmap?'ПЛАН ПОДГОТОВКИ':'БАЗА ЗНАНИЙ'}</span><h2>${roadmap?'Теория для QA-собеседования':'Коротко. По делу. Для интервью.'}</h2><p>${roadmap?'10 тем из нового конспекта: тестирование, REST API, SQL, Web и Android.':'Ищите по теме, фильтруйте трек и отмечайте пройденное.'}</p></div><div class="streak"><span>◆</span><div><b>${state.completed.size} / ${curriculum.length}</b><small>тем завершено</small></div></div></div>
   <div class="theory-tools"><form class="search learn-search-form"><input id="theory-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти определение или тему" aria-label="Поиск по плану подготовки" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="track-tabs">${tracks.map(t=>`<button data-track="${t}" class="${state.track===t?'active':''}">${t}</button>`).join('')}</div></div>
   <div class="topic-grid">${filtered.map((t,i)=>topicCard(t,i,roadmap)).join('')}</div>${!filtered.length?'<div class="empty-state"><h3>Темы не найдены</h3><p>Измените запрос или выберите другой трек.</p></div>':''}
@@ -497,9 +531,9 @@ function theoryView(roadmap=false) {
 
 function knowledgeView() {
   const baseQuestions=questions;
-  const categories=['Все',...new Set(baseQuestions.map(q=>q.category))];
+  const categories=[allLabel(),...new Set(baseQuestions.map(q=>q.category))];
   const query=state.theorySearch.toLowerCase();
-  const filtered=baseQuestions.filter(q=>(state.knowledgeCategory==='Все'||q.category===state.knowledgeCategory)&&`${q.prompt} ${q.answer} ${q.explanation}`.toLowerCase().includes(query));
+  const filtered=baseQuestions.filter(q=>(state.knowledgeCategory===allLabel()||q.category===state.knowledgeCategory)&&`${q.prompt} ${q.answer} ${q.explanation}`.toLowerCase().includes(query));
   return `<div class="learn-head knowledge-head"><div><span class="eyebrow">БАЗА ЗНАНИЙ</span><h2>Вопрос. Ответ. Почему.</h2><p>${baseQuestions.length} коротких разборов для повторения перед интервью.</p></div></div>
     <div class="knowledge-tools"><form class="search learn-search-form"><input id="knowledge-search" value="${esc(state.theorySearchDraft)}" placeholder="Найти вопрос, термин или ответ" aria-label="Поиск по базе знаний" /><button class="learn-search-button" type="submit" aria-label="Выполнить поиск" title="Выполнить поиск">⌕</button></form><div class="knowledge-tabs">${categories.map(c=>`<button data-knowledge-category="${c}" class="${state.knowledgeCategory===c?'active':''}">${c}</button>`).join('')}</div></div>
     <div class="knowledge-layout knowledge-only"><section class="knowledge-list">${filtered.map((q,i)=>`<details class="knowledge-card" ${i===0?'open':''}><summary><span>${String(i+1).padStart(2,'0')}</span><div><small>${q.category}</small><h3>${q.prompt}</h3></div><b>+</b></summary><div class="knowledge-answer"><section><span>Короткий ответ</span><p>${q.answer}</p></section><section><span>Почему так</span><p>${q.explanation}</p></section></div></details>`).join('')||'<div class="empty-state"><h3>Ничего не найдено</h3><p>Измените запрос или категорию.</p></div>'}</section></div>`;
@@ -521,7 +555,7 @@ function quizView() {
   if (!state.quiz) startQuiz(false);
   const q=state.quiz.question;
   const accuracy=state.quizStats.answered?Math.round(state.quizStats.correct/state.quizStats.answered*100):0;
-  const quizCategories=['Все',...new Set(questions.map(question=>question.category))];
+  const quizCategories=[allLabel(),...new Set(questions.map(question=>question.category))];
   return `<div class="quiz-head"><div><span class="eyebrow">ИНТЕРВЬЮ-ТРЕНАЖЁР</span><h2>Сессия из 10 вопросов</h2><p>Сначала ответьте вслух. Затем выберите вариант и разберите объяснение.</p></div><button class="new-session-btn" id="new-quiz">Новая сессия ↻</button></div>
     <div class="quiz-workspace">
       <section class="quiz-card quiz-exam">
@@ -532,7 +566,7 @@ function quizView() {
         <div class="quiz-feedback ${state.quiz.correct?'correct':'wrong'} ${state.quiz.answered?'show':''}">${state.quiz.answered?`<span>${state.quiz.correct?'✓':'×'}</span><div><b>${state.quiz.correct?'Верно':'Правильный ответ: '+esc(q.answer)}</b><p>${esc(q.explanation)}</p></div><button id="next-question">${state.quiz.index===9?'Завершить сессию':'Следующий вопрос →'}</button>`:''}</div>
       </section>
       <aside class="quiz-side-panel">
-        <span class="kicker">РЕЖИМ СЕССИИ</span><h3>${state.quizCategory==='Все'?'Смешанный раунд':state.quizCategory}</h3>
+        <span class="kicker">РЕЖИМ СЕССИИ</span><h3>${state.quizCategory===allLabel()?'Смешанный раунд':state.quizCategory}</h3>
         <div class="quiz-score"><div><strong>${accuracy}%</strong><span>общая точность</span></div><div><strong>${state.quizStats.answered}</strong><span>ответов дано</span></div></div>
         <div class="quiz-session-dots">${Array.from({length:10},(_,i)=>`<i class="${i<state.quiz.index?'passed':i===state.quiz.index?'current':''}"></i>`).join('')}</div>
         <p class="quiz-side-label">Темы вопросов</p><div class="quiz-topic-picker">${quizCategories.map(c=>`<button data-quiz-category="${c}" class="${state.quizCategory===c?'active':''}">${c}</button>`).join('')}</div>
@@ -542,7 +576,7 @@ function quizView() {
 }
 
 function startQuiz(renderNow=true) {
-  const pool=state.quizCategory==='Все'?questions:questions.filter(q=>q.category===state.quizCategory);
+  const pool=state.quizCategory===allLabel()?questions:questions.filter(q=>q.category===state.quizCategory);
   const set=shuffle(pool).slice(0,10).map(q=>({...q,displayOptions:shuffle(q.options)}));
   state.quiz={set,index:0,question:set[0],answered:false,correct:false}; save(); if(renderNow) renderLearn();
 }
@@ -566,7 +600,7 @@ function bindLearn() {
   document.querySelector('#new-quiz')?.addEventListener('click',()=>startQuiz());
   document.querySelectorAll('[data-quiz-category]').forEach(b=>b.addEventListener('click',()=>{state.quizCategory=b.dataset.quizCategory;startQuiz();}));
   document.querySelectorAll('[data-answer]').forEach(b=>b.addEventListener('click',()=>{ if(state.quiz.answered)return; state.quiz.answered=true;state.quiz.correct=b.dataset.answer===state.quiz.question.answer;state.quizStats.answered++;if(state.quiz.correct)state.quizStats.correct++;save();renderLearn(); }));
-  document.querySelector('#next-question')?.addEventListener('click',()=>{ if(state.quiz.index===9){toast(`Сессия завершена. Общая точность: ${Math.round(state.quizStats.correct/state.quizStats.answered*100)}%`);startQuiz();}else{state.quiz.index++;state.quiz.question=state.quiz.set[state.quiz.index];state.quiz.answered=false;state.quiz.correct=false;save();renderLearn();} });
+  document.querySelector('#next-question')?.addEventListener('click',()=>{ if(state.quiz.index===9){toast(tr(`Сессия завершена. Общая точность: ${Math.round(state.quizStats.correct/state.quizStats.answered*100)}%`));startQuiz();}else{state.quiz.index++;state.quiz.question=state.quiz.set[state.quiz.index];state.quiz.answered=false;state.quiz.correct=false;save();renderLearn();} });
 }
 
 function toast(message){const t=document.querySelector('#toast');if(!t)return;t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
