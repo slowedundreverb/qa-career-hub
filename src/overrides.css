@@ -3439,3 +3439,35 @@ body:has(.topic-overlay) {
     gap: 22px;
   }
 }
+
+/* Three section tabs no longer fit beside the logo and settings below 900px, so they take their own row. */
+@media (min-width: 621px) and (max-width: 900px) {
+  .topbar {
+    height: auto;
+    min-height: 112px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand settings"
+      "switch switch";
+    gap: 8px 12px;
+    padding-block: 10px;
+  }
+
+  .brand {
+    grid-area: brand;
+  }
+
+  .settings-wrap {
+    grid-area: settings;
+  }
+
+  .mode-switch {
+    grid-area: switch;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .settings-menu {
+    top: 114px;
+  }
+}
