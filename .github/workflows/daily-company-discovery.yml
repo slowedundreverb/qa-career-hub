@@ -15,7 +15,8 @@ concurrency:
 jobs:
   discover:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Run time grows ~2–3 min/week with the company list (24 min in Oct 2026)
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
