@@ -67,7 +67,7 @@ const en = {
   'Весь рынок': 'Whole market',
   'Банкинг': 'Banking',
   'Трейдинг': 'Trading',
-  'Остальные': 'Others',
+  'Топ стран по количеству вакансий': 'Top countries by job count',
   'Нет компаний в выборке': 'No companies in the sample',
   'мало': 'few',
   'много': 'many',

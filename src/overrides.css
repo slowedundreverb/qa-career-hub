@@ -3383,12 +3383,38 @@ body:has(.topic-overlay) {
   list-style: none;
 }
 
-.stats-group li {
+.stats-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 72px 26px;
+  grid-template-columns: minmax(0, 1fr) 72px 40px;
   align-items: center;
   gap: 10px;
   font-size: 11px;
+}
+
+button.stats-row {
+  width: 100%;
+  margin: -3px -6px;
+  padding: 3px 6px;
+  box-sizing: content-box;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.stats-row:hover,
+button.stats-row:focus-visible {
+  outline: none;
+  background: #f0eee8;
+}
+
+button.stats-row.selected {
+  background: #e7f6ec;
+  font-weight: 700;
 }
 
 .stats-company {
@@ -3415,11 +3441,7 @@ body:has(.topic-overlay) {
   background: #5fb88a;
 }
 
-.stats-other .stats-bar i {
-  background: #a9b3ae;
-}
-
-.stats-group li b {
+.stats-row b {
   text-align: right;
 }
 
@@ -3469,5 +3491,42 @@ body:has(.topic-overlay) {
 
   .settings-menu {
     top: 114px;
+  }
+}
+
+/* On a desktop the map takes whatever height the companies card leaves, so the tab fits one screen. */
+@media (min-width: 901px) {
+  .stats-page {
+    box-sizing: border-box;
+    height: calc(100vh - 86px);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 14px;
+    padding: 18px 4.2vw;
+  }
+
+  .stats-map-card {
+    display: flex;
+    min-height: 260px;
+  }
+
+  .stats-map {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .stats-map svg {
+    height: 100%;
+  }
+
+  .stats-companies {
+    padding: 16px 22px 18px;
+  }
+
+  .stats-groups {
+    margin-top: 14px;
+  }
+
+  .stats-group ol {
+    gap: 7px;
   }
 }

@@ -529,9 +529,12 @@ function renderStats() {
     return `<path d="${d}" data-code="${code}" fill="${country ? shade(country.count) : 'var(--map-empty)'}" class="${country ? 'has-data' : ''}${selected === code ? ' selected' : ''}"${first ? ` tabindex="0" role="button" aria-pressed="${selected === code}" aria-label="${esc(`${regionName(code)}: ${qaJobs(country.count)}`)}"` : ''}></path>`;
   }).join('');
   const scope = selected ? data.countries[selected] : { companies: data.world };
-  const top = sector => scope.companies.filter(c => c.sector === sector).slice(0, 8);
-  const groups = [['bank','Банкинг'],['trading','Трейдинг'],['other','Остальные']].map(([sector,title]) => [sector, title, top(sector)]);
+  const rowsShown = 6;
+  const top = sector => scope.companies.filter(c => c.sector === sector).slice(0, rowsShown);
+  const groups = [['bank','Банкинг'],['trading','Трейдинг']].map(([sector,title]) => [sector, title, top(sector)]);
   const barMax = Math.max(1, ...groups.flatMap(([,,rows]) => rows.map(c => c.count)));
+  const bar = (count, most) => `<span class="stats-bar"><i style="width:${Math.max(4, count / most * 100)}%"></i></span>`;
+  const topCountries = Object.entries(data.countries).sort((a,b) => b[1].count - a[1].count).slice(0, rowsShown);
   shell(`<main class="stats-page">
     <section class="stats-map-card">
       <div class="stats-map" id="stats-map">
@@ -549,7 +552,9 @@ function renderStats() {
         <div><h2>Компании, которые активно набирают QA</h2><p>${selected ? `${esc(regionName(selected))} · ${qaJobs(data.countries[selected].count)}` : 'Весь рынок'}</p></div>
         ${selected ? '<button class="stats-reset" id="stats-reset" type="button">Весь рынок</button>' : ''}
       </header>
-      <div class="stats-groups">${groups.map(([sector,title,rows]) => `<div class="stats-group stats-${sector}"><h3>${title}</h3>${rows.length ? `<ol>${rows.map(c => `<li><span class="stats-company">${esc(c.name)}</span><span class="stats-bar"><i style="width:${Math.max(4, c.count / barMax * 100)}%"></i></span><b>${c.count}</b></li>`).join('')}</ol>` : '<p class="stats-empty">Нет компаний в выборке</p>'}</div>`).join('')}</div>
+      <div class="stats-groups">${groups.map(([sector,title,rows]) => `<div class="stats-group stats-${sector}"><h3>${title}</h3>${rows.length ? `<ol>${rows.map(c => `<li class="stats-row"><span class="stats-company">${esc(c.name)}</span>${bar(c.count, barMax)}<b>${c.count}</b></li>`).join('')}</ol>` : '<p class="stats-empty">Нет компаний в выборке</p>'}</div>`).join('')}
+        <div class="stats-group stats-countries"><h3>Топ стран по количеству вакансий</h3><ol>${topCountries.map(([code, country]) => `<li><button type="button" class="stats-row${selected === code ? ' selected' : ''}" data-stats-country="${code}" aria-pressed="${selected === code}"><span class="stats-company">${esc(regionName(code))}</span>${bar(country.count, topCountries[0][1].count)}<b>${formatCount(country.count)}</b></button></li>`).join('')}</ol></div>
+      </div>
     </section>
   </main>`);
   bindStats(data);
@@ -565,11 +570,12 @@ function bindStats(data) {
     p.classList.toggle('hovered', on);
     if (on) svg.appendChild(p); // Raise the outline above neighbouring borders.
   });
-  const select = code => {
+  // Keeps keyboard focus on the control that was used, map shape or list row, after the re-render.
+  const select = (code, from = 'map') => {
     if (!data.countries[code]) return;
     state.statsCountry = state.statsCountry === code ? null : code;
     renderStats();
-    document.querySelector(`#stats-map path[data-code="${code}"][tabindex]`)?.focus({ preventScroll: true });
+    document.querySelector(from === 'list' ? `[data-stats-country="${code}"]` : `#stats-map path[data-code="${code}"][tabindex]`)?.focus({ preventScroll: true });
   };
   svg.addEventListener('pointermove', e => {
     const code = e.target.dataset?.code;
@@ -593,6 +599,7 @@ function bindStats(data) {
     document.querySelector('#map-legend').hidden = !state.statsLegendOpen;
   });
   document.querySelector('#stats-reset')?.addEventListener('click', () => { state.statsCountry = null; renderStats(); });
+  document.querySelectorAll('[data-stats-country]').forEach(b => b.addEventListener('click', () => select(b.dataset.statsCountry, 'list')));
 }
 
 function renderLearn() {
