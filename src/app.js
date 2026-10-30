@@ -5,6 +5,9 @@ import { curriculum as curriculumRu, tracks as tracksRu } from './data/curriculu
 import { questions as questionsRu } from './data/questions.js';
 import { curriculumEn, tracksEn, questionsEn } from './data/english-content.js';
 import { localizeDocument, translateUiText } from './i18n.js';
+import { market } from './data/market.js';
+import { worldMap } from './data/world-map.js';
+import { isAgency, sectorOf } from './sectors.js';
 
 const app = document.querySelector('#app');
 const saved = JSON.parse(localStorage.getItem('qa-hub-state') || '{}');
@@ -17,7 +20,7 @@ if (cachedJobs?.jobs?.length && new Date(cachedJobs.meta?.generatedAt || 0) > ne
   linkedinJobs.splice(0, linkedinJobs.length, ...(cachedJobs.linkedinJobs || []));
   Object.assign(jobMeta, cachedJobs.meta);
 }
-const modeFromHash = () => location.hash.includes('versions') ? 'versions' : location.hash.includes('learn') ? 'learn' : 'jobs';
+const modeFromHash = () => location.hash.includes('versions') ? 'versions' : location.hash.includes('learn') ? 'learn' : location.hash.includes('stats') ? 'stats' : 'jobs';
 const state = {
   mode: modeFromHash(),
   locale: saved.locale === 'en' ? 'en' : 'ru',
@@ -30,6 +33,8 @@ const state = {
   favorites: new Set(saved.favorites || []),
   quiz: savedLearningIsCurrent && saved.quiz?.set?.length === 10 ? saved.quiz : null,
   quizStats: savedLearningIsCurrent ? saved.quizStats || { answered: 0, correct: 0 } : { answered: 0, correct: 0 },
+  // On a phone the legend would cover half the map, so it starts closed there.
+  statsCountry: null, statsLegendOpen: window.matchMedia('(min-width: 621px)').matches,
   settingsOpen: false
 };
 
@@ -118,9 +123,10 @@ function shell(content) {
       <a class="brand" href="#jobs" data-mode="jobs" aria-label="QA Career Hub">
         <span class="brand-mark">Q</span><span>QA<span class="brand-accent">/</span>HUB</span>
       </a>
-      <nav class="mode-switch ${state.mode === 'learn' ? 'show-learn' : state.mode === 'jobs' ? 'show-jobs' : 'is-muted'}" aria-label="Главные разделы">
+      <nav class="mode-switch ${['jobs','learn','stats'].includes(state.mode) ? `show-${state.mode}` : 'is-muted'}" aria-label="Главные разделы">
         <button class="mode-btn ${state.mode === 'jobs' ? 'active' : ''}" data-mode="jobs"><span>01</span> Вакансии</button>
         <button class="mode-btn ${state.mode === 'learn' ? 'active' : ''}" data-mode="learn"><span>02</span> Подготовка</button>
+        <button class="mode-btn ${state.mode === 'stats' ? 'active' : ''}" data-mode="stats"><span>03</span> Статистика</button>
       </nav>
       <div class="settings-wrap">
         <div class="language-switch" role="group" aria-label="Язык интерфейса">
@@ -184,11 +190,11 @@ function bindGlobal() {
     const targetMode=el.dataset.mode;
     if(targetMode===state.mode) return;
     const switcher=document.querySelector('.mode-switch');
-    const animated=['jobs','learn'].includes(targetMode);
+    const animated=['jobs','learn','stats'].includes(targetMode);
     const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(animated&&switcher){
-      switcher.classList.remove('show-jobs','show-learn','is-muted');
-      switcher.classList.add(targetMode==='learn'?'show-learn':'show-jobs','switching');
+      switcher.classList.remove('show-jobs','show-learn','show-stats','is-muted');
+      switcher.classList.add(`show-${targetMode}`,'switching');
       document.querySelectorAll('.mode-btn').forEach(button=>button.classList.toggle('active',button.dataset.mode===targetMode));
     }
     window.setTimeout(()=>{
@@ -493,6 +499,102 @@ function renderVersions() {
   </main>`);
 }
 
+const regionName = code => { try { return new Intl.DisplayNames([state.locale], { type: 'region' }).of(code); } catch { return code; } };
+const formatCount = n => new Intl.NumberFormat(state.locale === 'en' ? 'en-GB' : 'ru').format(n);
+const qaJobs = n => state.locale === 'en'
+  ? `${formatCount(n)} QA ${n === 1 ? 'job' : 'jobs'}`
+  : `${formatCount(n)} ${{ one: 'QA-вакансия', few: 'QA-вакансии', many: 'QA-вакансий', other: 'QA-вакансии' }[new Intl.PluralRules('ru').select(n)]}`;
+const rankCompanies = counts => [...counts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).map(([name,count])=>({name,count,sector:sectorOf(name)}));
+
+// Adzuna has no Cyprus, so the island shows the site's own vacancies.
+function statsData() {
+  const cyprusJobs = jobs.filter(j => j.status !== 'closed' && j.country === 'Cyprus');
+  const cyprusCompanies = cyprusJobs.reduce((m,j)=>isAgency(j.company)?m:m.set(j.company,(m.get(j.company)||0)+1),new Map());
+  const countries = { ...market.countries, CY: { count: cyprusJobs.length, companies: rankCompanies(cyprusCompanies) } };
+  const world = new Map(market.world.map(c => [c.name, c.count]));
+  countries.CY.companies.forEach(c => world.set(c.name, (world.get(c.name)||0) + c.count));
+  return { countries, world: rankCompanies(world) };
+}
+
+function renderStats() {
+  const data = statsData();
+  const selected = data.countries[state.statsCountry] ? state.statsCountry : null;
+  const max = Math.max(1, ...Object.values(data.countries).map(c => c.count));
+  // Log scale from pale mint to brand green, so small markets still read against the largest ones.
+  const shade = n => { const t = Math.log1p(n) / Math.log1p(max); const mix = (a,b) => Math.round(a + (b - a) * t); return `rgb(${mix(226,15)},${mix(242,107)},${mix(232,82)})`; };
+  const focusable = new Set();
+  const paths = worldMap.countries.map(({ code, d }) => {
+    const country = data.countries[code];
+    const first = country && !focusable.has(code) && focusable.add(code);
+    return `<path d="${d}" data-code="${code}" fill="${country ? shade(country.count) : 'var(--map-empty)'}" class="${country ? 'has-data' : ''}${selected === code ? ' selected' : ''}"${first ? ` tabindex="0" role="button" aria-pressed="${selected === code}" aria-label="${esc(`${regionName(code)}: ${qaJobs(country.count)}`)}"` : ''}></path>`;
+  }).join('');
+  const scope = selected ? data.countries[selected] : { companies: data.world };
+  const top = sector => scope.companies.filter(c => c.sector === sector).slice(0, 8);
+  const groups = [['bank','Банкинг'],['trading','Трейдинг'],['other','Остальные']].map(([sector,title]) => [sector, title, top(sector)]);
+  const barMax = Math.max(1, ...groups.flatMap(([,,rows]) => rows.map(c => c.count)));
+  shell(`<main class="stats-page">
+    <section class="stats-map-card">
+      <div class="stats-map" id="stats-map">
+        <svg viewBox="0 0 ${worldMap.width} ${worldMap.height}" role="group" aria-label="Карта QA-вакансий по странам">${paths}</svg>
+        <div class="map-tooltip" id="map-tooltip" hidden></div>
+        <button class="map-legend-toggle" id="map-legend-toggle" type="button" aria-label="Легенда карты" aria-expanded="${state.statsLegendOpen}" aria-controls="map-legend">?</button>
+        <div class="map-legend" id="map-legend" ${state.statsLegendOpen ? '' : 'hidden'}>
+          <span class="map-legend-scale">мало <i></i> много</span>
+          <span class="map-legend-empty"><i></i> нет данных</span>
+        </div>
+      </div>
+    </section>
+    <section class="stats-companies">
+      <header>
+        <div><h2>Компании, которые активно набирают QA</h2><p>${selected ? `${esc(regionName(selected))} · ${qaJobs(data.countries[selected].count)}` : 'Весь рынок'}</p></div>
+        ${selected ? '<button class="stats-reset" id="stats-reset" type="button">Весь рынок</button>' : ''}
+      </header>
+      <div class="stats-groups">${groups.map(([sector,title,rows]) => `<div class="stats-group stats-${sector}"><h3>${title}</h3>${rows.length ? `<ol>${rows.map(c => `<li><span class="stats-company">${esc(c.name)}</span><span class="stats-bar"><i style="width:${Math.max(4, c.count / barMax * 100)}%"></i></span><b>${c.count}</b></li>`).join('')}</ol>` : '<p class="stats-empty">Нет компаний в выборке</p>'}</div>`).join('')}</div>
+    </section>
+  </main>`);
+  bindStats(data);
+}
+
+function bindStats(data) {
+  const map = document.querySelector('#stats-map');
+  const svg = map?.querySelector('svg');
+  const tooltip = document.querySelector('#map-tooltip');
+  if (!map || !svg || !tooltip) return;
+  const highlight = code => svg.querySelectorAll('path').forEach(p => {
+    const on = p.dataset.code === code;
+    p.classList.toggle('hovered', on);
+    if (on) svg.appendChild(p); // Raise the outline above neighbouring borders.
+  });
+  const select = code => {
+    if (!data.countries[code]) return;
+    state.statsCountry = state.statsCountry === code ? null : code;
+    renderStats();
+    document.querySelector(`#stats-map path[data-code="${code}"][tabindex]`)?.focus({ preventScroll: true });
+  };
+  svg.addEventListener('pointermove', e => {
+    const code = e.target.dataset?.code;
+    if (!code) { tooltip.hidden = true; highlight(null); return; }
+    const country = data.countries[code];
+    tooltip.textContent = `${regionName(code)} · ${country ? qaJobs(country.count) : tr('нет данных')}`;
+    const box = map.getBoundingClientRect();
+    tooltip.style.left = `${e.clientX - box.left}px`;
+    tooltip.style.top = `${e.clientY - box.top}px`;
+    tooltip.hidden = false;
+    if (!e.target.classList.contains('hovered')) highlight(code);
+  });
+  svg.addEventListener('pointerleave', () => { tooltip.hidden = true; highlight(null); });
+  svg.addEventListener('click', e => e.target.dataset?.code && select(e.target.dataset.code));
+  svg.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset?.code) { e.preventDefault(); select(e.target.dataset.code); }
+  });
+  document.querySelector('#map-legend-toggle')?.addEventListener('click', e => {
+    state.statsLegendOpen = !state.statsLegendOpen;
+    e.currentTarget.setAttribute('aria-expanded', String(state.statsLegendOpen));
+    document.querySelector('#map-legend').hidden = !state.statsLegendOpen;
+  });
+  document.querySelector('#stats-reset')?.addEventListener('click', () => { state.statsCountry = null; renderStats(); });
+}
+
 function renderLearn() {
   const done = state.completed.size;
   const pct = Math.round(done / curriculum.length * 100);
@@ -594,7 +696,7 @@ function bindLearn() {
 }
 
 function toast(message){const t=document.querySelector('#toast');if(!t)return;t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
-function render(){ state.mode==='versions'?renderVersions():state.mode==='jobs'?renderJobs():renderLearn(); window.scrollTo(0,0); }
+function render(){ state.mode==='versions'?renderVersions():state.mode==='jobs'?renderJobs():state.mode==='stats'?renderStats():renderLearn(); window.scrollTo(0,0); }
 window.addEventListener('hashchange',()=>{state.mode=modeFromHash();render();});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.selectedTopic){state.selectedTopic=null;renderLearn();}});
 loadVersionHistory();

@@ -34,6 +34,11 @@ jobs:
         run: npm run discover:linkedin -- --write
       - name: Refresh official vacancy sources
         run: npm run update:jobs
+      - name: Refresh QA market statistics
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+        run: npm run update:market
       - name: Cache logos for newly discovered companies
         run: npm run update:logos
       - name: Audit LinkedIn discoveries against official roles
@@ -66,6 +71,6 @@ jobs:
           fi
           git config user.name "qa-career-hub-bot"
           git config user.email "qa-career-hub-bot@users.noreply.github.com"
-          git add src/data/companies.js src/data/jobs.js src/data/company-logos.js src/assets/company-logos/
+          git add src/data/companies.js src/data/jobs.js src/data/market.js src/data/company-logos.js src/assets/company-logos/
           git commit -m "Update daily QA company discovery"
           git push
