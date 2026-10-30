@@ -33,8 +33,7 @@ const state = {
   favorites: new Set(saved.favorites || []),
   quiz: savedLearningIsCurrent && saved.quiz?.set?.length === 10 ? saved.quiz : null,
   quizStats: savedLearningIsCurrent ? saved.quizStats || { answered: 0, correct: 0 } : { answered: 0, correct: 0 },
-  // On a phone the legend would cover half the map, so it starts closed there.
-  statsCountry: null, statsLegendOpen: window.matchMedia('(min-width: 621px)').matches,
+  statsCountry: null, statsView: null,
   settingsOpen: false
 };
 
@@ -520,16 +519,14 @@ function statsData() {
   for (const job of jobs) {
     if (job.status === 'closed') continue;
     for (const code of new Set(String(job.country || '').split(' / ').map(mapCodeOf))) {
-      if (!code || market.countries[code]) continue;
-      const country = site.get(code) || site.set(code, { count: 0, companies: new Map() }).get(code);
-      country.count++;
-      if (!isAgency(job.company)) country.companies.set(job.company, (country.companies.get(job.company) || 0) + 1);
+      if (code && !market.countries[code]) (site.get(code) || site.set(code, []).get(code)).push(job);
     }
   }
   const countries = { ...market.countries };
   const world = new Map(market.world.map(c => [c.name, c.count]));
-  for (const [code, { count, companies }] of site) {
-    countries[code] = { count, companies: rankCompanies(companies) };
+  for (const [code, list] of site) {
+    const companies = list.reduce((m, j) => isAgency(j.company) ? m : m.set(j.company, (m.get(j.company) || 0) + 1), new Map());
+    countries[code] = { count: list.length, companies: rankCompanies(companies), jobs: list };
     companies.forEach((n, name) => world.set(name, (world.get(name) || 0) + n));
   }
   return { countries, world: rankCompanies(world) };
@@ -549,20 +546,34 @@ function renderStats() {
   }).join('');
   const scope = selected ? data.countries[selected] : { companies: data.world };
   const rowsShown = 6;
-  const top = sector => scope.companies.filter(c => c.sector === sector).slice(0, rowsShown);
-  const groups = [['bank','Банкинг'],['trading','Трейдинг']].map(([sector,title]) => [sector, title, top(sector)]);
-  const barMax = Math.max(1, ...groups.flatMap(([,,rows]) => rows.map(c => c.count)));
+  const sectors = [['bank','Банкинг'],['trading','Трейдинг'],['other','Остальные']];
   const bar = (count, most) => `<span class="stats-bar"><i style="width:${Math.max(4, count / most * 100)}%"></i></span>`;
+  let groups;
+  if (scope.jobs) {
+    // A country outside Adzuna lists every vacancy the site has there, banks and trading firms first.
+    groups = sectors.map(([sector,title]) => [sector, title, scope.jobs.filter(j => sectorOf(j.company) === sector)
+      .map(j => `<li><a class="stats-vacancy" href="${esc(j.url)}" target="_blank" rel="noreferrer"><b>${esc(j.company)}</b><span>${esc(j.title)}</span></a></li>`)]);
+  } else {
+    const rows = sector => scope.companies.filter(c => c.sector === sector).slice(0, rowsShown);
+    const finance = sectors.slice(0, 2).map(([sector,title]) => [sector, title, rows(sector)]);
+    // With no banks or brokers hiring, the other employers are shown instead of empty lists.
+    const lists = finance.some(([,,r]) => r.length) ? finance : [[...sectors[2], rows('other')]];
+    const most = Math.max(1, ...lists.flatMap(([,,r]) => r.map(c => c.count)));
+    groups = lists.map(([sector,title,r]) => [sector, title, r.map(c => `<li class="stats-row"><span class="stats-company">${esc(c.name)}</span>${bar(c.count, most)}<b>${c.count}</b></li>`)]);
+  }
   const topCountries = Object.entries(data.countries).sort((a,b) => b[1].count - a[1].count).slice(0, rowsShown);
   shell(`<main class="stats-page">
     <section class="stats-map-card">
       <div class="stats-map" id="stats-map">
         <svg viewBox="0 0 ${worldMap.width} ${worldMap.height}" role="group" aria-label="Карта QA-вакансий по странам">${paths}</svg>
         <div class="map-tooltip" id="map-tooltip" hidden></div>
-        <button class="map-legend-toggle" id="map-legend-toggle" type="button" aria-label="Легенда карты" aria-expanded="${state.statsLegendOpen}" aria-controls="map-legend">?</button>
-        <div class="map-legend" id="map-legend" ${state.statsLegendOpen ? '' : 'hidden'}>
+        <div class="map-legend">
           <span class="map-legend-scale">мало <i></i> много</span>
           <span class="map-legend-empty"><i></i> нет данных</span>
+        </div>
+        <div class="map-zoom">
+          <button type="button" data-zoom="1.5" aria-label="Приблизить">+</button>
+          <button type="button" data-zoom="0.6667" aria-label="Отдалить">−</button>
         </div>
       </div>
     </section>
@@ -571,13 +582,15 @@ function renderStats() {
         <div><h2>Компании, которые активно набирают QA</h2><p>${selected ? `${esc(regionName(selected))} · ${qaJobs(data.countries[selected].count)}` : 'Весь рынок'}</p></div>
         ${selected ? '<button class="stats-reset" id="stats-reset" type="button">Весь рынок</button>' : ''}
       </header>
-      <div class="stats-groups">${groups.map(([sector,title,rows]) => `<div class="stats-group stats-${sector}"><h3>${title}</h3>${rows.length ? `<ol>${rows.map(c => `<li class="stats-row"><span class="stats-company">${esc(c.name)}</span>${bar(c.count, barMax)}<b>${c.count}</b></li>`).join('')}</ol>` : '<p class="stats-empty">Нет компаний в выборке</p>'}</div>`).join('')}
+      <div class="stats-groups">${groups.filter(([,,items]) => items.length).map(([sector,title,items]) => `<div class="stats-group stats-${sector}"><h3>${title}</h3><ol>${items.join('')}</ol></div>`).join('')}
         <div class="stats-group stats-countries"><h3>Топ стран по количеству вакансий</h3><ol>${topCountries.map(([code, country]) => `<li><button type="button" class="stats-row${selected === code ? ' selected' : ''}" data-stats-country="${code}" aria-pressed="${selected === code}"><span class="stats-company">${esc(regionName(code))}</span>${bar(country.count, topCountries[0][1].count)}<b>${formatCount(country.count)}</b></button></li>`).join('')}</ol></div>
       </div>
     </section>
   </main>`);
   bindStats(data);
 }
+
+let statsResize;
 
 function bindStats(data) {
   const map = document.querySelector('#stats-map');
@@ -596,7 +609,38 @@ function bindStats(data) {
     renderStats();
     document.querySelector(from === 'list' ? `[data-stats-country="${code}"]` : `#stats-map path[data-code="${code}"][tabindex]`)?.focus({ preventScroll: true });
   };
+  // View in map units: zoom 1 shows the whole world, the first view fills the box; the centre is clamped to the map.
+  const applyView = () => {
+    const { width, height } = svg.getBoundingClientRect();
+    if (!width || !height) return 1;
+    const fit = Math.min(width / worldMap.width, height / worldMap.height);
+    const view = state.statsView ||= { zoom: Math.max(width / worldMap.width, height / worldMap.height) / fit, x: worldMap.width / 2, y: worldMap.height / 2 };
+    view.zoom = Math.min(12, Math.max(1, view.zoom));
+    const w = width / (fit * view.zoom), h = height / (fit * view.zoom);
+    view.x = w >= worldMap.width ? worldMap.width / 2 : Math.min(worldMap.width - w / 2, Math.max(w / 2, view.x));
+    view.y = h >= worldMap.height ? worldMap.height / 2 : Math.min(worldMap.height - h / 2, Math.max(h / 2, view.y));
+    svg.setAttribute('viewBox', `${view.x - w / 2} ${view.y - h / 2} ${w} ${h}`);
+    return fit * view.zoom;
+  };
+  let scale = applyView();
+  window.removeEventListener('resize', statsResize);
+  statsResize = () => { if (svg.isConnected) scale = applyView(); };
+  window.addEventListener('resize', statsResize);
+  document.querySelectorAll('[data-zoom]').forEach(b => b.addEventListener('click', () => { state.statsView.zoom *= Number(b.dataset.zoom); scale = applyView(); }));
+  // Dragging pans the map; a drag longer than a few pixels is not treated as a click on a country.
+  let drag = null, dragged = false;
+  svg.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, id: e.pointerId }; dragged = false; });
+  svg.addEventListener('pointerup', () => { drag = null; map.classList.remove('dragging'); });
+  svg.addEventListener('pointercancel', () => { drag = null; map.classList.remove('dragging'); });
   svg.addEventListener('pointermove', e => {
+    if (drag && (dragged || Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4)) {
+      if (!dragged) { dragged = true; svg.setPointerCapture(drag.id); map.classList.add('dragging'); highlight(null); tooltip.hidden = true; }
+      state.statsView.x -= (e.clientX - drag.x) / scale;
+      state.statsView.y -= (e.clientY - drag.y) / scale;
+      drag.x = e.clientX; drag.y = e.clientY;
+      scale = applyView();
+      return;
+    }
     const code = e.target.dataset?.code;
     if (!code) { tooltip.hidden = true; highlight(null); return; }
     const country = data.countries[code];
@@ -607,15 +651,10 @@ function bindStats(data) {
     tooltip.hidden = false;
     if (!e.target.classList.contains('hovered')) highlight(code);
   });
-  svg.addEventListener('pointerleave', () => { tooltip.hidden = true; highlight(null); });
-  svg.addEventListener('click', e => e.target.dataset?.code && select(e.target.dataset.code));
+  svg.addEventListener('pointerleave', () => { if (!drag) { tooltip.hidden = true; highlight(null); } });
+  svg.addEventListener('click', e => !dragged && e.target.dataset?.code && select(e.target.dataset.code));
   svg.addEventListener('keydown', e => {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset?.code) { e.preventDefault(); select(e.target.dataset.code); }
-  });
-  document.querySelector('#map-legend-toggle')?.addEventListener('click', e => {
-    state.statsLegendOpen = !state.statsLegendOpen;
-    e.currentTarget.setAttribute('aria-expanded', String(state.statsLegendOpen));
-    document.querySelector('#map-legend').hidden = !state.statsLegendOpen;
   });
   document.querySelector('#stats-reset')?.addEventListener('click', () => { state.statsCountry = null; renderStats(); });
   document.querySelectorAll('[data-stats-country]').forEach(b => b.addEventListener('click', () => select(b.dataset.statsCountry, 'list')));
