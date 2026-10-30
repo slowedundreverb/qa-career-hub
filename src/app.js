@@ -506,13 +506,32 @@ const qaJobs = n => state.locale === 'en'
   : `${formatCount(n)} ${{ one: 'QA-вакансия', few: 'QA-вакансии', many: 'QA-вакансий', other: 'QA-вакансии' }[new Intl.PluralRules('ru').select(n)]}`;
 const rankCompanies = counts => [...counts.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).map(([name,count])=>({name,count,sector:sectorOf(name)}));
 
-// Adzuna has no Cyprus, so the island shows the site's own vacancies.
+// Site country names to map codes; the collector writes "Czech Republic" where Intl says "Czechia".
+const mapCodeOf = (() => {
+  const english = new Intl.DisplayNames(['en'], { type: 'region' });
+  const codes = new Map(worldMap.countries.map(({ code }) => [english.of(code), code]));
+  codes.set('Czech Republic', 'CZ');
+  return name => codes.get(name);
+})();
+
+// Countries Adzuna does not cover (Cyprus, the UAE, much of Europe) show the site's own vacancies.
 function statsData() {
-  const cyprusJobs = jobs.filter(j => j.status !== 'closed' && j.country === 'Cyprus');
-  const cyprusCompanies = cyprusJobs.reduce((m,j)=>isAgency(j.company)?m:m.set(j.company,(m.get(j.company)||0)+1),new Map());
-  const countries = { ...market.countries, CY: { count: cyprusJobs.length, companies: rankCompanies(cyprusCompanies) } };
+  const site = new Map();
+  for (const job of jobs) {
+    if (job.status === 'closed') continue;
+    for (const code of new Set(String(job.country || '').split(' / ').map(mapCodeOf))) {
+      if (!code || market.countries[code]) continue;
+      const country = site.get(code) || site.set(code, { count: 0, companies: new Map() }).get(code);
+      country.count++;
+      if (!isAgency(job.company)) country.companies.set(job.company, (country.companies.get(job.company) || 0) + 1);
+    }
+  }
+  const countries = { ...market.countries };
   const world = new Map(market.world.map(c => [c.name, c.count]));
-  countries.CY.companies.forEach(c => world.set(c.name, (world.get(c.name)||0) + c.count));
+  for (const [code, { count, companies }] of site) {
+    countries[code] = { count, companies: rankCompanies(companies) };
+    companies.forEach((n, name) => world.set(name, (world.get(name) || 0) + n));
+  }
   return { countries, world: rankCompanies(world) };
 }
 
