@@ -22,7 +22,7 @@ const state = {
   mode: modeFromHash(),
   locale: saved.locale === 'en' ? 'en' : 'ru',
   learnView: saved.learnView || 'roadmap',
-  jobSearch: '', jobSearchDraft: '', type: 'all', industry: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit', jobFiltersOpen: false,
+  jobSearch: '', jobSearchDraft: '', type: 'all', company: 'all', format: 'all', level: 'all', location: 'all', sort: 'fit', jobFiltersOpen: false,
   companySearch: '', companySearchDraft: '', companyOpenFirst: true,
   favoritesOnly: false,
   track: saved.locale === 'en' ? 'All' : 'Все', theorySearch: '', theorySearchDraft: '', knowledgeCategory: saved.locale === 'en' ? 'All' : 'Все', selectedTopic: null, quizCategory: savedLearningIsCurrent ? saved.quizCategory || (saved.locale === 'en' ? 'All' : 'Все') : (saved.locale === 'en' ? 'All' : 'Все'),
@@ -73,6 +73,9 @@ const initials = name => name.split(/\s+/).map(x => x[0]).join('').slice(0,2).to
 const jobCountry = job => job.country || (/cyprus|limassol|nicosia|paphos/i.test(job.location||'') ? 'Cyprus' : /remote|global|worldwide|anywhere/i.test(job.location||'') ? 'Worldwide' : 'Country not specified');
 const watchedCompanies = () => companies;
 const companyKey = name => String(name).replace(/\.US$/,'').replace(/\s*\/\s*Gen Digital$/,'').trim().toLowerCase();
+const careerUrls = new Map(companies.map(c => [companyKey(c.name), c.careerUrl]));
+// Saved ids of vacancies that left the snapshot stay in storage but are not counted.
+const savedCount = () => jobs.filter(j => state.favorites.has(j.id) && j.status !== 'closed').length;
 const companyLogo = (name, small=false) => {
   const logo=companyLogos[companyKey(name)];
   return `<span class="company-logo${small?' small':''}" style="--h:${(name.length*31)%360}"><span>${esc(initials(name))}</span>${logo?`<img src="${esc(logo)}" alt="" loading="lazy" onerror="this.remove()">`:''}</span>`;
@@ -243,7 +246,6 @@ function filteredJobs() {
     return (!state.favoritesOnly || state.favorites.has(j.id)) &&
       (!state.jobSearch || hay.includes(state.jobSearch.toLowerCase())) &&
       (state.type === 'all' || jobType(j) === state.type) &&
-      (state.industry === 'all' || (state.industry === 'fintech' ? /fintech|bank|payment|financial|trading|mortgage|insurtech/i.test(j.industry||'') : j.industry === state.industry)) &&
       (state.company === 'all' || companyKey(j.company) === companyKey(state.company)) &&
       (state.format === 'all' || j.format === state.format) &&
       (state.level === 'all' || j.level === state.level) &&
@@ -256,8 +258,6 @@ function renderJobs() {
   const list = filteredJobs();
   const active = jobs.filter(j => j.status === 'active').length;
   const watchlist=watchedCompanies();
-  const cyprus = jobs.filter(j => /cyprus|limassol|nicosia/i.test(j.location)).length;
-  const industries=[...new Set(jobs.map(j=>j.industry||'Technology'))].sort((a,b)=>a.localeCompare(b));
   const regions=[...new Set(jobs.map(j=>j.region||'Other'))].sort((a,b)=>a.localeCompare(b));
   const employers=[...new Set(watchlist.map(company=>company.name))].sort((a,b)=>a.localeCompare(b));
   const employerCounts=jobs.filter(job=>job.status!=='closed').reduce((counts,job)=>{
@@ -266,31 +266,24 @@ function renderJobs() {
     return counts;
   },new Map());
   const coveredEmployers=new Set((jobMeta.coveredCompanies||[]).map(companyKey));
-  const activeFilterCount=[state.industry,state.location,state.company,state.type,state.level,state.format].filter(value=>value!=='all').length;
+  const activeFilterCount=[state.location,state.company,state.type,state.level,state.format].filter(value=>value!=='all').length;
   const employerOptions=employers.map(name=>{
     const count=employerCounts.get(companyKey(name))||0;
     const checked=coveredEmployers.has(companyKey(name));
     return [name,count?`${name} · ${count}`:checked?`${name} · 0 QA-вакансий`:`${name} · только career-ссылка`,count===0];
   });
   const focusCountries=['Germany','Spain','Netherlands','Italy','France','Ireland'];
+  // Rendered twice: in the "About" row on desktop (adds no height), under the filters on mobile.
+  const resetButton=activeFilterCount||state.jobSearch?'<button type="button" class="reset-filters" data-reset-filters>Сбросить фильтры</button>':'';
   shell(`<main class="jobs-layout">
     <aside class="sidebar">
       <div class="eyebrow">CAREER CONTROL</div>
       <h1>Найдите роль,<br><em>подходящую вам.</em></h1>
-      <p class="lead">Международные QA-вакансии с официальных страниц работодателей.</p>
       <div class="side-nav">
         <button id="show-all-jobs" class="${state.favoritesOnly?'':'active'}"><span>${navIcon('jobs')}</span> Найденные вакансии <b>${active}</b></button>
         <button id="show-companies"><span>${navIcon('companies')}</span> Компании <b>${watchlist.length}</b></button>
-        <button id="show-favorites" class="${state.favoritesOnly?'active':''}"><span>${navIcon('favorites')}</span> Сохранённые <b>${state.favorites.size}</b></button>
+        <button id="show-favorites" class="${state.favoritesOnly?'active':''}"><span>${navIcon('favorites')}</span> Сохранённые <b>${savedCount()}</b></button>
       </div>
-      <div class="update-box about-box"><button id="show-about" aria-label="Открыть информацию о проекте">${navIcon('knowledge')}<span>О проекте</span></button></div>
-    </aside>
-    <section class="jobs-main">
-      <div class="jobs-hero">
-        <div><div class="eyebrow">${new Date().toLocaleDateString(state.locale === 'en' ? 'en-GB' : 'ru',{weekday:'long',day:'numeric',month:'long'})}</div><h2>Подходящие вакансии</h2><p>${active ? `Есть ${active} активных позиций, ${cyprus} — с фокусом на Кипр.` : 'Запустите обновление, чтобы наполнить агрегатор официальными вакансиями.'}</p></div>
-        <div class="hero-stats"><div><strong>${active}</strong><span>активных</span></div><div><strong>${watchlist.length}</strong><span>компаний</span></div><div><strong>${state.favorites.size}</strong><span>сохранено</span></div></div>
-      </div>
-      ${linkedinBlock()}
       <div class="filterbar ${state.jobFiltersOpen?'filters-open':''}">
         <form class="search job-search-form" id="job-search-form">
           <input id="job-search" value="${esc(state.jobSearchDraft)}" placeholder="Должность, компания или технология" aria-label="Поиск вакансий" />
@@ -298,36 +291,31 @@ function renderJobs() {
         </form>
         <button class="mobile-filter-toggle" id="mobile-filter-toggle" type="button" aria-expanded="${state.jobFiltersOpen}" aria-controls="job-filter-options"><span>${state.jobFiltersOpen?'Скрыть':'Фильтры'}</span>${activeFilterCount?`<b>${activeFilterCount}</b>`:''}</button>
         <div class="filter-options" id="job-filter-options">
-          ${select('job-industry',[['all','Все отрасли'],['fintech','Fintech / банки'],...industries.map(x=>[x,x])],state.industry)}
+          ${select('job-company',[['all',`Все компании · ${employers.length}`],...employerOptions],state.company,'wide')}
           ${select('job-location',[['all','Вся география'],['remote','Только remote'],...focusCountries.map(x=>[`country:${x.toLowerCase()}`,`${x} + remote EU`]),...regions.map(x=>[x.toLowerCase(),x])],state.location)}
-          ${select('job-company',[['all',`Все компании · ${employers.length}`],...employerOptions],state.company)}
           ${select('job-type',[['all','Все роли'],['manual','Manual QA'],['aqa','Automation'],['java','Java AQA'],['sdet','SDET']],state.type)}
           ${select('job-level',[['all','Любой уровень'],['Junior','Junior'],['Middle','Middle'],['Senior','Senior'],['Lead','Lead']],state.level)}
           ${select('job-format',[['all','Любой формат'],['Remote','Remote'],['Hybrid','Hybrid'],['On-site','Офис']],state.format)}
-          ${select('job-sort',[['updated','Сначала свежие'],['fit','По совпадению']],state.sort)}
+          ${select('job-sort',[['updated','Сначала свежие'],['fit','По совпадению']],state.sort,'wide')}
         </div>
       </div>
-      <div class="results-head"><span><b>${list.length}</b> вакансий после фильтрации</span><small>Только официальные страницы работодателей</small></div>
+      <div class="sidebar-results">${resetButton}</div>
+      <div class="update-box about-box"><button id="show-about" aria-label="Открыть информацию о проекте">${navIcon('knowledge')}<span>О проекте</span></button>${resetButton}</div>
+    </aside>
+    <section class="jobs-main">
       <div class="jobs-list">${list.length ? list.map(jobCard).join('') : emptyJobs()}</div>
     </section>
   </main>${companiesDrawer()}${aboutDialog()}`);
   bindJobs();
 }
 
-const select = (id, opts, current) => `<label class="select-wrap"><select id="${id}">${opts.map(([v,l,disabled])=>`<option value="${esc(v)}" ${v===current?'selected':''} ${disabled?'disabled':''}>${esc(l)}</option>`).join('')}</select><span>⌄</span></label>`;
-
-function linkedinBlock() {
-  if (!jobMeta.linkedinConnected) return `<section class="linkedin-panel disconnected">
-    <div class="li-icon">in</div><div class="li-copy"><div><span class="kicker">LINKEDIN RADAR</span><h3>10 свежих QA-вакансий</h3></div><p>Интеграция не подключена — мы не подменяем реальные данные демонстрационными.</p></div>
-    <a href="https://www.linkedin.com/jobs/search/?keywords=QA%20Engineer&location=Cyprus&f_TPR=r604800" target="_blank" rel="noreferrer">Открыть поиск <span>↗</span></a>
-  </section>`;
-  return `<section class="linkedin-panel"><div class="li-icon">in</div><div class="li-copy"><span class="kicker">LINKEDIN RADAR</span><h3>10 свежих QA-вакансий</h3><p>${linkedinJobs.length} получено через настроенный API</p></div><div class="fresh-strip">${linkedinJobs.slice(0,10).map(j=>`<a href="${esc(j.url)}" target="_blank"><b>${esc(j.title)}</b><span>${esc(j.company)} · ${esc(j.location)}</span></a>`).join('')}</div></section>`;
-}
+const select = (id, opts, current, cls='') => `<label class="select-wrap ${cls}"><select id="${id}">${opts.map(([v,l,disabled])=>`<option value="${esc(v)}" ${v===current?'selected':''} ${disabled?'disabled':''}>${esc(l)}</option>`).join('')}</select></label>`;
 
 function jobCard(j) {
   const fav = state.favorites.has(j.id);
+  const careerUrl = careerUrls.get(companyKey(j.company));
   return `<article class="job-card">
-    <header class="job-card-header">${companyLogo(j.company)}<div class="job-card-employer"><b>${esc(j.company)}</b><span>${esc(jobCountry(j))}</span></div><button class="save ${fav?'saved':''}" data-favorite="${esc(j.id)}" aria-label="${fav?'Убрать из сохранённых':'Сохранить вакансию'}">${fav?'♥':'♡'}</button></header>
+    <header class="job-card-header">${companyLogo(j.company)}<div class="job-card-employer">${careerUrl?`<a href="${esc(careerUrl)}" target="_blank" rel="noreferrer">${esc(j.company)}</a>`:`<b>${esc(j.company)}</b>`}<span>${esc(jobCountry(j))}</span></div><button class="save ${fav?'saved':''}" data-favorite="${esc(j.id)}" aria-label="${fav?'Убрать из сохранённых':'Сохранить вакансию'}">${fav?'♥':'♡'}</button></header>
     <div class="job-content"><div class="job-title-row"><div><span class="fit ${j.matchScore>=85?'great':''}">${j.matchScore||70}% совпадение</span><h3>${esc(j.title)}</h3></div></div>
       <div class="job-company"><span>${esc(j.location)}</span></div>
       <div class="tag-cloud job-tags">${(j.technologies||[]).slice(0,4).map(x=>`<span>${esc(x)}</span>`).join('')}</div>
@@ -337,7 +325,9 @@ function jobCard(j) {
   </article>`;
 }
 
-const emptyJobs = () => `<div class="empty-state"><h3>${jobs.length ? 'Ничего не найдено' : 'Данные вакансий ещё не обновлены'}</h3><p>${jobs.length ? 'Измените фильтры или поисковый запрос.' : 'В терминале проекта выполните npm run update:jobs. Каждый источник проверяется независимо.'}</p>${jobs.length?'<button id="reset-filters">Сбросить фильтры</button>':''}</div>`;
+const emptyJobs = () => state.favoritesOnly && !savedCount()
+  ? `<div class="empty-state"><h3>Сохранённых вакансий нет</h3><p>Нажмите на сердечко на карточке, чтобы сохранить вакансию.</p></div>`
+  : `<div class="empty-state"><h3>${jobs.length ? 'Ничего не найдено' : 'Данные вакансий ещё не обновлены'}</h3><p>${jobs.length ? 'Измените фильтры или поисковый запрос.' : 'В терминале проекта выполните npm run update:jobs. Каждый источник проверяется независимо.'}</p>${jobs.length?'<button data-reset-filters>Сбросить фильтры</button>':''}</div>`;
 
 function aboutDialog() {
   return `<dialog id="about-dialog" class="about-dialog">
@@ -393,9 +383,9 @@ function bindJobs() {
     renderJobs();
   });
   document.querySelector('#mobile-filter-toggle')?.addEventListener('click',()=>{state.jobFiltersOpen=!state.jobFiltersOpen;renderJobs();});
-  [['job-type','type'],['job-industry','industry'],['job-company','company'],['job-location','location'],['job-level','level'],['job-format','format'],['job-sort','sort']].forEach(([id,key])=>document.querySelector(`#${id}`)?.addEventListener('change',e=>rerenderWith(key,e.target.value)));
+  [['job-type','type'],['job-company','company'],['job-location','location'],['job-level','level'],['job-format','format'],['job-sort','sort']].forEach(([id,key])=>document.querySelector(`#${id}`)?.addEventListener('change',e=>rerenderWith(key,e.target.value)));
   document.querySelectorAll('[data-favorite]').forEach(b=>b.addEventListener('click',()=>{ state.favorites.has(b.dataset.favorite)?state.favorites.delete(b.dataset.favorite):state.favorites.add(b.dataset.favorite); save(); renderJobs(); }));
-  document.querySelector('#reset-filters')?.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',jobSearchDraft:'',type:'all',industry:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();});
+  document.querySelectorAll('[data-reset-filters]').forEach(b=>b.addEventListener('click',()=>{Object.assign(state,{jobSearch:'',jobSearchDraft:'',type:'all',company:'all',format:'all',level:'all',location:'all'});renderJobs();}));
   const dialog=document.querySelector('#companies-dialog'); document.querySelector('#show-companies')?.addEventListener('click',()=>dialog.showModal()); document.querySelector('#close-dialog')?.addEventListener('click',()=>dialog.close());
   const reopenCompanies=()=>{renderJobs();document.querySelector('#companies-dialog')?.showModal();};
   document.querySelector('#company-search')?.addEventListener('input',e=>{state.companySearchDraft=e.target.value;});

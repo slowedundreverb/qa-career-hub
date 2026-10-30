@@ -2758,14 +2758,28 @@ body:has(.topic-overlay) {
 }
 
 .job-card-employer b,
+.job-card-employer a,
 .job-card-employer span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.job-card-employer b {
+.job-card-employer b,
+.job-card-employer a {
   font-size: 11px;
+}
+
+.job-card-employer a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.job-card-employer a:hover,
+.job-card-employer a:focus-visible {
+  color: var(--green);
+  text-decoration: underline;
 }
 
 .job-card-employer span {
@@ -2900,5 +2914,288 @@ body:has(.topic-overlay) {
     padding-top: 10px;
     border-top: 1px solid var(--line);
     text-align: left;
+  }
+}
+
+/* Job filters live in the dark sidebar so the main column holds only cards. */
+.sidebar .side-nav {
+  margin-top: 18px;
+}
+
+.sidebar .filterbar {
+  margin: 22px 0 0;
+}
+
+.sidebar .search,
+.sidebar .select-wrap {
+  border-color: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.055);
+  color: #f5f8f6;
+}
+
+.sidebar .search:focus-within,
+.sidebar .select-wrap:focus-within {
+  border-color: rgba(223,244,123,.58);
+}
+
+.sidebar .search input,
+.sidebar .select-wrap select {
+  color: inherit;
+}
+
+.sidebar .search input::placeholder {
+  color: #aeb8b3;
+}
+
+.sidebar .select-wrap option {
+  color: var(--ink);
+}
+
+.sidebar .job-search-button {
+  background: rgba(255,255,255,.12);
+}
+
+.sidebar-results {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  color: #aeb8b3;
+  font-size: 10px;
+}
+
+.sidebar .reset-filters {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--lime);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sidebar .about-box .reset-filters {
+  color: var(--lime);
+}
+
+.sidebar .reset-filters:hover,
+.sidebar .reset-filters:focus-visible {
+  text-decoration: underline;
+}
+
+@media (min-width: 901px) {
+  /* "About" sits at the bottom, but flows after the filters on short screens instead of covering them. */
+  /* Tight vertical rhythm so the whole panel fits a ~860px-tall window without scrolling. */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    padding-top: 30px;
+  }
+
+  .sidebar h1 {
+    margin-bottom: 12px;
+  }
+
+  .sidebar .filterbar {
+    margin-bottom: 20px;
+  }
+
+  .sidebar-results {
+    display: none;
+  }
+
+  .sidebar .about-box {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 14px;
+  }
+
+  .sidebar .filterbar {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar .filterbar .search {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .sidebar .mobile-filter-toggle {
+    border-color: rgba(255,255,255,.08);
+    background: rgba(255,255,255,.055);
+    color: #f5f8f6;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    height: auto;
+    max-height: none;
+    grid-template-areas:
+      "label utility"
+      "title title"
+      "nav nav"
+      "filters filters"
+      "results results";
+    grid-template-rows: auto;
+  }
+
+  .sidebar .side-nav {
+    margin-top: 0;
+  }
+
+  .sidebar .filterbar {
+    grid-area: filters;
+    margin: 0;
+  }
+
+  .sidebar-results {
+    grid-area: results;
+    margin: 0 0 0 4px;
+  }
+
+  .sidebar .about-box .reset-filters {
+    display: none;
+  }
+}
+
+/* Sidebar filters: compact chips, two per row; long-value ones (company, sort) span the row. */
+@media (min-width: 621px) {
+  .sidebar .filter-options {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+@media (max-width: 620px) {
+  .sidebar .filterbar.filters-open .filter-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.sidebar .select-wrap {
+  min-width: 0;
+  height: 40px;
+  border-radius: 12px;
+  transition: background .16s ease, border-color .16s ease;
+}
+
+.sidebar .select-wrap.wide {
+  grid-column: 1 / -1;
+}
+
+.sidebar .select-wrap:hover {
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.09);
+}
+
+/* A filter with a non-default value stays highlighted. */
+.sidebar .select-wrap:has(option[value="all"]:not(:checked)) {
+  border-color: rgba(223,244,123,.58);
+  background: rgba(223,244,123,.08);
+}
+
+.sidebar .select-wrap select {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 12px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Styled option list where the browser supports customizable select; elsewhere the native list opens. */
+.sidebar .select-wrap select {
+  appearance: base-select;
+}
+
+.sidebar .select-wrap select::picker(select) {
+  appearance: base-select;
+}
+
+.sidebar .select-wrap select::picker-icon {
+  display: none;
+}
+
+.sidebar .select-wrap select:focus-visible {
+  outline: none;
+}
+
+.sidebar .select-wrap select::picker(select) {
+  min-width: anchor-size(width);
+  max-width: 300px;
+  max-height: min(340px, 60vh);
+  margin-block: 6px;
+  padding: 6px;
+  overflow: auto;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  background: #1f2e2a;
+  color: #dce5e1;
+  box-shadow: 0 22px 48px rgba(6,14,12,.42);
+  scrollbar-color: rgba(255,255,255,.2) transparent;
+  scrollbar-width: thin;
+  opacity: 0;
+  translate: 0 -4px;
+  transition: opacity .16s ease, translate .16s ease, display .16s allow-discrete, overlay .16s allow-discrete;
+}
+
+.sidebar .select-wrap select:open::picker(select) {
+  opacity: 1;
+  translate: 0 0;
+}
+
+@starting-style {
+  .sidebar .select-wrap select:open::picker(select) {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+.sidebar .select-wrap option {
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  color: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sidebar .select-wrap option:hover,
+.sidebar .select-wrap option:focus-visible {
+  outline: none;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+}
+
+.sidebar .select-wrap option:checked {
+  background: rgba(223,244,123,.1);
+  color: var(--lime);
+}
+
+.sidebar .select-wrap option::checkmark {
+  order: 1;
+  margin-inline-start: auto;
+}
+
+.sidebar .select-wrap option:disabled {
+  color: rgba(255,255,255,.32);
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar .select-wrap select::picker(select) {
+    transition: none;
   }
 }
