@@ -561,7 +561,7 @@ function renderStats() {
     const most = Math.max(1, ...lists.flatMap(([,,r]) => r.map(c => c.count)));
     groups = lists.map(([sector,title,r]) => [sector, title, r.map(c => `<li class="stats-row"><span class="stats-company">${esc(c.name)}</span>${bar(c.count, most)}<b>${c.count}</b></li>`)]);
   }
-  const topCountries = Object.entries(data.countries).sort((a,b) => b[1].count - a[1].count).slice(0, rowsShown);
+  const topCountries = Object.entries(data.countries).sort((a,b) => b[1].count - a[1].count).slice(0, 15);
   shell(`<main class="stats-page">
     <section class="stats-map-card">
       <div class="stats-map" id="stats-map">
