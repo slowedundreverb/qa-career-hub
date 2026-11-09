@@ -2161,6 +2161,7 @@ export const companyLogos = {
   "skin analytics ltd": "./src/assets/company-logos/skin-analytics-ltd.png",
   "skipton building society": "./src/assets/company-logos/skipton-building-society.png",
   "škoda group": "./src/assets/company-logos/s-koda-group.png",
+  "skydance": "./src/assets/company-logos/skydance.png",
   "skyral": "./src/assets/company-logos/skyral.png",
   "skyscanner": "./src/assets/company-logos/skyscanner.png",
   "skywaves rise": "./src/assets/company-logos/skywaves-rise.png",
